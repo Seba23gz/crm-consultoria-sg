@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM · Consultoría SG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --ink:#1a1a17; --ink-soft:#5f5e58; --ink-faint:#8f8e86;
+    --paper:#f6f4ee; --card:#fffdf8; --line:#e4e0d6;
+    --accent:#2f5d50; --accent-soft:#e3ede9;
+    --alta:#b5502e; --alta-soft:#f4e5de;
+    --warn:#a8641a; --warn-soft:#f6ebda;
+    --win:#2f5d50; --lost:#8f8e86;
+    --radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:500;letter-spacing:-0.01em}
+
+  /* Login */
+  #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .login-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:40px;width:100%;max-width:400px}
+  .login-card .eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);font-weight:600;margin-bottom:8px}
+  .login-card h1{font-size:28px;margin-bottom:6px}
+  .login-card p.sub{color:var(--ink-soft);font-size:14px;margin-bottom:28px}
+  label{display:block;font-size:13px;font-weight:500;margin-bottom:6px;color:var(--ink-soft)}
+  input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px;background:var(--paper);color:var(--ink)}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
+  .field{margin-bottom:16px}
+  button{font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;border:none;border-radius:8px;transition:opacity .15s}
+  button:hover{opacity:.88}
+  .btn-primary{background:var(--accent);color:#fff;padding:11px 18px;width:100%}
+  .btn-ghost{background:transparent;color:var(--accent);padding:8px 0;width:100%;font-size:13px}
+  .msg{font-size:13px;padding:10px 12px;border-radius:8px;margin-bottom:16px;display:none}
+  .msg.err{background:var(--alta-soft);color:var(--alta);display:block}
+  .msg.ok{background:var(--accent-soft);color:var(--accent);display:block}
+
+  /* App shell */
+  #app{display:none}
+  header.top{background:var(--card);border-bottom:1px solid var(--line);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+  .brand{display:flex;align-items:baseline;gap:10px}
+  .brand .mark{font-family:'Fraunces',serif;font-size:20px;font-weight:600;color:var(--accent)}
+  .brand .tag{font-size:12px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.1em}
+  .top-actions{display:flex;align-items:center;gap:12px}
+  .user-email{font-size:13px;color:var(--ink-soft)}
+  .btn-sm{padding:7px 14px;background:var(--paper);border:1px solid var(--line);color:var(--ink-soft)}
+
+  .wrap{padding:24px;max-width:1400px;margin:0 auto}
+
+  /* Stats */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+  .stat .num{font-family:'Fraunces',serif;font-size:30px;font-weight:600;line-height:1}
+  .stat .lbl{font-size:12px;color:var(--ink-soft);margin-top:6px}
+  .stat.alert .num{color:var(--warn)}
+
+  /* Toolbar */
+  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap}
+  .toolbar h2{font-size:20px}
+  .btn-add{background:var(--accent);color:#fff;padding:9px 16px;display:inline-flex;align-items:center;gap:6px}
+
+  /* Board */
+  .board{display:grid;grid-template-columns:repeat(6,minmax(200px,1fr));gap:12px;overflow-x:auto;padding-bottom:12px}
+  .col{background:transparent}
+  .col-head{display:flex;align-items:center;justify-content:space-between;padding:8px 4px;margin-bottom:8px;border-bottom:2px solid var(--line)}
+  .col-head .name{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft)}
+  .col-head .count{font-size:12px;color:var(--ink-faint);background:var(--card);border:1px solid var(--line);border-radius:20px;padding:1px 8px}
+  .col-body{display:flex;flex-direction:column;gap:10px;min-height:60px}
+
+  /* Card */
+  .lead{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;cursor:pointer;transition:border-color .15s,transform .1s}
+  .lead:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .lead .name{font-weight:600;font-size:14px;margin-bottom:2px}
+  .lead .role{font-size:12px;color:var(--ink-soft);margin-bottom:8px}
+  .lead .co{font-size:12px;color:var(--ink);background:var(--paper);border-radius:6px;padding:3px 7px;display:inline-block;margin-bottom:8px}
+  .lead .foot{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+  .pill{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+  .pill.alta{background:var(--alta-soft);color:var(--alta)}
+  .pill.media{background:var(--accent-soft);color:var(--accent)}
+  .pill.baja{background:#efeee8;color:var(--ink-faint)}
+  .follow{font-size:11px;color:var(--ink-faint)}
+  .follow.overdue{color:var(--warn);font-weight:600}
+
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(26,26,23,.4);display:none;align-items:flex-start;justify-content:center;padding:40px 20px;z-index:50;overflow-y:auto}
+  .overlay.open{display:flex}
+  .modal{background:var(--card);border-radius:var(--radius);width:100%;max-width:520px;padding:28px}
+  .modal h3{font-size:22px;margin-bottom:4px}
+  .modal .modal-sub{font-size:13px;color:var(--ink-soft);margin-bottom:20px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .modal-actions{display:flex;gap:10px;margin-top:20px}
+  .modal-actions button{flex:1;padding:11px}
+  .btn-cancel{background:var(--paper);border:1px solid var(--line);color:var(--ink-soft)}
+  .acts{margin-top:20px;border-top:1px solid var(--line);padding-top:16px}
+  .acts h4{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin-bottom:10px}
+  .act{font-size:13px;padding:8px 0;border-bottom:1px solid var(--line);display:flex;gap:8px}
+  .act .at{font-weight:600;text-transform:capitalize;color:var(--accent)}
+  .act .ad{color:var(--ink-soft)}
+  .act .af{margin-left:auto;color:var(--ink-faint);font-size:12px;white-space:nowrap}
+  .empty{text-align:center;padding:40px;color:var(--ink-faint);font-size:14px}
+  @media(max-width:640px){.wrap{padding:16px}.row2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="login-card">
+    <div class="eyebrow">Consultoría SG</div>
+    <h1>Tu CRM</h1>
+    <p class="sub">Pipeline de clientes de automatización e IA.</p>
+    <div id="loginMsg" class="msg"></div>
+    <div class="field">
+      <label for="email">Correo</label>
+      <input type="email" id="email" placeholder="tucorreo@ejemplo.cl" autocomplete="email">
+    </div>
+    <div class="field">
+      <label for="password">Contraseña</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" id="btnLogin">Entrar</button>
+    <button class="btn-ghost" id="btnSignup">Primera vez · crear mi acceso</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header class="top">
+    <div class="brand">
+      <span class="mark">CRM</span>
+      <span class="tag">Consultoría SG</span>
+    </div>
+    <div class="top-actions">
+      <span class="user-email" id="userEmail"></span>
+      <button class="btn-sm" id="btnLogout">Salir</button>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="stats" id="stats"></div>
+
+    <div class="toolbar">
+      <h2>Pipeline</h2>
+      <button class="btn-add" id="btnNew">+ Nuevo contacto</button>
+    </div>
+
+    <div class="board" id="board"></div>
+  </div>
+</div>
+
+<!-- MODAL: contacto -->
+<div class="overlay" id="modalLead">
+  <div class="modal">
+    <h3 id="modalTitle">Contacto</h3>
+    <p class="modal-sub" id="modalCo"></p>
+    <div class="row2">
+      <div class="field"><label>Nombre</label><input id="m_nombre"></div>
+      <div class="field"><label>Cargo</label><input id="m_cargo"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Email</label><input id="m_email"></div>
+      <div class="field"><label>Teléfono</label><input id="m_telefono"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Empresa</label><select id="m_empresa"></select></div>
+      <div class="field"><label>Etapa</label><select id="m_etapa">
+        <option value="nuevo">Nuevo</option>
+        <option value="contactado">Contactado</option>
+        <option value="respondio">Respondió</option>
+        <option value="reunion_agendada">Reunión agendada</option>
+        <option value="propuesta_enviada">Propuesta enviada</option>
+        <option value="ganado">Ganado</option>
+        <option value="perdido">Perdido</option>
+      </select></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Prioridad</label><select id="m_prioridad">
+        <option value="alta">Alta</option><option value="media">Media</option><option value="baja">Baja</option>
+      </select></div>
+      <div class="field"><label>Próximo seguimiento</label><input type="date" id="m_seguimiento"></div>
+    </div>
+    <div class="field"><label>Notas</label><textarea id="m_notas" rows="2"></textarea></div>
+
+    <div class="acts" id="actsBox" style="display:none">
+      <h4>Registrar actividad</h4>
+      <div class="row2">
+        <div class="field"><select id="a_tipo">
+          <option value="email">Email</option><option value="llamada">Llamada</option>
+          <option value="whatsapp">WhatsApp</option><option value="reunion">Reunión</option><option value="nota">Nota</option>
+        </select></div>
+        <div class="field"><button class="btn-sm" id="btnAddAct" style="width:100%">+ Agregar</button></div>
+      </div>
+      <input id="a_desc" placeholder="Descripción de la actividad" style="margin-bottom:12px">
+      <div id="actList"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btnCancel">Cerrar</button>
+      <button class="btn-primary" id="btnSave" style="background:var(--accent);color:#fff">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ====== CONFIG: reemplaza estos dos valores ======
+const SUPABASE_URL = 'https://rayvimywyqjnzzmbagpv.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJheXZpbXl3eXFqbnp6bWJhZ3B2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzMjk2MzksImV4cCI6MjA5OTkwNTYzOX0.Dd7AEixH8guWZsk0LxDEpsJvj9RFRglIsAkDidmW5R8';
+// ==================================================
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const ETAPAS = [
+  {key:'nuevo', label:'Nuevo'},
+  {key:'contactado', label:'Contactado'},
+  {key:'respondio', label:'Respondió'},
+  {key:'reunion_agendada', label:'Reunión'},
+  {key:'propuesta_enviada', label:'Propuesta'},
+  {key:'ganado', label:'Ganado'},
+];
+let empresas = [], contactos = [], editingId = null;
+
+// ---------- AUTH ----------
+const $ = id => document.getElementById(id);
+function showMsg(t, ok){const m=$('loginMsg');m.textContent=t;m.className='msg '+(ok?'ok':'err');}
+
+$('btnLogin').onclick = async () => {
+  const {error} = await sb.auth.signInWithPassword({email:$('email').value.trim(), password:$('password').value});
+  if(error) showMsg(error.message, false);
+};
+$('btnSignup').onclick = async () => {
+  const {error} = await sb.auth.signUp({email:$('email').value.trim(), password:$('password').value});
+  if(error) showMsg(error.message, false);
+  else showMsg('Acceso creado. Si tu proyecto pide confirmación por correo, revísalo; si no, ya puedes entrar.', true);
+};
+$('btnLogout').onclick = async () => { await sb.auth.signOut(); };
+
+sb.auth.onAuthStateChange((_e, session) => {
+  if(session){
+    $('login').style.display='none';
+    $('app').style.display='block';
+    $('userEmail').textContent = session.user.email;
+    loadAll();
+  } else {
+    $('login').style.display='flex';
+    $('app').style.display='none';
+  }
+});
+
+// ---------- DATA ----------
+async function loadAll(){
+  const [e, c] = await Promise.all([
+    sb.from('empresas').select('*').order('nombre'),
+    sb.from('contactos').select('*').order('created_at')
+  ]);
+  empresas = e.data || [];
+  contactos = c.data || [];
+  render();
+}
+
+function empName(id){const e=empresas.find(x=>x.id===id);return e?e.nombre:'—';}
+function todayStr(){return new Date().toISOString().slice(0,10);}
+
+function render(){
+  // stats
+  const total = contactos.length;
+  const activos = contactos.filter(c=>!['ganado','perdido'].includes(c.etapa)).length;
+  const ganados = contactos.filter(c=>c.etapa==='ganado').length;
+  const vencidos = contactos.filter(c=>c.proximo_seguimiento && c.proximo_seguimiento < todayStr() && !['ganado','perdido'].includes(c.etapa)).length;
+  $('stats').innerHTML = `
+    <div class="stat"><div class="num">${total}</div><div class="lbl">Contactos totales</div></div>
+    <div class="stat"><div class="num">${activos}</div><div class="lbl">En pipeline activo</div></div>
+    <div class="stat"><div class="num">${ganados}</div><div class="lbl">Ganados</div></div>
+    <div class="stat ${vencidos?'alert':''}"><div class="num">${vencidos}</div><div class="lbl">Seguimientos vencidos</div></div>`;
+
+  // board
+  const board = $('board');
+  board.innerHTML = '';
+  ETAPAS.forEach(et => {
+    const items = contactos.filter(c=>c.etapa===et.key);
+    const col = document.createElement('div');
+    col.className='col';
+    col.innerHTML = `<div class="col-head"><span class="name">${et.label}</span><span class="count">${items.length}</span></div>`;
+    const body = document.createElement('div');
+    body.className='col-body';
+    items.forEach(c => body.appendChild(card(c)));
+    col.appendChild(body);
+    board.appendChild(col);
+  });
+}
+
+function card(c){
+  const d = document.createElement('div');
+  d.className='lead';
+  const overdue = c.proximo_seguimiento && c.proximo_seguimiento < todayStr();
+  d.innerHTML = `
+    <div class="name">${c.nombre}</div>
+    <div class="role">${c.cargo||''}</div>
+    <div class="co">${empName(c.empresa_id)}</div>
+    <div class="foot">
+      <span class="pill ${c.prioridad||'media'}">${c.prioridad||'media'}</span>
+      ${c.proximo_seguimiento?`<span class="follow ${overdue?'overdue':''}">${overdue?'⚠ ':''}${c.proximo_seguimiento}</span>`:''}
+    </div>`;
+  d.onclick = () => openLead(c.id);
+  return d;
+}
+
+// ---------- MODAL ----------
+function fillEmpresas(sel){
+  $('m_empresa').innerHTML = empresas.map(e=>`<option value="${e.id}" ${e.id===sel?'selected':''}>${e.nombre}</option>`).join('');
+}
+
+function openLead(id){
+  editingId = id;
+  const c = contactos.find(x=>x.id===id);
+  $('modalTitle').textContent = c?c.nombre:'Nuevo contacto';
+  $('modalCo').textContent = c?empName(c.empresa_id):'';
+  $('m_nombre').value=c?.nombre||''; $('m_cargo').value=c?.cargo||'';
+  $('m_email').value=c?.email||''; $('m_telefono').value=c?.telefono||'';
+  fillEmpresas(c?.empresa_id);
+  $('m_etapa').value=c?.etapa||'nuevo'; $('m_prioridad').value=c?.prioridad||'media';
+  $('m_seguimiento').value=c?.proximo_seguimiento||''; $('m_notas').value=c?.notas||'';
+  $('actsBox').style.display = c?'block':'none';
+  if(c) loadActs(id);
+  $('modalLead').classList.add('open');
+}
+
+$('btnNew').onclick = () => openLead(null);
+$('btnCancel').onclick = () => $('modalLead').classList.remove('open');
+
+$('btnSave').onclick = async () => {
+  const payload = {
+    nombre:$('m_nombre').value.trim(), cargo:$('m_cargo').value.trim(),
+    email:$('m_email').value.trim(), telefono:$('m_telefono').value.trim(),
+    empresa_id: $('m_empresa').value?Number($('m_empresa').value):null,
+    etapa:$('m_etapa').value, prioridad:$('m_prioridad').value,
+    proximo_seguimiento:$('m_seguimiento').value||null, notas:$('m_notas').value.trim()
+  };
+  if(editingId){ await sb.from('contactos').update(payload).eq('id',editingId); }
+  else { await sb.from('contactos').insert(payload); }
+  $('modalLead').classList.remove('open');
+  loadAll();
+};
+
+async function loadActs(id){
+  const {data} = await sb.from('actividades').select('*').eq('contacto_id',id).order('fecha',{ascending:false});
+  $('actList').innerHTML = (data||[]).map(a=>`
+    <div class="act"><span class="at">${a.tipo}</span><span class="ad">${a.descripcion||''}</span><span class="af">${a.fecha}</span></div>
+  `).join('') || '<div class="empty" style="padding:16px">Sin actividades aún.</div>';
+}
+
+$('btnAddAct').onclick = async () => {
+  if(!editingId) return;
+  const desc = $('a_desc').value.trim();
+  await sb.from('actividades').insert({contacto_id:editingId, tipo:$('a_tipo').value, descripcion:desc, fecha:todayStr()});
+  $('a_desc').value='';
+  loadActs(editingId);
+};
+</script>
+</body>
+</html>
