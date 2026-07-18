@@ -121,6 +121,8 @@
   .modal-actions{display:flex;gap:10px;margin-top:20px}
   .modal-actions button{flex:1;padding:12px}
   .btn-cancel{background:var(--card);border:1px solid var(--line);color:var(--ink-soft)}
+  .btn-danger{background:transparent;border:1px solid var(--line);color:var(--warn);flex:0 0 auto;margin-right:auto;padding:12px 18px}
+  .btn-danger:hover{background:var(--warn-soft);border-color:var(--warn);opacity:1}
   .acts{margin-top:20px;border-top:1px solid var(--line);padding-top:16px}
   .acts h4{font-family:var(--font-mono);font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);margin-bottom:10px;font-weight:400}
   .act{font-size:13px;padding:8px 0;border-bottom:1px solid var(--line);display:flex;gap:8px}
@@ -229,6 +231,7 @@
     </div>
 
     <div class="modal-actions">
+      <button class="btn-danger" id="btnDelete" style="display:none">Eliminar</button>
       <button class="btn-cancel" id="btnCancel">Cerrar</button>
       <button class="btn-primary" id="btnSave" style="background:var(--accent);color:#fff">Guardar</button>
     </div>
@@ -412,6 +415,7 @@ function openLead(id){
   $('m_etapa').value=c?.etapa||'nuevo'; $('m_prioridad').value=c?.prioridad||'media';
   $('m_seguimiento').value=c?.proximo_seguimiento||''; $('m_notas').value=c?.notas||'';
   $('actsBox').style.display = c?'block':'none';
+  $('btnDelete').style.display = c?'inline-flex':'none';
   if(c) loadActs(id);
   $('modalLead').classList.add('open');
 }
@@ -419,6 +423,19 @@ function openLead(id){
 $('btnNew').onclick = () => openLead(null);
 $('btnFollow').onclick = () => $('followPanel').classList.toggle('open');
 $('btnCancel').onclick = () => $('modalLead').classList.remove('open');
+
+$('btnDelete').onclick = async () => {
+  if(!editingId) return;
+  const c = contactos.find(x=>x.id===editingId);
+  if(!confirm(`¿Eliminar a ${c?c.nombre:'este contacto'}? Esta acción no se puede deshacer.`)) return;
+  // Borra primero sus actividades (evita error por la clave foránea) y luego el contacto.
+  await sb.from('actividades').delete().eq('contacto_id', editingId);
+  const {error} = await sb.from('contactos').delete().eq('id', editingId);
+  if(error){ alert('No se pudo eliminar: '+error.message); return; }
+  $('modalLead').classList.remove('open');
+  editingId = null;
+  loadAll();
+};
 
 $('btnSave').onclick = async () => {
   const payload = {
