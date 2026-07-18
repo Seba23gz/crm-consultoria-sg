@@ -65,15 +65,37 @@
   .btn-add{background:var(--accent);color:#fff;padding:9px 16px;display:inline-flex;align-items:center;gap:6px}
 
   /* Board */
-  .board{display:grid;grid-template-columns:repeat(6,minmax(200px,1fr));gap:12px;overflow-x:auto;padding-bottom:12px}
+  .board{display:grid;grid-template-columns:repeat(7,minmax(190px,1fr));gap:12px;overflow-x:auto;padding-bottom:12px}
   .col{background:transparent}
   .col-head{display:flex;align-items:center;justify-content:space-between;padding:8px 4px;margin-bottom:8px;border-bottom:2px solid var(--line)}
   .col-head .name{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft)}
   .col-head .count{font-size:12px;color:var(--ink-faint);background:var(--card);border:1px solid var(--line);border-radius:20px;padding:1px 8px}
-  .col-body{display:flex;flex-direction:column;gap:10px;min-height:60px}
+  .col.won .col-head{border-bottom-color:var(--win)}
+  .col.won .col-head .name{color:var(--win)}
+  .col.lost .col-head{border-bottom-color:var(--lost)}
+  .col.lost .col-head .name{color:var(--lost)}
+  .col-body{display:flex;flex-direction:column;gap:10px;min-height:60px;border-radius:10px;transition:background .12s,box-shadow .12s}
+  .col-body.over{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
+
+  /* Seguimientos panel */
+  .followbar{display:flex;justify-content:flex-end;margin-bottom:12px}
+  .btn-follow{background:var(--warn-soft);color:var(--warn);padding:8px 14px;font-weight:600;display:inline-flex;align-items:center;gap:8px}
+  .btn-follow.none{background:var(--paper);color:var(--ink-faint);border:1px solid var(--line)}
+  .follow-panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:8px;margin-bottom:20px;display:none}
+  .follow-panel.open{display:block}
+  .follow-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;cursor:pointer}
+  .follow-row:hover{background:var(--paper)}
+  .follow-row .fr-date{font-size:12px;font-weight:600;white-space:nowrap;min-width:86px}
+  .follow-row .fr-date.overdue{color:var(--warn)}
+  .follow-row .fr-date.today{color:var(--accent)}
+  .follow-row .fr-name{font-weight:600;font-size:14px}
+  .follow-row .fr-co{font-size:12px;color:var(--ink-soft)}
+  .follow-row .fr-stage{margin-left:auto;font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.05em}
 
   /* Card */
-  .lead{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;cursor:pointer;transition:border-color .15s,transform .1s}
+  .lead{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;cursor:grab;transition:border-color .15s,transform .1s,opacity .1s}
+  .lead:active{cursor:grabbing}
+  .lead.dragging{opacity:.4}
   .lead:hover{border-color:var(--accent);transform:translateY(-1px)}
   .lead .name{font-weight:600;font-size:14px;margin-bottom:2px}
   .lead .role{font-size:12px;color:var(--ink-soft);margin-bottom:8px}
@@ -143,6 +165,11 @@
 
   <div class="wrap">
     <div class="stats" id="stats"></div>
+
+    <div class="followbar">
+      <button class="btn-follow" id="btnFollow">Seguimientos</button>
+    </div>
+    <div class="follow-panel" id="followPanel"></div>
 
     <div class="toolbar">
       <h2>Pipeline</h2>
@@ -220,8 +247,10 @@ const ETAPAS = [
   {key:'respondio', label:'Respondió'},
   {key:'reunion_agendada', label:'Reunión'},
   {key:'propuesta_enviada', label:'Propuesta'},
-  {key:'ganado', label:'Ganado'},
+  {key:'ganado', label:'Ganado', cls:'won'},
+  {key:'perdido', label:'Perdido', cls:'lost'},
 ];
+const CERRADAS = ['ganado','perdido'];
 let empresas = [], contactos = [], editingId = null;
 
 // ---------- AUTH ----------
@@ -283,19 +312,70 @@ function render(){
   ETAPAS.forEach(et => {
     const items = contactos.filter(c=>c.etapa===et.key);
     const col = document.createElement('div');
-    col.className='col';
+    col.className='col'+(et.cls?' '+et.cls:'');
     col.innerHTML = `<div class="col-head"><span class="name">${et.label}</span><span class="count">${items.length}</span></div>`;
     const body = document.createElement('div');
     body.className='col-body';
+    body.dataset.etapa = et.key;
+    body.addEventListener('dragover', e => { e.preventDefault(); body.classList.add('over'); });
+    body.addEventListener('dragleave', () => body.classList.remove('over'));
+    body.addEventListener('drop', e => {
+      e.preventDefault();
+      body.classList.remove('over');
+      moveEtapa(Number(e.dataTransfer.getData('text/plain')), et.key);
+    });
     items.forEach(c => body.appendChild(card(c)));
     col.appendChild(body);
     board.appendChild(col);
   });
+
+  renderFollow();
+}
+
+// Cambia la etapa de un contacto al soltarlo en otra columna (drag & drop).
+async function moveEtapa(id, etapa){
+  const c = contactos.find(x=>x.id===id);
+  if(!c || c.etapa===etapa) return;
+  c.etapa = etapa;           // optimista: se refleja al instante
+  render();
+  const {error} = await sb.from('contactos').update({etapa}).eq('id',id);
+  if(error){ await loadAll(); }   // si falla, recarga el estado real
+}
+
+// Panel de seguimientos: vencidos + los de hoy, ordenados por fecha.
+function renderFollow(){
+  const hoy = todayStr();
+  const due = contactos
+    .filter(c => c.proximo_seguimiento && c.proximo_seguimiento <= hoy && !CERRADAS.includes(c.etapa))
+    .sort((a,b) => a.proximo_seguimiento.localeCompare(b.proximo_seguimiento));
+  const btn = $('btnFollow');
+  btn.textContent = due.length ? `⚠ Seguimientos · ${due.length}` : 'Seguimientos · al día';
+  btn.className = 'btn-follow'+(due.length?'':' none');
+  const etLabel = k => (ETAPAS.find(e=>e.key===k)||{}).label || k;
+  const panel = $('followPanel');
+  panel.innerHTML = due.length ? due.map(c => {
+    const cls = c.proximo_seguimiento < hoy ? 'overdue' : 'today';
+    const txt = c.proximo_seguimiento < hoy ? `⚠ ${c.proximo_seguimiento}` : 'Hoy';
+    return `<div class="follow-row" data-id="${c.id}">
+      <span class="fr-date ${cls}">${txt}</span>
+      <span><span class="fr-name">${c.nombre}</span> <span class="fr-co">· ${empName(c.empresa_id)}</span></span>
+      <span class="fr-stage">${etLabel(c.etapa)}</span>
+    </div>`;
+  }).join('') : '<div class="empty" style="padding:20px">Sin seguimientos vencidos ni para hoy. 🎉</div>';
+  panel.querySelectorAll('.follow-row').forEach(row =>
+    row.onclick = () => openLead(Number(row.dataset.id)));
 }
 
 function card(c){
   const d = document.createElement('div');
   d.className='lead';
+  d.draggable = true;
+  d.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('text/plain', String(c.id));
+    e.dataTransfer.effectAllowed = 'move';
+    d.classList.add('dragging');
+  });
+  d.addEventListener('dragend', () => d.classList.remove('dragging'));
   const overdue = c.proximo_seguimiento && c.proximo_seguimiento < todayStr();
   d.innerHTML = `
     <div class="name">${c.nombre}</div>
@@ -330,6 +410,7 @@ function openLead(id){
 }
 
 $('btnNew').onclick = () => openLead(null);
+$('btnFollow').onclick = () => $('followPanel').classList.toggle('open');
 $('btnCancel').onclick = () => $('modalLead').classList.remove('open');
 
 $('btnSave').onclick = async () => {
