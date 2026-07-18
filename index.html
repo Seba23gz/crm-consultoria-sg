@@ -257,12 +257,24 @@ let empresas = [], contactos = [], editingId = null;
 const $ = id => document.getElementById(id);
 function showMsg(t, ok){const m=$('loginMsg');m.textContent=t;m.className='msg '+(ok?'ok':'err');}
 
+// Valida que haya correo y contraseña antes de llamar a Supabase.
+function creds(){
+  const email = $('email').value.trim();
+  const password = $('password').value;
+  if(!email){ showMsg('Escribe tu correo.', false); return null; }
+  if(!password){ showMsg('Escribe una contraseña.', false); return null; }
+  return {email, password};
+}
+
 $('btnLogin').onclick = async () => {
-  const {error} = await sb.auth.signInWithPassword({email:$('email').value.trim(), password:$('password').value});
+  const c = creds(); if(!c) return;
+  const {error} = await sb.auth.signInWithPassword(c);
   if(error) showMsg(error.message, false);
 };
 $('btnSignup').onclick = async () => {
-  const {error} = await sb.auth.signUp({email:$('email').value.trim(), password:$('password').value});
+  const c = creds(); if(!c) return;
+  if(c.password.length < 6){ showMsg('La contraseña debe tener al menos 6 caracteres.', false); return; }
+  const {error} = await sb.auth.signUp(c);
   if(error) showMsg(error.message, false);
   else showMsg('Acceso creado. Si tu proyecto pide confirmación por correo, revísalo; si no, ya puedes entrar.', true);
 };
