@@ -146,7 +146,6 @@
       <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
     </div>
     <button class="btn-primary" id="btnLogin">Entrar</button>
-    <button class="btn-ghost" id="btnSignup">Primera vez · crear mi acceso</button>
   </div>
 </div>
 
@@ -270,13 +269,6 @@ $('btnLogin').onclick = async () => {
   const c = creds(); if(!c) return;
   const {error} = await sb.auth.signInWithPassword(c);
   if(error) showMsg(error.message, false);
-};
-$('btnSignup').onclick = async () => {
-  const c = creds(); if(!c) return;
-  if(c.password.length < 6){ showMsg('La contraseña debe tener al menos 6 caracteres.', false); return; }
-  const {error} = await sb.auth.signUp(c);
-  if(error) showMsg(error.message, false);
-  else showMsg('Acceso creado. Si tu proyecto pide confirmación por correo, revísalo; si no, ya puedes entrar.', true);
 };
 $('btnLogout').onclick = async () => { await sb.auth.signOut(); };
 
