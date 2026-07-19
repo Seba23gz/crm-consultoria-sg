@@ -16,7 +16,6 @@
     --ink:#111111; --ink-soft:#52525b; --ink-faint:#a1a1aa;
     --paper:#f4f4f5; --card:#ffffff; --line:#e4e4e7;
     --accent:#111111; --accent-soft:#e9e9ec;
-    --alta:#b5502e; --alta-soft:#f4e5de;
     --warn:#b45309; --warn-soft:#fbe4cf;
     --win:#111111; --lost:#a1a1aa;
     --radius:12px;
@@ -24,6 +23,7 @@
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:var(--font-body);background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
   h1,h2,h3{font-family:var(--font-display);font-weight:700;letter-spacing:-0.02em}
+  a{color:inherit;text-decoration:none}
 
   /* Login */
   #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
@@ -38,34 +38,59 @@
   button{font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;border:none;border-radius:100px;transition:opacity .15s,background .15s}
   button:hover{opacity:.85}
   .btn-primary{background:var(--ink);color:var(--paper);padding:12px 22px;width:100%}
-  .btn-ghost{background:transparent;color:var(--ink-soft);padding:8px 0;width:100%;font-size:13px;font-weight:500}
   .msg{font-size:13px;padding:10px 12px;border-radius:10px;margin-bottom:16px;display:none}
   .msg.err{background:var(--warn-soft);color:var(--warn);display:block}
   .msg.ok{background:var(--accent-soft);color:var(--ink);display:block}
 
   /* App shell */
   #app{display:none}
-  header.top{background:var(--card);border-bottom:1px solid var(--line);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
-  .brand{display:flex;align-items:baseline;gap:10px}
+  header.top{background:var(--card);border-bottom:1px solid var(--line);padding:0 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;gap:16px;flex-wrap:wrap}
+  .brand{display:flex;align-items:baseline;gap:10px;padding:16px 0}
   .brand .mark{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-0.02em}
-  .brand .tag{font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em}
+  .brand .btag{font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em}
+  nav.tabs{display:flex;gap:4px;flex-wrap:wrap;order:3;width:100%;border-top:1px solid var(--line)}
+  nav.tabs a{font-size:14px;font-weight:500;color:var(--ink-soft);padding:12px 14px;border-bottom:2px solid transparent;cursor:pointer}
+  nav.tabs a:hover{color:var(--ink)}
+  nav.tabs a.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
   .top-actions{display:flex;align-items:center;gap:12px}
   .user-email{font-size:13px;color:var(--ink-soft)}
   .btn-sm{padding:8px 16px;background:var(--card);border:1px solid var(--line);color:var(--ink-soft);border-radius:100px}
+  @media(min-width:860px){
+    header.top{flex-wrap:nowrap}
+    nav.tabs{order:0;width:auto;border-top:none;margin-left:8px}
+  }
 
   .wrap{padding:24px;max-width:1400px;margin:0 auto}
+  .view{display:none}
+  .view.active{display:block}
+  .page-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:12px;flex-wrap:wrap}
+  .page-head h2{font-size:26px;letter-spacing:-0.02em}
+  .btn-add{background:var(--ink);color:var(--paper);padding:10px 18px;display:inline-flex;align-items:center;gap:6px;border-radius:100px;white-space:nowrap}
 
   /* Stats */
-  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
   .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px}
-  .stat .num{font-family:var(--font-display);font-size:34px;font-weight:700;line-height:1;letter-spacing:-0.03em}
+  .stat .num{font-family:var(--font-display);font-size:32px;font-weight:700;line-height:1;letter-spacing:-0.03em}
   .stat .lbl{font-family:var(--font-mono);font-size:11px;color:var(--ink-soft);margin-top:8px;text-transform:uppercase;letter-spacing:.04em}
   .stat.alert .num{color:var(--warn)}
 
-  /* Toolbar */
-  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap}
-  .toolbar h2{font-size:24px;letter-spacing:-0.02em}
-  .btn-add{background:var(--ink);color:var(--paper);padding:10px 18px;display:inline-flex;align-items:center;gap:6px;border-radius:100px}
+  /* Panels */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:20px}
+  .panel h3{font-size:18px;margin-bottom:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:820px){.grid2{grid-template-columns:1fr}}
+
+  /* Funnel */
+  .funnel-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+  .funnel-row .fl{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);width:96px;flex:none}
+  .funnel-bar{flex:1;background:var(--paper);border-radius:6px;height:22px;overflow:hidden}
+  .funnel-bar span{display:block;height:100%;background:var(--ink);border-radius:6px;min-width:2px}
+  .funnel-row .fn{font-weight:600;font-size:14px;width:34px;text-align:right;flex:none}
+
+  /* Toolbar (filters) */
+  .toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+  .toolbar input,.toolbar select{width:auto;flex:1;min-width:150px;background:var(--card)}
+  .toolbar .search{flex:2;min-width:200px}
 
   /* Board */
   .board{display:grid;grid-template-columns:repeat(7,minmax(190px,1fr));gap:12px;overflow-x:auto;padding-bottom:12px}
@@ -73,27 +98,10 @@
   .col-head{display:flex;align-items:center;justify-content:space-between;padding:8px 4px;margin-bottom:8px;border-bottom:1.5px solid var(--line)}
   .col-head .name{font-family:var(--font-mono);font-size:12px;font-weight:400;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft)}
   .col-head .count{font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);background:var(--card);border:1px solid var(--line);border-radius:100px;padding:1px 8px}
-  .col.won .col-head{border-bottom-color:var(--ink)}
-  .col.won .col-head .name{color:var(--ink)}
-  .col.lost .col-head{border-bottom-color:var(--lost)}
-  .col.lost .col-head .name{color:var(--lost)}
+  .col.won .col-head{border-bottom-color:var(--ink)} .col.won .col-head .name{color:var(--ink)}
+  .col.lost .col-head{border-bottom-color:var(--lost)} .col.lost .col-head .name{color:var(--lost)}
   .col-body{display:flex;flex-direction:column;gap:10px;min-height:60px;border-radius:12px;transition:background .12s,box-shadow .12s}
   .col-body.over{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--ink)}
-
-  /* Seguimientos panel */
-  .followbar{display:flex;justify-content:flex-end;margin-bottom:12px}
-  .btn-follow{background:var(--warn-soft);color:var(--warn);padding:9px 16px;font-weight:600;display:inline-flex;align-items:center;gap:8px;border-radius:100px}
-  .btn-follow.none{background:var(--card);color:var(--ink-soft);border:1px solid var(--line)}
-  .follow-panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:8px;margin-bottom:20px;display:none}
-  .follow-panel.open{display:block}
-  .follow-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;cursor:pointer}
-  .follow-row:hover{background:var(--paper)}
-  .follow-row .fr-date{font-family:var(--font-mono);font-size:12px;font-weight:400;white-space:nowrap;min-width:96px}
-  .follow-row .fr-date.overdue{color:var(--warn)}
-  .follow-row .fr-date.today{color:var(--ink)}
-  .follow-row .fr-name{font-weight:600;font-size:14px}
-  .follow-row .fr-co{font-size:12px;color:var(--ink-soft)}
-  .follow-row .fr-stage{margin-left:auto;font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.04em}
 
   /* Card */
   .lead{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;cursor:grab;transition:border-color .15s,transform .1s,opacity .1s}
@@ -104,17 +112,41 @@
   .lead .role{font-size:12px;color:var(--ink-soft);margin-bottom:8px}
   .lead .co{font-size:12px;color:var(--ink);background:var(--paper);border-radius:8px;padding:3px 8px;display:inline-block;margin-bottom:8px}
   .lead .foot{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
-  .pill{font-family:var(--font-mono);font-size:10px;font-weight:400;text-transform:uppercase;letter-spacing:.03em;padding:3px 9px;border-radius:100px}
+  .pill{font-family:var(--font-mono);font-size:10px;font-weight:400;text-transform:uppercase;letter-spacing:.03em;padding:3px 9px;border-radius:100px;white-space:nowrap}
   .pill.alta{background:var(--ink);color:var(--paper)}
   .pill.media{background:var(--card);color:var(--ink-soft);border:1px solid var(--line)}
   .pill.baja{background:var(--paper);color:var(--ink-faint)}
-  .follow{font-size:11px;color:var(--ink-faint)}
-  .follow.overdue{color:var(--warn);font-weight:600}
+  .badge{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.03em;padding:3px 9px;border-radius:100px;border:1px solid var(--line);color:var(--ink-soft);white-space:nowrap}
+  .badge.ganado{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .badge.perdido{color:var(--lost)}
+  .follow{font-size:11px;color:var(--ink-faint)} .follow.overdue{color:var(--warn);font-weight:600}
+
+  /* Table */
+  .table-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  thead th{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);font-weight:400;text-align:left;padding:12px 16px;border-bottom:1px solid var(--line);white-space:nowrap}
+  tbody td{padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+  tbody tr{cursor:pointer;transition:background .1s}
+  tbody tr:hover{background:var(--paper)}
+  tbody tr:last-child td{border-bottom:none}
+  td .t-name{font-weight:600}
+  td .t-sub{font-size:12px;color:var(--ink-soft)}
+  .muted{color:var(--ink-faint)}
+  .row-empty{text-align:center;padding:44px;color:var(--ink-faint)}
+
+  /* Seguimientos */
+  .sg-group{margin-bottom:24px}
+  .sg-group h3{font-size:16px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .sg-count{font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);border:1px solid var(--line);border-radius:100px;padding:1px 8px}
+  .sg-row{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer}
+  .sg-row:hover{border-color:var(--ink)}
+  .sg-row .sg-date{font-family:var(--font-mono);font-size:12px;white-space:nowrap;min-width:96px}
+  .sg-row .sg-date.overdue{color:var(--warn)} .sg-row .sg-date.today{color:var(--ink);font-weight:700}
 
   /* Modal */
   .overlay{position:fixed;inset:0;background:rgba(17,17,17,.45);display:none;align-items:flex-start;justify-content:center;padding:40px 20px;z-index:50;overflow-y:auto}
   .overlay.open{display:flex}
-  .modal{background:var(--card);border-radius:16px;width:100%;max-width:520px;padding:28px}
+  .modal{background:var(--card);border-radius:16px;width:100%;max-width:560px;padding:28px}
   .modal h3{font-size:24px;margin-bottom:4px;letter-spacing:-0.02em}
   .modal .modal-sub{font-size:13px;color:var(--ink-soft);margin-bottom:20px}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -123,13 +155,15 @@
   .btn-cancel{background:var(--card);border:1px solid var(--line);color:var(--ink-soft)}
   .btn-danger{background:transparent;border:1px solid var(--line);color:var(--warn);flex:0 0 auto;margin-right:auto;padding:12px 18px}
   .btn-danger:hover{background:var(--warn-soft);border-color:var(--warn);opacity:1}
-  .acts{margin-top:20px;border-top:1px solid var(--line);padding-top:16px}
-  .acts h4{font-family:var(--font-mono);font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);margin-bottom:10px;font-weight:400}
-  .act{font-size:13px;padding:8px 0;border-bottom:1px solid var(--line);display:flex;gap:8px}
-  .act .at{font-weight:600;text-transform:capitalize;color:var(--ink)}
-  .act .ad{color:var(--ink-soft)}
-  .act .af{margin-left:auto;color:var(--ink-faint);font-size:12px;white-space:nowrap}
-  .empty{text-align:center;padding:40px;color:var(--ink-faint);font-size:14px}
+  .sub-list{margin-top:20px;border-top:1px solid var(--line);padding-top:16px}
+  .sub-list h4{font-family:var(--font-mono);font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);margin-bottom:10px;font-weight:400}
+  .li{font-size:13px;padding:9px 0;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
+  .li:last-child{border-bottom:none}
+  .li .at{font-weight:600;text-transform:capitalize;color:var(--ink)}
+  .li .ad{color:var(--ink-soft)}
+  .li .af{margin-left:auto;color:var(--ink-faint);font-size:12px;white-space:nowrap}
+  .li.click{cursor:pointer} .li.click:hover{color:var(--ink)}
+  .empty{text-align:center;padding:20px;color:var(--ink-faint);font-size:14px}
   @media(max-width:640px){.wrap{padding:16px}.row2{grid-template-columns:1fr}}
 </style>
 </head>
@@ -159,8 +193,15 @@
   <header class="top">
     <div class="brand">
       <span class="mark">CRM</span>
-      <span class="tag">Consultoría SG</span>
+      <span class="btag">Consultoría SG</span>
     </div>
+    <nav class="tabs" id="tabs">
+      <a data-view="dashboard" class="active">Dashboard</a>
+      <a data-view="pipeline">Pipeline</a>
+      <a data-view="contactos">Contactos</a>
+      <a data-view="empresas">Empresas</a>
+      <a data-view="seguimientos">Seguimientos</a>
+    </nav>
     <div class="top-actions">
       <span class="user-email" id="userEmail"></span>
       <button class="btn-sm" id="btnLogout">Salir</button>
@@ -168,19 +209,58 @@
   </header>
 
   <div class="wrap">
-    <div class="stats" id="stats"></div>
 
-    <div class="followbar">
-      <button class="btn-follow" id="btnFollow">Seguimientos</button>
-    </div>
-    <div class="follow-panel" id="followPanel"></div>
+    <!-- DASHBOARD -->
+    <section class="view active" id="view-dashboard">
+      <div class="page-head"><h2>Dashboard</h2></div>
+      <div class="stats" id="dashStats"></div>
+      <div class="grid2">
+        <div class="panel"><h3>Embudo por etapa</h3><div id="funnel"></div></div>
+        <div class="panel"><h3>Próximos seguimientos</h3><div id="dashFollow"></div></div>
+      </div>
+    </section>
 
-    <div class="toolbar">
-      <h2>Pipeline</h2>
-      <button class="btn-add" id="btnNew">+ Nuevo contacto</button>
-    </div>
+    <!-- PIPELINE -->
+    <section class="view" id="view-pipeline">
+      <div class="page-head"><h2>Pipeline</h2><button class="btn-add" id="btnNewLeadP">+ Nuevo contacto</button></div>
+      <div class="board" id="board"></div>
+    </section>
 
-    <div class="board" id="board"></div>
+    <!-- CONTACTOS -->
+    <section class="view" id="view-contactos">
+      <div class="page-head"><h2>Contactos</h2><button class="btn-add" id="btnNewLeadC">+ Nuevo contacto</button></div>
+      <div class="toolbar">
+        <input class="search" id="cSearch" placeholder="Buscar por nombre, empresa o email…">
+        <select id="cEtapa"><option value="">Todas las etapas</option></select>
+        <select id="cPrioridad">
+          <option value="">Toda prioridad</option>
+          <option value="alta">Alta</option><option value="media">Media</option><option value="baja">Baja</option>
+        </select>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Nombre</th><th>Empresa</th><th>Contacto</th><th>Etapa</th><th>Prioridad</th><th>Valor</th><th>Seguimiento</th></tr></thead>
+        <tbody id="cBody"></tbody>
+      </table></div>
+    </section>
+
+    <!-- EMPRESAS -->
+    <section class="view" id="view-empresas">
+      <div class="page-head"><h2>Empresas</h2><button class="btn-add" id="btnNewEmpresa">+ Nueva empresa</button></div>
+      <div class="toolbar">
+        <input class="search" id="eSearch" placeholder="Buscar empresa, rubro o ciudad…">
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Empresa</th><th>Rubro</th><th>Ciudad</th><th>Empleados</th><th>Contactos</th><th>Sitio web</th></tr></thead>
+        <tbody id="eBody"></tbody>
+      </table></div>
+    </section>
+
+    <!-- SEGUIMIENTOS -->
+    <section class="view" id="view-seguimientos">
+      <div class="page-head"><h2>Seguimientos</h2></div>
+      <div id="sgContent"></div>
+    </section>
+
   </div>
 </div>
 
@@ -213,11 +293,15 @@
       <div class="field"><label>Prioridad</label><select id="m_prioridad">
         <option value="alta">Alta</option><option value="media">Media</option><option value="baja">Baja</option>
       </select></div>
+      <div class="field"><label>Valor estimado (CLP)</label><input id="m_valor" type="number" min="0" placeholder="0"></div>
+    </div>
+    <div class="row2">
       <div class="field"><label>Próximo seguimiento</label><input type="date" id="m_seguimiento"></div>
+      <div class="field"><label>LinkedIn</label><input id="m_linkedin" placeholder="URL"></div>
     </div>
     <div class="field"><label>Notas</label><textarea id="m_notas" rows="2"></textarea></div>
 
-    <div class="acts" id="actsBox" style="display:none">
+    <div class="sub-list" id="actsBox" style="display:none">
       <h4>Registrar actividad</h4>
       <div class="row2">
         <div class="field"><select id="a_tipo">
@@ -233,18 +317,49 @@
     <div class="modal-actions">
       <button class="btn-danger" id="btnDelete" style="display:none">Eliminar</button>
       <button class="btn-cancel" id="btnCancel">Cerrar</button>
-      <button class="btn-primary" id="btnSave" style="background:var(--accent);color:#fff">Guardar</button>
+      <button class="btn-primary" id="btnSave" style="width:auto">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: empresa -->
+<div class="overlay" id="modalEmpresa">
+  <div class="modal">
+    <h3 id="empTitle">Empresa</h3>
+    <p class="modal-sub">Cuenta / organización</p>
+    <div class="field"><label>Nombre</label><input id="e_nombre"></div>
+    <div class="row2">
+      <div class="field"><label>Rubro</label><input id="e_rubro"></div>
+      <div class="field"><label>Ciudad</label><input id="e_ciudad"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Nº empleados</label><input id="e_empleados" type="number" min="0"></div>
+      <div class="field"><label>Teléfono</label><input id="e_telefono"></div>
+    </div>
+    <div class="field"><label>Sitio web</label><input id="e_web" placeholder="https://"></div>
+    <div class="field"><label>Notas</label><textarea id="e_notas" rows="2"></textarea></div>
+
+    <div class="sub-list" id="empContacts" style="display:none">
+      <h4>Contactos de esta empresa</h4>
+      <div id="empContactList"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-danger" id="btnDeleteEmp" style="display:none">Eliminar</button>
+      <button class="btn-cancel" id="btnCancelEmp">Cerrar</button>
+      <button class="btn-primary" id="btnSaveEmp" style="width:auto">Guardar</button>
     </div>
   </div>
 </div>
 
 <script>
-// ====== CONFIG: reemplaza estos dos valores ======
+// ====== CONFIG ======
 const SUPABASE_URL = 'https://rayvimywyqjnzzmbagpv.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJheXZpbXl3eXFqbnp6bWJhZ3B2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzMjk2MzksImV4cCI6MjA5OTkwNTYzOX0.Dd7AEixH8guWZsk0LxDEpsJvj9RFRglIsAkDidmW5R8';
-// ==================================================
+// ====================
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = id => document.getElementById(id);
 
 const ETAPAS = [
   {key:'nuevo', label:'Nuevo'},
@@ -256,39 +371,47 @@ const ETAPAS = [
   {key:'perdido', label:'Perdido', cls:'lost'},
 ];
 const CERRADAS = ['ganado','perdido'];
-let empresas = [], contactos = [], editingId = null;
+const etLabel = k => (ETAPAS.find(e=>e.key===k)||{}).label || k;
+
+let empresas = [], contactos = [], editingId = null, editingEmpId = null, currentView = 'dashboard';
+
+const todayStr = () => new Date().toISOString().slice(0,10);
+const empName = id => { const e=empresas.find(x=>x.id===id); return e?e.nombre:'—'; };
+const money = n => (n==null||n==='') ? '—' : new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n);
+const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 // ---------- AUTH ----------
-const $ = id => document.getElementById(id);
 function showMsg(t, ok){const m=$('loginMsg');m.textContent=t;m.className='msg '+(ok?'ok':'err');}
-
-// Valida que haya correo y contraseña antes de llamar a Supabase.
 function creds(){
-  const email = $('email').value.trim();
-  const password = $('password').value;
+  const email=$('email').value.trim(), password=$('password').value;
   if(!email){ showMsg('Escribe tu correo.', false); return null; }
   if(!password){ showMsg('Escribe una contraseña.', false); return null; }
   return {email, password};
 }
-
 $('btnLogin').onclick = async () => {
-  const c = creds(); if(!c) return;
-  const {error} = await sb.auth.signInWithPassword(c);
+  const c=creds(); if(!c) return;
+  const {error}=await sb.auth.signInWithPassword(c);
   if(error) showMsg(error.message, false);
 };
 $('btnLogout').onclick = async () => { await sb.auth.signOut(); };
-
 sb.auth.onAuthStateChange((_e, session) => {
   if(session){
-    $('login').style.display='none';
-    $('app').style.display='block';
+    $('login').style.display='none'; $('app').style.display='block';
     $('userEmail').textContent = session.user.email;
     loadAll();
   } else {
-    $('login').style.display='flex';
-    $('app').style.display='none';
+    $('login').style.display='flex'; $('app').style.display='none';
   }
 });
+
+// ---------- NAV ----------
+function showView(name){
+  currentView = name;
+  document.querySelectorAll('nav.tabs a').forEach(a=>a.classList.toggle('active', a.dataset.view===name));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id==='view-'+name));
+  renderActive();
+}
+document.querySelectorAll('nav.tabs a').forEach(a => a.onclick = () => showView(a.dataset.view));
 
 // ---------- DATA ----------
 async function loadAll(){
@@ -298,99 +421,71 @@ async function loadAll(){
   ]);
   empresas = e.data || [];
   contactos = c.data || [];
-  render();
+  // llena selects que dependen de datos
+  $('cEtapa').innerHTML = '<option value="">Todas las etapas</option>' + ETAPAS.map(x=>`<option value="${x.key}">${x.label}</option>`).join('');
+  renderActive();
+}
+function renderActive(){
+  ({dashboard:renderDashboard, pipeline:renderPipeline, contactos:renderContactos,
+    empresas:renderEmpresas, seguimientos:renderSeguimientos}[currentView] || renderDashboard)();
 }
 
-function empName(id){const e=empresas.find(x=>x.id===id);return e?e.nombre:'—';}
-function todayStr(){return new Date().toISOString().slice(0,10);}
+// ---------- DASHBOARD ----------
+function renderDashboard(){
+  const activos = contactos.filter(c=>!CERRADAS.includes(c.etapa));
+  const ganados = contactos.filter(c=>c.etapa==='ganado');
+  const vencidos = contactos.filter(c=>c.proximo_seguimiento && c.proximo_seguimiento < todayStr() && !CERRADAS.includes(c.etapa));
+  const valorPipeline = activos.reduce((s,c)=>s+(c.valor_estimado||0),0);
+  $('dashStats').innerHTML = `
+    <div class="stat"><div class="num">${contactos.length}</div><div class="lbl">Contactos totales</div></div>
+    <div class="stat"><div class="num">${activos.length}</div><div class="lbl">Pipeline activo</div></div>
+    <div class="stat"><div class="num">${ganados.length}</div><div class="lbl">Ganados</div></div>
+    <div class="stat"><div class="num" style="font-size:24px">${money(valorPipeline)}</div><div class="lbl">Valor en pipeline</div></div>
+    <div class="stat ${vencidos.length?'alert':''}"><div class="num">${vencidos.length}</div><div class="lbl">Seguimientos vencidos</div></div>`;
 
-function render(){
-  // stats
-  const total = contactos.length;
-  const activos = contactos.filter(c=>!['ganado','perdido'].includes(c.etapa)).length;
-  const ganados = contactos.filter(c=>c.etapa==='ganado').length;
-  const vencidos = contactos.filter(c=>c.proximo_seguimiento && c.proximo_seguimiento < todayStr() && !['ganado','perdido'].includes(c.etapa)).length;
-  $('stats').innerHTML = `
-    <div class="stat"><div class="num">${total}</div><div class="lbl">Contactos totales</div></div>
-    <div class="stat"><div class="num">${activos}</div><div class="lbl">En pipeline activo</div></div>
-    <div class="stat"><div class="num">${ganados}</div><div class="lbl">Ganados</div></div>
-    <div class="stat ${vencidos?'alert':''}"><div class="num">${vencidos}</div><div class="lbl">Seguimientos vencidos</div></div>`;
+  const max = Math.max(1, ...ETAPAS.map(et=>contactos.filter(c=>c.etapa===et.key).length));
+  $('funnel').innerHTML = ETAPAS.map(et => {
+    const n = contactos.filter(c=>c.etapa===et.key).length;
+    return `<div class="funnel-row"><span class="fl">${et.label}</span>
+      <span class="funnel-bar"><span style="width:${Math.round(n/max*100)}%"></span></span>
+      <span class="fn">${n}</span></div>`;
+  }).join('');
 
-  // board
+  const due = dueList();
+  $('dashFollow').innerHTML = due.length ? due.slice(0,6).map(fRow).join('') : '<div class="empty">Sin seguimientos pendientes 🎉</div>';
+  bindFollowRows('dashFollow');
+}
+
+// ---------- PIPELINE ----------
+function renderPipeline(){
   const board = $('board');
   board.innerHTML = '';
   ETAPAS.forEach(et => {
     const items = contactos.filter(c=>c.etapa===et.key);
     const col = document.createElement('div');
-    col.className='col'+(et.cls?' '+et.cls:'');
+    col.className = 'col'+(et.cls?' '+et.cls:'');
     col.innerHTML = `<div class="col-head"><span class="name">${et.label}</span><span class="count">${items.length}</span></div>`;
     const body = document.createElement('div');
-    body.className='col-body';
-    body.dataset.etapa = et.key;
+    body.className = 'col-body';
     body.addEventListener('dragover', e => { e.preventDefault(); body.classList.add('over'); });
     body.addEventListener('dragleave', () => body.classList.remove('over'));
-    body.addEventListener('drop', e => {
-      e.preventDefault();
-      body.classList.remove('over');
-      moveEtapa(Number(e.dataTransfer.getData('text/plain')), et.key);
-    });
+    body.addEventListener('drop', e => { e.preventDefault(); body.classList.remove('over'); moveEtapa(Number(e.dataTransfer.getData('text/plain')), et.key); });
     items.forEach(c => body.appendChild(card(c)));
     col.appendChild(body);
     board.appendChild(col);
   });
-
-  renderFollow();
 }
-
-// Cambia la etapa de un contacto al soltarlo en otra columna (drag & drop).
-async function moveEtapa(id, etapa){
-  const c = contactos.find(x=>x.id===id);
-  if(!c || c.etapa===etapa) return;
-  c.etapa = etapa;           // optimista: se refleja al instante
-  render();
-  const {error} = await sb.from('contactos').update({etapa}).eq('id',id);
-  if(error){ await loadAll(); }   // si falla, recarga el estado real
-}
-
-// Panel de seguimientos: vencidos + los de hoy, ordenados por fecha.
-function renderFollow(){
-  const hoy = todayStr();
-  const due = contactos
-    .filter(c => c.proximo_seguimiento && c.proximo_seguimiento <= hoy && !CERRADAS.includes(c.etapa))
-    .sort((a,b) => a.proximo_seguimiento.localeCompare(b.proximo_seguimiento));
-  const btn = $('btnFollow');
-  btn.textContent = due.length ? `⚠ Seguimientos · ${due.length}` : 'Seguimientos · al día';
-  btn.className = 'btn-follow'+(due.length?'':' none');
-  const etLabel = k => (ETAPAS.find(e=>e.key===k)||{}).label || k;
-  const panel = $('followPanel');
-  panel.innerHTML = due.length ? due.map(c => {
-    const cls = c.proximo_seguimiento < hoy ? 'overdue' : 'today';
-    const txt = c.proximo_seguimiento < hoy ? `⚠ ${c.proximo_seguimiento}` : 'Hoy';
-    return `<div class="follow-row" data-id="${c.id}">
-      <span class="fr-date ${cls}">${txt}</span>
-      <span><span class="fr-name">${c.nombre}</span> <span class="fr-co">· ${empName(c.empresa_id)}</span></span>
-      <span class="fr-stage">${etLabel(c.etapa)}</span>
-    </div>`;
-  }).join('') : '<div class="empty" style="padding:20px">Sin seguimientos vencidos ni para hoy. 🎉</div>';
-  panel.querySelectorAll('.follow-row').forEach(row =>
-    row.onclick = () => openLead(Number(row.dataset.id)));
-}
-
 function card(c){
   const d = document.createElement('div');
-  d.className='lead';
+  d.className = 'lead';
   d.draggable = true;
-  d.addEventListener('dragstart', e => {
-    e.dataTransfer.setData('text/plain', String(c.id));
-    e.dataTransfer.effectAllowed = 'move';
-    d.classList.add('dragging');
-  });
+  d.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', String(c.id)); e.dataTransfer.effectAllowed='move'; d.classList.add('dragging'); });
   d.addEventListener('dragend', () => d.classList.remove('dragging'));
   const overdue = c.proximo_seguimiento && c.proximo_seguimiento < todayStr();
   d.innerHTML = `
-    <div class="name">${c.nombre}</div>
-    <div class="role">${c.cargo||''}</div>
-    <div class="co">${empName(c.empresa_id)}</div>
+    <div class="name">${esc(c.nombre)}</div>
+    <div class="role">${esc(c.cargo||'')}</div>
+    <div class="co">${esc(empName(c.empresa_id))}</div>
     <div class="foot">
       <span class="pill ${c.prioridad||'media'}">${c.prioridad||'media'}</span>
       ${c.proximo_seguimiento?`<span class="follow ${overdue?'overdue':''}">${overdue?'⚠ ':''}${c.proximo_seguimiento}</span>`:''}
@@ -398,73 +493,204 @@ function card(c){
   d.onclick = () => openLead(c.id);
   return d;
 }
-
-// ---------- MODAL ----------
-function fillEmpresas(sel){
-  $('m_empresa').innerHTML = empresas.map(e=>`<option value="${e.id}" ${e.id===sel?'selected':''}>${e.nombre}</option>`).join('');
+async function moveEtapa(id, etapa){
+  const c = contactos.find(x=>x.id===id);
+  if(!c || c.etapa===etapa) return;
+  c.etapa = etapa;
+  renderActive();
+  const {error} = await sb.from('contactos').update({etapa}).eq('id',id);
+  if(error){ await loadAll(); }
 }
 
+// ---------- CONTACTOS (tabla) ----------
+['cSearch','cEtapa','cPrioridad'].forEach(id => $(id).addEventListener('input', () => { if(currentView==='contactos') renderContactos(); }));
+function renderContactos(){
+  const q = $('cSearch').value.trim().toLowerCase();
+  const fe = $('cEtapa').value, fp = $('cPrioridad').value;
+  let rows = contactos.filter(c => {
+    if(fe && c.etapa!==fe) return false;
+    if(fp && (c.prioridad||'media')!==fp) return false;
+    if(q){
+      const hay = [c.nombre, c.cargo, c.email, empName(c.empresa_id)].join(' ').toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  $('cBody').innerHTML = rows.length ? rows.map(c => {
+    const overdue = c.proximo_seguimiento && c.proximo_seguimiento < todayStr() && !CERRADAS.includes(c.etapa);
+    return `<tr data-id="${c.id}">
+      <td><div class="t-name">${esc(c.nombre)}</div><div class="t-sub">${esc(c.cargo||'')}</div></td>
+      <td>${esc(empName(c.empresa_id))}</td>
+      <td><div class="t-sub">${esc(c.email||'—')}</div><div class="t-sub">${esc(c.telefono||'')}</div></td>
+      <td><span class="badge ${c.etapa}">${etLabel(c.etapa)}</span></td>
+      <td><span class="pill ${c.prioridad||'media'}">${c.prioridad||'media'}</span></td>
+      <td>${money(c.valor_estimado)}</td>
+      <td>${c.proximo_seguimiento?`<span class="follow ${overdue?'overdue':''}">${overdue?'⚠ ':''}${c.proximo_seguimiento}</span>`:'<span class="muted">—</span>'}</td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="7" class="row-empty">Sin contactos que coincidan.</td></tr>';
+  $('cBody').querySelectorAll('tr[data-id]').forEach(tr => tr.onclick = () => openLead(Number(tr.dataset.id)));
+}
+
+// ---------- EMPRESAS (tabla) ----------
+$('eSearch').addEventListener('input', () => { if(currentView==='empresas') renderEmpresas(); });
+function contactosDe(empId){ return contactos.filter(c=>c.empresa_id===empId); }
+function renderEmpresas(){
+  const q = $('eSearch').value.trim().toLowerCase();
+  let rows = empresas.filter(e => !q || [e.nombre,e.rubro,e.ciudad].join(' ').toLowerCase().includes(q));
+  $('eBody').innerHTML = rows.length ? rows.map(e => `
+    <tr data-id="${e.id}">
+      <td><div class="t-name">${esc(e.nombre)}</div></td>
+      <td>${esc(e.rubro||'—')}</td>
+      <td>${esc(e.ciudad||'—')}</td>
+      <td>${e.num_empleados??'<span class="muted">—</span>'}</td>
+      <td>${contactosDe(e.id).length}</td>
+      <td>${e.sitio_web?`<span class="t-sub">${esc(e.sitio_web)}</span>`:'<span class="muted">—</span>'}</td>
+    </tr>`).join('') : '<tr><td colspan="6" class="row-empty">Sin empresas que coincidan.</td></tr>';
+  $('eBody').querySelectorAll('tr[data-id]').forEach(tr => tr.onclick = () => openEmpresa(Number(tr.dataset.id)));
+}
+
+// ---------- SEGUIMIENTOS ----------
+function dueList(){
+  return contactos
+    .filter(c => c.proximo_seguimiento && !CERRADAS.includes(c.etapa))
+    .sort((a,b)=>a.proximo_seguimiento.localeCompare(b.proximo_seguimiento));
+}
+function fRow(c){
+  const hoy = todayStr();
+  const cls = c.proximo_seguimiento < hoy ? 'overdue' : (c.proximo_seguimiento===hoy ? 'today' : '');
+  const txt = c.proximo_seguimiento < hoy ? '⚠ '+c.proximo_seguimiento : (c.proximo_seguimiento===hoy ? 'Hoy' : c.proximo_seguimiento);
+  return `<div class="sg-row" data-id="${c.id}">
+    <span class="sg-date ${cls}">${txt}</span>
+    <span><span class="t-name">${esc(c.nombre)}</span> <span class="t-sub">· ${esc(empName(c.empresa_id))}</span></span>
+    <span class="badge ${c.etapa}" style="margin-left:auto">${etLabel(c.etapa)}</span>
+  </div>`;
+}
+function bindFollowRows(containerId){
+  $(containerId).querySelectorAll('.sg-row[data-id]').forEach(r => r.onclick = () => openLead(Number(r.dataset.id)));
+}
+function renderSeguimientos(){
+  const hoy = todayStr();
+  const all = dueList();
+  const vencidos = all.filter(c=>c.proximo_seguimiento < hoy);
+  const deHoy = all.filter(c=>c.proximo_seguimiento === hoy);
+  const prox = all.filter(c=>c.proximo_seguimiento > hoy);
+  const group = (titulo, arr) => `<div class="sg-group"><h3>${titulo} <span class="sg-count">${arr.length}</span></h3>${
+    arr.length ? arr.map(fRow).join('') : '<div class="empty">Nada por aquí.</div>'}</div>`;
+  $('sgContent').innerHTML = group('⚠ Vencidos', vencidos) + group('Hoy', deHoy) + group('Próximos', prox);
+  bindFollowRows('sgContent');
+}
+
+// ---------- MODAL: contacto ----------
+function fillEmpresas(sel){
+  $('m_empresa').innerHTML = '<option value="">— Sin empresa —</option>' +
+    empresas.map(e=>`<option value="${e.id}" ${e.id===sel?'selected':''}>${esc(e.nombre)}</option>`).join('');
+}
 function openLead(id){
   editingId = id;
   const c = contactos.find(x=>x.id===id);
   $('modalTitle').textContent = c?c.nombre:'Nuevo contacto';
-  $('modalCo').textContent = c?empName(c.empresa_id):'';
+  $('modalCo').textContent = c?empName(c.empresa_id):'Nuevo registro';
   $('m_nombre').value=c?.nombre||''; $('m_cargo').value=c?.cargo||'';
   $('m_email').value=c?.email||''; $('m_telefono').value=c?.telefono||'';
   fillEmpresas(c?.empresa_id);
   $('m_etapa').value=c?.etapa||'nuevo'; $('m_prioridad').value=c?.prioridad||'media';
+  $('m_valor').value=c?.valor_estimado??''; $('m_linkedin').value=c?.linkedin_url||'';
   $('m_seguimiento').value=c?.proximo_seguimiento||''; $('m_notas').value=c?.notas||'';
   $('actsBox').style.display = c?'block':'none';
   $('btnDelete').style.display = c?'inline-flex':'none';
-  if(c) loadActs(id);
+  if(c) loadActs(id); else $('actList').innerHTML='';
   $('modalLead').classList.add('open');
 }
-
-$('btnNew').onclick = () => openLead(null);
-$('btnFollow').onclick = () => $('followPanel').classList.toggle('open');
+$('btnNewLeadP').onclick = () => openLead(null);
+$('btnNewLeadC').onclick = () => openLead(null);
 $('btnCancel').onclick = () => $('modalLead').classList.remove('open');
-
-$('btnDelete').onclick = async () => {
-  if(!editingId) return;
-  const c = contactos.find(x=>x.id===editingId);
-  if(!confirm(`¿Eliminar a ${c?c.nombre:'este contacto'}? Esta acción no se puede deshacer.`)) return;
-  // Borra primero sus actividades (evita error por la clave foránea) y luego el contacto.
-  await sb.from('actividades').delete().eq('contacto_id', editingId);
-  const {error} = await sb.from('contactos').delete().eq('id', editingId);
-  if(error){ alert('No se pudo eliminar: '+error.message); return; }
-  $('modalLead').classList.remove('open');
-  editingId = null;
-  loadAll();
-};
-
 $('btnSave').onclick = async () => {
+  const valor = $('m_valor').value;
   const payload = {
     nombre:$('m_nombre').value.trim(), cargo:$('m_cargo').value.trim(),
     email:$('m_email').value.trim(), telefono:$('m_telefono').value.trim(),
     empresa_id: $('m_empresa').value?Number($('m_empresa').value):null,
     etapa:$('m_etapa').value, prioridad:$('m_prioridad').value,
+    valor_estimado: valor!==''?Number(valor):null, linkedin_url:$('m_linkedin').value.trim()||null,
     proximo_seguimiento:$('m_seguimiento').value||null, notas:$('m_notas').value.trim()
   };
-  if(editingId){ await sb.from('contactos').update(payload).eq('id',editingId); }
-  else { await sb.from('contactos').insert(payload); }
+  if(!payload.nombre){ alert('El nombre es obligatorio.'); return; }
+  const {error} = editingId
+    ? await sb.from('contactos').update(payload).eq('id',editingId)
+    : await sb.from('contactos').insert(payload);
+  if(error){ alert('No se pudo guardar: '+error.message); return; }
   $('modalLead').classList.remove('open');
   loadAll();
 };
-
+$('btnDelete').onclick = async () => {
+  if(!editingId) return;
+  const c = contactos.find(x=>x.id===editingId);
+  if(!confirm(`¿Eliminar a ${c?c.nombre:'este contacto'}? Esta acción no se puede deshacer.`)) return;
+  await sb.from('actividades').delete().eq('contacto_id', editingId);
+  const {error} = await sb.from('contactos').delete().eq('id', editingId);
+  if(error){ alert('No se pudo eliminar: '+error.message); return; }
+  $('modalLead').classList.remove('open'); editingId=null; loadAll();
+};
 async function loadActs(id){
   const {data} = await sb.from('actividades').select('*').eq('contacto_id',id).order('fecha',{ascending:false});
   $('actList').innerHTML = (data||[]).map(a=>`
-    <div class="act"><span class="at">${a.tipo}</span><span class="ad">${a.descripcion||''}</span><span class="af">${a.fecha}</span></div>
-  `).join('') || '<div class="empty" style="padding:16px">Sin actividades aún.</div>';
+    <div class="li"><span class="at">${esc(a.tipo)}</span><span class="ad">${esc(a.descripcion||'')}</span><span class="af">${a.fecha}</span></div>
+  `).join('') || '<div class="empty">Sin actividades aún.</div>';
 }
-
 $('btnAddAct').onclick = async () => {
   if(!editingId) return;
   const desc = $('a_desc').value.trim();
   await sb.from('actividades').insert({contacto_id:editingId, tipo:$('a_tipo').value, descripcion:desc, fecha:todayStr()});
-  $('a_desc').value='';
-  loadActs(editingId);
+  $('a_desc').value=''; loadActs(editingId);
 };
+
+// ---------- MODAL: empresa ----------
+function openEmpresa(id){
+  editingEmpId = id;
+  const e = empresas.find(x=>x.id===id);
+  $('empTitle').textContent = e?e.nombre:'Nueva empresa';
+  $('e_nombre').value=e?.nombre||''; $('e_rubro').value=e?.rubro||''; $('e_ciudad').value=e?.ciudad||'';
+  $('e_empleados').value=e?.num_empleados??''; $('e_telefono').value=e?.telefono||'';
+  $('e_web').value=e?.sitio_web||''; $('e_notas').value=e?.notas||'';
+  $('btnDeleteEmp').style.display = e?'inline-flex':'none';
+  const cs = e?contactosDe(id):[];
+  $('empContacts').style.display = e?'block':'none';
+  $('empContactList').innerHTML = cs.length ? cs.map(c=>`
+    <div class="li click" data-id="${c.id}"><span class="at" style="text-transform:none">${esc(c.nombre)}</span>
+      <span class="ad">${esc(c.cargo||'')}</span><span class="af">${etLabel(c.etapa)}</span></div>
+  `).join('') : '<div class="empty">Sin contactos.</div>';
+  $('empContactList').querySelectorAll('.li[data-id]').forEach(li => li.onclick = () => { $('modalEmpresa').classList.remove('open'); openLead(Number(li.dataset.id)); });
+  $('modalEmpresa').classList.add('open');
+}
+$('btnNewEmpresa').onclick = () => openEmpresa(null);
+$('btnCancelEmp').onclick = () => $('modalEmpresa').classList.remove('open');
+$('btnSaveEmp').onclick = async () => {
+  const emp = $('e_empleados').value;
+  const payload = {
+    nombre:$('e_nombre').value.trim(), rubro:$('e_rubro').value.trim()||null, ciudad:$('e_ciudad').value.trim()||null,
+    num_empleados: emp!==''?Number(emp):null, telefono:$('e_telefono').value.trim()||null,
+    sitio_web:$('e_web').value.trim()||null, notas:$('e_notas').value.trim()||null
+  };
+  if(!payload.nombre){ alert('El nombre de la empresa es obligatorio.'); return; }
+  const {error} = editingEmpId
+    ? await sb.from('empresas').update(payload).eq('id',editingEmpId)
+    : await sb.from('empresas').insert(payload);
+  if(error){ alert('No se pudo guardar: '+error.message); return; }
+  $('modalEmpresa').classList.remove('open'); loadAll();
+};
+$('btnDeleteEmp').onclick = async () => {
+  if(!editingEmpId) return;
+  const e = empresas.find(x=>x.id===editingEmpId);
+  const n = contactosDe(editingEmpId).length;
+  if(!confirm(`¿Eliminar la empresa ${e?e.nombre:''}?` + (n?` Sus ${n} contacto(s) quedarán sin empresa (no se borran).`:''))) return;
+  if(n) await sb.from('contactos').update({empresa_id:null}).eq('empresa_id', editingEmpId);
+  const {error} = await sb.from('empresas').delete().eq('id', editingEmpId);
+  if(error){ alert('No se pudo eliminar: '+error.message); return; }
+  $('modalEmpresa').classList.remove('open'); editingEmpId=null; loadAll();
+};
+
+// cerrar modales al hacer clic fuera
+document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
 </script>
 </body>
 </html>
