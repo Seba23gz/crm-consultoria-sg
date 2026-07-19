@@ -202,7 +202,7 @@
 
     <!-- LEADS -->
     <section class="view" id="view-leads">
-      <div class="page-head"><h2>Leads</h2><button class="btn-add" id="btnNewLeadL">+ Nuevo lead</button></div>
+      <div class="page-head"><h2>Leads</h2><div style="display:flex;gap:8px"><button class="btn-sm" id="btnExportLeads">⇩ CSV</button><button class="btn-add" id="btnNewLeadL">+ Nuevo lead</button></div></div>
       <div class="toolbar">
         <input class="search" id="lSearch" placeholder="Buscar por contacto, empresa o título…">
         <select id="lEtapa"><option value="">Todas las etapas</option></select>
@@ -216,7 +216,7 @@
 
     <!-- CONTACTOS -->
     <section class="view" id="view-contactos">
-      <div class="page-head"><h2>Contactos</h2><button class="btn-add" id="btnNewContacto">+ Nuevo contacto</button></div>
+      <div class="page-head"><h2>Contactos</h2><div style="display:flex;gap:8px"><button class="btn-sm" id="btnExportContactos">⇩ CSV</button><button class="btn-add" id="btnNewContacto">+ Nuevo contacto</button></div></div>
       <div class="toolbar"><input class="search" id="cSearch" placeholder="Buscar por nombre, empresa o email…"></div>
       <div class="table-wrap"><table>
         <thead><tr><th>Nombre</th><th>Cargo</th><th>Empresa</th><th>Email</th><th>Teléfono</th><th>Leads</th></tr></thead>
@@ -226,7 +226,7 @@
 
     <!-- EMPRESAS -->
     <section class="view" id="view-empresas">
-      <div class="page-head"><h2>Empresas</h2><button class="btn-add" id="btnNewEmpresa">+ Nueva empresa</button></div>
+      <div class="page-head"><h2>Empresas</h2><div style="display:flex;gap:8px"><button class="btn-sm" id="btnExportEmpresas">⇩ CSV</button><button class="btn-add" id="btnNewEmpresa">+ Nueva empresa</button></div></div>
       <div class="toolbar"><input class="search" id="eSearch" placeholder="Buscar empresa, rubro o ciudad…"></div>
       <div class="table-wrap"><table>
         <thead><tr><th>Empresa</th><th>Rubro</th><th>Ciudad</th><th>Contactos</th><th>Leads</th><th>Sitio web</th></tr></thead>
@@ -697,6 +697,25 @@ $('btnDeleteEmp').onclick = async () => {
   if(error){ alert('No se pudo eliminar: '+error.message); return; }
   $('modalEmpresa').classList.remove('open'); editEmpId=null; loadAll();
 };
+
+// ---------- EXPORTAR CSV ----------
+function downloadCSV(filename, headers, rows){
+  const cell = v => { const s = v==null?'':String(v); return /[",\n\r]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
+  const csv = [headers.map(cell).join(','), ...rows.map(r=>r.map(cell).join(','))].join('\r\n');
+  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+}
+$('btnExportLeads').onclick = () => downloadCSV('leads.csv',
+  ['Contacto','Empresa','Titulo','Etapa','Prioridad','Valor estimado','Proximo seguimiento','Notas'],
+  leads.map(l=>[cName(l.contacto_id), empName(l.empresa_id), l.titulo, etLabel(l.etapa), l.prioridad, l.valor_estimado, l.proximo_seguimiento, l.notas]));
+$('btnExportContactos').onclick = () => downloadCSV('contactos.csv',
+  ['Nombre','Cargo','Empresa','Email','Telefono','LinkedIn','Notas'],
+  contactos.map(c=>[c.nombre, c.cargo, empName(c.empresa_id), c.email, c.telefono, c.linkedin_url, c.notas]));
+$('btnExportEmpresas').onclick = () => downloadCSV('empresas.csv',
+  ['Nombre','Rubro','Ciudad','Empleados','Telefono','Sitio web','Notas'],
+  empresas.map(e=>[e.nombre, e.rubro, e.ciudad, e.num_empleados, e.telefono, e.sitio_web, e.notas]));
 
 // cerrar modales al hacer clic fuera
 document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
