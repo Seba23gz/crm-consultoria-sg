@@ -141,6 +141,12 @@
   .btn-ghost2{background:var(--paper);border:1px solid var(--line);color:var(--ink);flex:0 0 auto;padding:12px 16px}
   .btn-danger{background:transparent;border:1px solid var(--line);color:var(--warn);flex:0 0 auto;margin-right:auto;padding:12px 18px}
   .btn-danger:hover{background:var(--warn-soft);border-color:var(--warn);opacity:1}
+  .autocomp{position:absolute;left:0;right:0;top:100%;z-index:5;background:var(--card);border:1px solid var(--line);border-radius:10px;margin-top:4px;max-height:230px;overflow-y:auto;display:none;box-shadow:0 6px 20px rgba(17,17,17,.08)}
+  .autocomp.open{display:block}
+  .autocomp .ac-item{padding:9px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--line)}
+  .autocomp .ac-item:last-child{border-bottom:none}
+  .autocomp .ac-item:hover{background:var(--paper)}
+  .autocomp .ac-sub{font-size:11px;color:var(--ink-soft)}
   .sub-list{margin-top:20px;border-top:1px solid var(--line);padding-top:16px}
   .sub-list h4{font-family:var(--font-mono);font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);margin-bottom:10px;font-weight:400}
   .li{font-size:13px;padding:9px 0;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
@@ -296,7 +302,11 @@
       <div class="field"><label>Teléfono</label><input id="c_telefono"></div>
     </div>
     <div class="row2">
-      <div class="field"><label>Empresa</label><select id="c_empresa"></select></div>
+      <div class="field" style="position:relative"><label>Empresa</label>
+        <input id="c_empresa_txt" placeholder="Buscar por nombre o RUT…" autocomplete="off">
+        <input type="hidden" id="c_empresa_id">
+        <div id="c_empresa_res" class="autocomp"></div>
+      </div>
       <div class="field"><label>LinkedIn</label><input id="c_linkedin" placeholder="URL"></div>
     </div>
     <div class="field"><label>Notas</label><textarea id="c_notas" rows="2"></textarea></div>
@@ -334,6 +344,10 @@
     </div>
     <div class="field"><label>Sitio web</label><input id="e_web" placeholder="https://"></div>
     <div class="field"><label>Notas</label><textarea id="e_notas" rows="2"></textarea></div>
+
+    <div class="sub-list" id="empSii" style="display:none">
+      <h4>Datos SII</h4><div id="empSiiDatos"></div>
+    </div>
 
     <div class="sub-list" id="empSub" style="display:none">
       <h4>Contactos</h4><div id="empContactList"></div>
@@ -420,12 +434,15 @@ async function fetchAll(tabla, col){
   return todo;
 }
 async function loadAll(){
-  const [e, c, l] = await Promise.all([
-    fetchAll('empresas','nombre'),
+  const [c, l] = await Promise.all([
     fetchAll('contactos','nombre'),
     fetchAll('leads','created_at')
   ]);
-  empresas = e; contactos = c; leads = l;
+  contactos = c; leads = l;
+  // Con miles de empresas no se cargan todas: solo las que usan tus contactos y leads.
+  // El resto se busca en el servidor (tabla Empresas y selector de empresa).
+  const ids = [...new Set([...contactos.map(x=>x.empresa_id), ...leads.map(x=>x.empresa_id)].filter(Boolean))];
+  empresas = ids.length ? ((await sb.from('empresas').select('*').in('id', ids)).data || []) : [];
   $('lEtapa').innerHTML = '<option value="">Todas las etapas</option>' + ETAPAS.map(x=>`<option value="${x.key}">${x.label}</option>`).join('');
   renderActive();
 }
@@ -540,12 +557,20 @@ function renderContactos(){
 }
 
 // ---------- EMPRESAS (tabla) ----------
-$('eSearch').addEventListener('input', () => { if(currentView==='empresas') renderEmpresas(); });
-const TOPE_TABLA = 300; // con miles de empresas, dibujar todas congela el navegador
-function renderEmpresas(){
-  const q=$('eSearch').value.trim().toLowerCase();
-  const rows = empresas.filter(e => !q || [e.nombre,e.rubro,e.ciudad].join(' ').toLowerCase().includes(q));
-  const vista = rows.slice(0, TOPE_TABLA);
+const TOPE_TABLA = 300; // se piden como máximo 300 a la vez; el buscador afina
+let eTimer;
+$('eSearch').addEventListener('input', () => {
+  clearTimeout(eTimer);
+  eTimer = setTimeout(() => { if(currentView==='empresas') renderEmpresas(); }, 250);
+});
+// Busca en el servidor (hay miles de empresas, no están todas en memoria)
+async function renderEmpresas(){
+  const q = $('eSearch').value.trim().replace(/[,()%*]/g,' ').trim();
+  let consulta = sb.from('empresas').select('*', {count:'exact'}).order('nombre').limit(TOPE_TABLA);
+  if(q) consulta = consulta.or(`nombre.ilike.%${q}%,rubro.ilike.%${q}%,ciudad.ilike.%${q}%,rut.ilike.%${q}%`);
+  const { data, count, error } = await consulta;
+  if(error){ $('eBody').innerHTML = `<tr><td colspan="6" class="row-empty">Error al buscar: ${esc(error.message)}</td></tr>`; return; }
+  const vista = data || [], total = count ?? vista.length;
   const cuerpo = vista.length
     ? vista.map(e => `
     <tr data-id="${e.id}">
@@ -555,9 +580,11 @@ function renderEmpresas(){
       <td>${e.sitio_web?`<span class="t-sub">${esc(e.sitio_web)}</span>`:'<span class="muted">—</span>'}</td>
     </tr>`).join('')
     : '<tr><td colspan="6" class="row-empty">Sin empresas que coincidan.</td></tr>';
-  const aviso = rows.length > vista.length
-    ? `<tr><td colspan="6" class="row-empty">Mostrando ${vista.length} de ${rows.length.toLocaleString('es-CL')} empresas · usa el buscador para afinar</td></tr>` : '';
+  const aviso = total > vista.length
+    ? `<tr><td colspan="6" class="row-empty">Mostrando ${vista.length} de ${total.toLocaleString('es-CL')} empresas · usa el buscador para afinar</td></tr>` : '';
   $('eBody').innerHTML = cuerpo + aviso;
+  // Guarda en memoria las mostradas para poder abrir su ficha
+  vista.forEach(e => { if(!empresas.some(x=>x.id===e.id)) empresas.push(e); });
   $('eBody').querySelectorAll('tr[data-id]').forEach(tr => tr.onclick = () => openEmpresa(Number(tr.dataset.id)));
 }
 
@@ -638,16 +665,42 @@ $('btnAddAct').onclick = async () => {
 };
 
 // ---------- MODAL: CONTACTO ----------
-function fillEmpresaSelect(elId, sel){
-  $(elId).innerHTML = '<option value="">— Sin empresa —</option>' + empresas.map(e=>`<option value="${e.id}" ${e.id===sel?'selected':''}>${esc(e.nombre)}</option>`).join('');
-}
+// Autocompletado de empresa (busca en el servidor: hay miles)
+let acTimer;
+const acCerrar = () => $('c_empresa_res').classList.remove('open');
+$('c_empresa_txt').addEventListener('input', () => {
+  $('c_empresa_id').value = '';                 // al escribir se deselecciona
+  const q = $('c_empresa_txt').value.trim().replace(/[,()%*]/g,' ').trim();
+  clearTimeout(acTimer);
+  if(q.length < 2){ acCerrar(); return; }
+  acTimer = setTimeout(async () => {
+    const { data } = await sb.from('empresas').select('id,nombre,rut,ciudad,rubro')
+      .or(`nombre.ilike.%${q}%,rut.ilike.%${q}%`).order('nombre').limit(8);
+    const cont = $('c_empresa_res');
+    cont.innerHTML = (data||[]).length
+      ? data.map(e=>`<div class="ac-item" data-id="${e.id}" data-nombre="${esc(e.nombre)}">${esc(e.nombre)}<div class="ac-sub">${esc(e.rut||'')} · ${esc(e.ciudad||'')}</div></div>`).join('')
+      : '<div class="ac-item ac-sub">Sin resultados</div>';
+    cont.querySelectorAll('.ac-item[data-id]').forEach(d => d.onclick = () => {
+      $('c_empresa_id').value = d.dataset.id;
+      $('c_empresa_txt').value = d.dataset.nombre;
+      if(!empresas.some(x=>x.id===Number(d.dataset.id))) empresas.push((data||[]).find(e=>e.id===Number(d.dataset.id)));
+      acCerrar();
+    });
+    cont.classList.add('open');
+  }, 250);
+});
+document.addEventListener('click', e => {
+  if(!e.target.closest('#c_empresa_res') && e.target !== $('c_empresa_txt')) acCerrar();
+});
 function openContacto(id){
   editContactoId = id;
   const c = cById(id);
   $('contactoTitle').textContent = c?c.nombre:'Nuevo contacto';
   $('c_nombre').value=c?.nombre||''; $('c_cargo').value=c?.cargo||''; $('c_email').value=c?.email||'';
   $('c_telefono').value=c?.telefono||''; $('c_linkedin').value=c?.linkedin_url||''; $('c_notas').value=c?.notas||'';
-  fillEmpresaSelect('c_empresa', c?.empresa_id);
+  $('c_empresa_id').value = c?.empresa_id || '';
+  $('c_empresa_txt').value = c?.empresa_id ? empName(c.empresa_id) : '';
+  acCerrar();
   const ls = c?leadsDeContacto(id):[];
   $('c_leadsBox').style.display = c?'block':'none';
   $('btnDeleteContacto').style.display = c?'inline-flex':'none';
@@ -663,7 +716,7 @@ $('btnSaveContacto').onclick = async () => {
   const payload = {
     nombre:$('c_nombre').value.trim(), cargo:$('c_cargo').value.trim()||null, email:$('c_email').value.trim()||null,
     telefono:$('c_telefono').value.trim()||null, linkedin_url:$('c_linkedin').value.trim()||null,
-    empresa_id:$('c_empresa').value?Number($('c_empresa').value):null, notas:$('c_notas').value.trim()||null
+    empresa_id:$('c_empresa_id').value?Number($('c_empresa_id').value):null, notas:$('c_notas').value.trim()||null
   };
   if(!payload.nombre){ alert('El nombre es obligatorio.'); return; }
   const {error} = editContactoId ? await sb.from('contactos').update(payload).eq('id',editContactoId) : await sb.from('contactos').insert(payload);
@@ -687,6 +740,24 @@ function openEmpresa(id){
   $('e_nombre').value=e?.nombre||''; $('e_rut').value=e?.rut||''; $('e_rubro').value=e?.rubro||''; $('e_ciudad').value=e?.ciudad||'';
   $('e_empleados').value=e?.num_empleados??''; $('e_telefono').value=e?.telefono||''; $('e_web').value=e?.sitio_web||''; $('e_notas').value=e?.notas||'';
   $('btnDeleteEmp').style.display = e?'inline-flex':'none';
+  // Datos del padrón SII (solo lectura)
+  $('empSii').style.display = e?'block':'none';
+  if(e){
+    const filas = [
+      ['Tramo de ventas', e.tramo_ventas!=null?('Tramo '+e.tramo_ventas+' de 13'):null],
+      ['Actividad económica', e.actividad_economica], ['Subrubro', e.subrubro],
+      ['Provincia', e.provincia], ['Región', e.region],
+      ['Tipo contribuyente', e.tipo_contribuyente], ['Subtipo', e.subtipo_contribuyente],
+      ['Inicio actividades', e.fecha_inicio_actividades], ['Primera inscripción', e.fecha_primera_inscripcion],
+      ['Término de giro', e.fecha_termino_giro], ['Tipo término giro', e.tipo_termino_giro],
+      ['Capital propio (tramo)', e.tramo_capital_positivo], ['Capital negativo (tramo)', e.tramo_capital_negativo],
+      ['Régimen tributario', e.otros_regimenes], ['Renta presunta', e.r_presunta],
+      ['Año comercial', e.anio_comercial],
+    ].filter(([,v]) => v!=null && v!=='');
+    $('empSiiDatos').innerHTML = filas.length
+      ? filas.map(([k,v])=>`<div class="li"><span class="ad">${k}</span><span class="af">${esc(String(v))}</span></div>`).join('')
+      : '<div class="empty">Sin datos del SII.</div>';
+  }
   $('empSub').style.display = e?'block':'none';
   if(e){
     const cs=contactosDeEmpresa(id), ls=leadsDeEmpresa(id);
