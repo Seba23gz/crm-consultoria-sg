@@ -320,7 +320,10 @@
   <div class="modal">
     <h3 id="empTitle">Empresa</h3>
     <p class="modal-sub">Cuenta / organización</p>
-    <div class="field"><label>Nombre</label><input id="e_nombre"></div>
+    <div class="row2">
+      <div class="field"><label>Nombre</label><input id="e_nombre"></div>
+      <div class="field"><label>RUT</label><input id="e_rut" placeholder="12345678-9"></div>
+    </div>
     <div class="row2">
       <div class="field"><label>Rubro</label><input id="e_rubro"></div>
       <div class="field"><label>Ciudad</label><input id="e_ciudad"></div>
@@ -538,16 +541,23 @@ function renderContactos(){
 
 // ---------- EMPRESAS (tabla) ----------
 $('eSearch').addEventListener('input', () => { if(currentView==='empresas') renderEmpresas(); });
+const TOPE_TABLA = 300; // con miles de empresas, dibujar todas congela el navegador
 function renderEmpresas(){
   const q=$('eSearch').value.trim().toLowerCase();
-  let rows = empresas.filter(e => !q || [e.nombre,e.rubro,e.ciudad].join(' ').toLowerCase().includes(q));
-  $('eBody').innerHTML = rows.length ? rows.map(e => `
+  const rows = empresas.filter(e => !q || [e.nombre,e.rubro,e.ciudad].join(' ').toLowerCase().includes(q));
+  const vista = rows.slice(0, TOPE_TABLA);
+  const cuerpo = vista.length
+    ? vista.map(e => `
     <tr data-id="${e.id}">
-      <td><div class="t-name">${esc(e.nombre)}</div></td>
+      <td><div class="t-name">${esc(e.nombre)}</div>${e.rut?`<div class="t-sub">${esc(e.rut)}</div>`:''}</td>
       <td>${esc(e.rubro||'—')}</td><td>${esc(e.ciudad||'—')}</td>
       <td>${contactosDeEmpresa(e.id).length}</td><td>${leadsDeEmpresa(e.id).length}</td>
       <td>${e.sitio_web?`<span class="t-sub">${esc(e.sitio_web)}</span>`:'<span class="muted">—</span>'}</td>
-    </tr>`).join('') : '<tr><td colspan="6" class="row-empty">Sin empresas que coincidan.</td></tr>';
+    </tr>`).join('')
+    : '<tr><td colspan="6" class="row-empty">Sin empresas que coincidan.</td></tr>';
+  const aviso = rows.length > vista.length
+    ? `<tr><td colspan="6" class="row-empty">Mostrando ${vista.length} de ${rows.length.toLocaleString('es-CL')} empresas · usa el buscador para afinar</td></tr>` : '';
+  $('eBody').innerHTML = cuerpo + aviso;
   $('eBody').querySelectorAll('tr[data-id]').forEach(tr => tr.onclick = () => openEmpresa(Number(tr.dataset.id)));
 }
 
@@ -674,7 +684,7 @@ function openEmpresa(id){
   editEmpId = id;
   const e = empById(id);
   $('empTitle').textContent = e?e.nombre:'Nueva empresa';
-  $('e_nombre').value=e?.nombre||''; $('e_rubro').value=e?.rubro||''; $('e_ciudad').value=e?.ciudad||'';
+  $('e_nombre').value=e?.nombre||''; $('e_rut').value=e?.rut||''; $('e_rubro').value=e?.rubro||''; $('e_ciudad').value=e?.ciudad||'';
   $('e_empleados').value=e?.num_empleados??''; $('e_telefono').value=e?.telefono||''; $('e_web').value=e?.sitio_web||''; $('e_notas').value=e?.notas||'';
   $('btnDeleteEmp').style.display = e?'inline-flex':'none';
   $('empSub').style.display = e?'block':'none';
@@ -692,7 +702,8 @@ $('btnCancelEmp').onclick = () => $('modalEmpresa').classList.remove('open');
 $('btnSaveEmp').onclick = async () => {
   const emp=$('e_empleados').value;
   const payload = {
-    nombre:$('e_nombre').value.trim(), rubro:$('e_rubro').value.trim()||null, ciudad:$('e_ciudad').value.trim()||null,
+    nombre:$('e_nombre').value.trim(), rut:$('e_rut').value.trim()||null,
+    rubro:$('e_rubro').value.trim()||null, ciudad:$('e_ciudad').value.trim()||null,
     num_empleados: emp!==''?Number(emp):null, telefono:$('e_telefono').value.trim()||null, sitio_web:$('e_web').value.trim()||null, notas:$('e_notas').value.trim()||null
   };
   if(!payload.nombre){ alert('El nombre de la empresa es obligatorio.'); return; }
