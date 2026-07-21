@@ -404,13 +404,25 @@ function showView(name){
 document.querySelectorAll('nav.tabs a').forEach(a => a.onclick = () => showView(a.dataset.view));
 
 // ---------- DATA ----------
+// Trae TODAS las filas paginando: la API de Supabase devuelve máx. 1000 por consulta.
+async function fetchAll(tabla, col){
+  const PAG = 1000; let desde = 0, todo = [];
+  for(;;){
+    const { data, error } = await sb.from(tabla).select('*').order(col).range(desde, desde+PAG-1);
+    if(error || !data) break;
+    todo = todo.concat(data);
+    if(data.length < PAG) break;
+    desde += PAG;
+  }
+  return todo;
+}
 async function loadAll(){
   const [e, c, l] = await Promise.all([
-    sb.from('empresas').select('*').order('nombre'),
-    sb.from('contactos').select('*').order('nombre'),
-    sb.from('leads').select('*').order('created_at')
+    fetchAll('empresas','nombre'),
+    fetchAll('contactos','nombre'),
+    fetchAll('leads','created_at')
   ]);
-  empresas = e.data||[]; contactos = c.data||[]; leads = l.data||[];
+  empresas = e; contactos = c; leads = l;
   $('lEtapa').innerHTML = '<option value="">Todas las etapas</option>' + ETAPAS.map(x=>`<option value="${x.key}">${x.label}</option>`).join('');
   renderActive();
 }
