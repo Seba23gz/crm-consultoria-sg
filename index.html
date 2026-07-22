@@ -1,305 +1,418 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Veta Labs · Automatización, datos e IA para PYMEs</title>
-<meta name="description" content="Automatizamos procesos y convertimos los datos de tu empresa en decisiones. Consultoría para PYMEs de la Región de Coquimbo.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg stroke='%23111111' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' fill='none'%3E%3Cpath d='M14 14L32 48L50 14'/%3E%3C/g%3E%3Ccircle cx='32' cy='48' r='7' fill='%23111111'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Veta Labs — Automatización e inteligencia de datos para PYMEs</title>
+  <meta name="description" content="Veta Labs automatiza procesos, integra datos y construye software, dashboards e IA para PYMEs. 100% remoto en Chile.">
+  <meta name="author" content="Veta Labs">
+  <meta name="theme-color" content="#111111">
+  <link rel="canonical" href="https://vetalabs.vercel.app/">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23111111'/%3E%3Cg stroke='%23f4f4f5' stroke-width='4' stroke-linecap='round' fill='none' opacity='.45'%3E%3Cpath d='M8 26H19'/%3E%3Cpath d='M45 26H56'/%3E%3C/g%3E%3Cg stroke='%23f4f4f5' stroke-width='7' stroke-linecap='round' stroke-linejoin='round' fill='none'%3E%3Cpath d='M18 17L32 45L46 17'/%3E%3C/g%3E%3Ccircle cx='32' cy='45' r='6' fill='%23f4f4f5'/%3E%3C/svg%3E">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_CL">
+  <meta property="og:url" content="https://vetalabs.vercel.app/">
+  <meta property="og:site_name" content="Veta Labs">
+  <meta property="og:title" content="Veta Labs — Automatización e inteligencia de datos para PYMEs">
+  <meta property="og:description" content="Automatizamos procesos, integramos datos y construimos software, dashboards e IA para que tu negocio crezca con calma. 100% remoto en Chile.">
+  <meta property="og:image" content="https://vetalabs.vercel.app/og-image.jpg">
+  <meta property="og:image:alt" content="Veta Labs">
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Veta Labs — Automatización e inteligencia de datos para PYMEs">
+  <meta name="twitter:description" content="Automatizamos procesos, integramos datos y construimos software, dashboards e IA para que tu negocio crezca con calma.">
+  <meta name="twitter:image" content="https://vetalabs.vercel.app/og-image.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --font-display:'Space Grotesk',system-ui,sans-serif;
-    --font-body:'Inter',system-ui,sans-serif;
-    --font-mono:'Space Mono',ui-monospace,monospace;
-    --ink:#111111; --ink-soft:#52525b; --ink-faint:#a1a1aa;
-    --paper:#f4f4f5; --card:#ffffff; --line:#e4e4e7;
-    --radius:12px;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:var(--font-body);background:var(--paper);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
-  h1,h2,h3{font-family:var(--font-display);font-weight:700;letter-spacing:-0.03em;line-height:1.15}
-  a{color:inherit}
-  img,svg{max-width:100%}
-  .wrap{max-width:1000px;margin:0 auto;padding:0 24px}
-  .eyebrow{font-family:var(--font-mono);font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft)}
-
-  /* marca */
-  .iso{flex:none;color:var(--ink)}
-  .iso .estrato{opacity:.32}
-  .brand{display:flex;align-items:center;gap:10px}
-  .brand .mark{font-family:var(--font-display);font-size:19px;font-weight:700;letter-spacing:-0.02em;white-space:nowrap}
-
-  /* header */
-  header{position:sticky;top:0;z-index:10;background:rgba(244,244,245,.88);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
-  header .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-top:16px;padding-bottom:16px}
-  .btn{display:inline-block;font-family:var(--font-body);font-size:14px;font-weight:600;border-radius:100px;padding:11px 22px;text-decoration:none;border:1px solid var(--ink);transition:opacity .15s}
-  .btn:hover{opacity:.85}
-  .btn-solid{background:var(--ink);color:var(--paper)}
-  .btn-ghost{background:transparent;color:var(--ink)}
-
-  /* hero */
-  .hero{padding:clamp(56px,10vw,104px) 0 clamp(40px,7vw,72px)}
-  .hero h1{font-size:clamp(36px,6.2vw,62px);margin:14px 0 20px;max-width:16ch}
-  .hero p.lead{font-size:clamp(17px,2.1vw,20px);color:var(--ink-soft);max-width:56ch}
-  .hero .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
-
-  /* secciones */
-  section{padding:clamp(44px,6vw,72px) 0;border-top:1px solid var(--line)}
-  section h2{font-size:clamp(26px,3.6vw,38px);margin:10px 0 14px}
-  section p.intro{color:var(--ink-soft);max-width:60ch;font-size:16px}
-
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:36px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:26px}
-  .card h3{font-size:19px;margin-bottom:9px}
-  .card p{color:var(--ink-soft);font-size:15px}
-  .card .num{font-family:var(--font-mono);font-size:12px;color:var(--ink-faint);margin-bottom:14px;display:block}
-
-  /* pasos */
-  ol.pasos{list-style:none;counter-reset:p;margin-top:32px;display:grid;gap:14px}
-  ol.pasos li{counter-increment:p;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;display:flex;gap:18px;align-items:flex-start}
-  ol.pasos li::before{content:counter(p);font-family:var(--font-mono);font-size:13px;font-weight:700;flex:none;width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;margin-top:2px}
-  ol.pasos h3{font-size:17px;margin-bottom:4px}
-  ol.pasos p{color:var(--ink-soft);font-size:15px}
-
-  /* contacto */
-  form{margin-top:32px;max-width:620px}
-  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  @media(max-width:560px){.row2{grid-template-columns:1fr}}
-  .field{margin-bottom:14px}
-  label{display:block;font-size:13px;font-weight:500;margin-bottom:6px;color:var(--ink-soft)}
-  input,textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:15px;background:var(--card);color:var(--ink)}
-  input:focus,textarea:focus{outline:2px solid var(--ink);outline-offset:-1px;border-color:transparent}
-  button[type=submit]{font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;border:none;border-radius:100px;background:var(--ink);color:var(--paper);padding:13px 30px;transition:opacity .15s}
-  button[type=submit]:hover{opacity:.85}
-  button[type=submit]:disabled{opacity:.5;cursor:default}
-  .msg{display:none;margin-top:16px;padding:13px 15px;border-radius:10px;font-size:14px;border:1px solid var(--line)}
-  .msg.show{display:block}
-  .msg.ok{background:#f0f6f2;border-color:#cfe3d6}
-  .msg.bad{background:#fbe4cf;border-color:#f0c9a4;color:#8a4708}
-  .directo{margin-top:26px;font-size:15px;color:var(--ink-soft)}
-  .directo a{font-weight:600;color:var(--ink)}
-
-  footer{border-top:1px solid var(--line);padding:34px 0;color:var(--ink-soft);font-size:14px}
-  footer .wrap{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;--brand:#111111;background:#f4f4f5;color:#111111;font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  input,textarea{font-family:inherit}
+  input:focus,textarea:focus{outline:none;border-color:#71717a !important}
+  ::placeholder{color:#a89c8f}
+  @keyframes riseIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+  @keyframes pulseDot{0%,100%{box-shadow:0 0 0 0 rgba(17,17,17,.45)}70%{box-shadow:0 0 0 7px rgba(17,17,17,0)}}
 </style>
 </head>
 <body>
+<canvas id="bg-dots" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none"></canvas>
+<div style="position:relative;z-index:1;width:100%;overflow-x:hidden">
 
-<header>
-  <div class="wrap">
-    <div class="brand">
-      <svg class="iso" width="26" height="26" viewBox="0 0 64 64" aria-hidden="true">
-        <g class="estrato" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none">
-          <path d="M4 24H16"/><path d="M48 24H60"/>
-        </g>
-        <g stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
-          <path d="M15 13L32 47L49 13"/>
-        </g>
-        <circle cx="32" cy="47" r="6.5" fill="currentColor"/>
-      </svg>
-      <span class="mark">Veta Labs</span>
+  <!-- ===== NAV ===== -->
+  <div style="position:sticky;top:0;z-index:50;background:rgba(244,244,245,.82);backdrop-filter:blur(12px);border-bottom:1px solid #e6e6e8">
+    <div style="max-width:1120px;margin:0 auto;padding:16px clamp(20px,4vw,44px);display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
+      <a href="#top" style="font:700 18px 'Space Grotesk',sans-serif;letter-spacing:-.02em;display:flex;align-items:center;gap:10px"><svg width="24" height="24" viewBox="0 0 64 64" aria-hidden="true" style="flex:none"><g stroke="var(--brand)" stroke-width="4" stroke-linecap="round" fill="none" opacity=".32"><path d="M4 24H16"/><path d="M48 24H60"/></g><g stroke="var(--brand)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M15 13L32 47L49 13"/></g><circle cx="32" cy="47" r="6.5" fill="var(--brand)"/></svg>Veta Labs</a>
+      <div style="display:flex;gap:26px;align-items:center;font:500 14.5px 'Inter',sans-serif;color:#52525b;flex-wrap:wrap">
+        <a href="#servicios" data-navlink="servicios" style="transition:color .2s" style-hover="color:#111111">Servicios</a>
+        <a href="#proceso" data-navlink="proceso" style="transition:color .2s" style-hover="color:#111111">Proceso</a>
+        <a href="#resultados" data-navlink="resultados" style="transition:color .2s" style-hover="color:#111111">Resultados</a>
+        <a href="#proyectos" data-navlink="proyectos" style="transition:color .2s" style-hover="color:#111111">Proyectos</a>
+        <a href="#sobre-mi" data-navlink="sobre-mi" style="transition:color .2s" style-hover="color:#111111">Nosotros</a>
+      </div>
+      <a href="#contacto" style="padding:11px 22px;background:var(--brand);color:#f4f4f5;border-radius:100px;font:600 14.5px 'Inter',sans-serif;transition:opacity .2s" style-hover="opacity:.85">Agenda tu reunión</a>
     </div>
-    <a class="btn btn-solid" href="#contacto">Conversemos</a>
   </div>
-</header>
 
-<div class="wrap hero">
-  <span class="eyebrow">Automatización · Datos · IA</span>
-  <h1>Tu empresa ya tiene los datos. Falta extraerlos.</h1>
-  <p class="lead">
-    Una veta es el filón de valor que está ahí, en la roca, esperando que alguien lo
-    encuentre. En tu empresa pasa lo mismo: la información existe, pero vive repartida
-    en planillas, correos y cabezas. Nosotros la sacamos a la superficie y la
-    convertimos en procesos que corren solos y en tableros que te dicen qué hacer.
-  </p>
-  <div class="cta">
-    <a class="btn btn-solid" href="#contacto">Agendar una conversación</a>
-    <a class="btn btn-ghost" href="#servicios">Ver qué hacemos</a>
+  <!-- ===== HERO ===== -->
+  <div id="top" style="max-width:1180px;margin:0 auto;padding:clamp(44px,7vw,88px) clamp(20px,4vw,44px) clamp(32px,5vw,52px);display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:clamp(36px,5vw,60px);align-items:center">
+    <div style="display:flex;flex-direction:column;align-items:flex-start;text-align:left">
+      <div style="display:inline-flex;align-items:center;gap:9px;padding:8px 16px;background:#fff;border:1px solid #e4e4e7;color:#3f3f46;border-radius:100px;font:600 13px 'Inter',sans-serif;margin-bottom:clamp(22px,3vw,30px);animation:riseIn .6s both" id="hero-badge"><span style="width:8px;height:8px;border-radius:50%;background:#111111;display:inline-block;animation:pulseDot 2.4s infinite"></span>Disponible para nuevos proyectos</div>
+      <h1 style="font:700 clamp(38px,6vw,62px)/1.04 'Space Grotesk',sans-serif;letter-spacing:-.03em;margin:0 0 22px;max-width:15ch;animation:riseIn .7s .06s both">Que la tecnología trabaje por ti, <span style="color:#a1a1aa">no al revés</span></h1>
+      <p style="font:400 clamp(17px,2.2vw,21px)/1.55 'Inter',sans-serif;color:#52525b;max-width:520px;margin:0 0 clamp(28px,4vw,40px);animation:riseIn .7s .14s both">Automatizamos tareas, implementamos IA y construimos el software y los dashboards que tu negocio necesita para crecer con calma.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;animation:riseIn .7s .22s both">
+        <a href="#contacto" style="padding:16px 32px;background:var(--brand);color:#f4f4f5;border-radius:100px;font:700 15px 'Inter',sans-serif;transition:opacity .2s" style-hover="opacity:.85">Agenda una reunión</a>
+        <a href="#servicios" style="padding:16px 32px;background:#fff;border:1px solid #e4e4e7;border-radius:100px;font:600 15px 'Inter',sans-serif;transition:border-color .2s" style-hover="border-color:#111111">Ver servicios</a>
+      </div>
+    </div>
+    <div style="justify-self:center;width:100%;max-width:440px;animation:riseIn .8s .3s both">
+      <div id="dotgrid-panel" style="position:relative;aspect-ratio:1;border-radius:40px;overflow:hidden;background:radial-gradient(120% 120% at 50% 45%,#141414 0%,#111111 55%,#0d0d0d 100%);cursor:crosshair;-webkit-mask-image:radial-gradient(135% 135% at 50% 50%,#000 55%,rgba(0,0,0,.45) 82%,transparent 100%);mask-image:radial-gradient(135% 135% at 50% 50%,#000 55%,rgba(0,0,0,.45) 82%,transparent 100%)">
+        <canvas id="dotgrid" style="position:absolute;inset:0;width:100%;height:100%;display:block"></canvas>
+      </div>
+    </div>
   </div>
+
+  <!-- ===== TRUST STRIP ===== -->
+  <div id="trust-strip" style="max-width:1000px;margin:0 auto;padding:clamp(28px,4vw,44px) clamp(20px,4vw,44px) clamp(48px,7vw,72px)">
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 26px;font:500 13.5px 'Inter',sans-serif;color:#71717a">
+      <span>100% remoto en todo Chile</span><span style="color:#d0c7b8">•</span><span>Respuesta en menos de 24 h</span><span style="color:#d0c7b8">•</span><span>Sin permanencia ni letra chica</span>
+    </div>
+  </div>
+
+  <!-- ===== SERVICIOS ===== -->
+  <div id="servicios" style="max-width:1120px;margin:0 auto;padding:clamp(40px,6vw,68px) clamp(20px,4vw,44px);scroll-margin-top:72px">
+    <div data-reveal="0" style="text-align:center;margin-bottom:clamp(36px,5vw,52px)">
+      <div style="font:700 12px 'Space Mono',monospace;letter-spacing:.14em;color:#a1a1aa;margin-bottom:14px">SERVICIOS</div>
+      <h2 style="font:700 clamp(30px,4.5vw,42px) 'Space Grotesk',sans-serif;letter-spacing:-.02em;margin:0 0 12px">En qué te puedo ayudar</h2>
+      <p style="font:400 17px 'Inter',sans-serif;color:#52525b;margin:0">Cinco formas de sacarte trabajo de encima.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px">
+      <div data-reveal="0" style="background:#fff;border-radius:20px;padding:32px;border:1px solid #e6e6e8;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease" style-hover="transform:translateY(-5px);box-shadow:0 22px 44px -26px rgba(36,31,26,.4);border-color:#d4d4d8"><div style="width:48px;height:48px;border-radius:14px;background:#ebebed;display:flex;align-items:center;justify-content:center;font-size:23px;margin-bottom:18px">🚀</div><h3 style="font:600 20px 'Space Grotesk',sans-serif;margin:0 0 9px">Creación de SaaS</h3><p style="font:400 15.5px/1.55 'Inter',sans-serif;color:#52525b;margin:0">De la idea al producto: construimos tu plataforma web completa, del MVP al lanzamiento.</p></div>
+      <div data-reveal="0.06" style="background:#fff;border-radius:20px;padding:32px;border:1px solid #e6e6e8;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease" style-hover="transform:translateY(-5px);box-shadow:0 22px 44px -26px rgba(36,31,26,.4);border-color:#d4d4d8"><div style="width:48px;height:48px;border-radius:14px;background:#ebebed;display:flex;align-items:center;justify-content:center;font-size:23px;margin-bottom:18px">🤖</div><h3 style="font:600 20px 'Space Grotesk',sans-serif;margin:0 0 9px">Implementación de IA y agentes</h3><p style="font:400 15.5px/1.55 'Inter',sans-serif;color:#52525b;margin:0">Agentes que clasifican, responden y ejecutan tareas por ti: correos, cotizaciones, seguimiento.</p></div>
+      <div data-reveal="0.12" style="background:#fff;border-radius:20px;padding:32px;border:1px solid #e6e6e8;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease" style-hover="transform:translateY(-5px);box-shadow:0 22px 44px -26px rgba(36,31,26,.4);border-color:#d4d4d8"><div style="width:48px;height:48px;border-radius:14px;background:#ebebed;display:flex;align-items:center;justify-content:center;font-size:23px;margin-bottom:18px">⚙️</div><h3 style="font:600 20px 'Space Grotesk',sans-serif;margin:0 0 9px">Automatizaciones</h3><p style="font:400 15.5px/1.55 'Inter',sans-serif;color:#52525b;margin:0">Conectamos tus herramientas —CRM, correo, planillas, facturación— y eliminamos el trabajo manual.</p></div>
+      <div data-reveal="0" style="background:#fff;border-radius:20px;padding:32px;border:1px solid #e6e6e8;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease" style-hover="transform:translateY(-5px);box-shadow:0 22px 44px -26px rgba(36,31,26,.4);border-color:#d4d4d8"><div style="width:48px;height:48px;border-radius:14px;background:#ebebed;display:flex;align-items:center;justify-content:center;font-size:23px;margin-bottom:18px">🌐</div><h3 style="font:600 20px 'Space Grotesk',sans-serif;margin:0 0 9px">Desarrollo web</h3><p style="font:400 15.5px/1.55 'Inter',sans-serif;color:#52525b;margin:0">Sitios y aplicaciones web a la medida de tu negocio, rápidos y fáciles de mantener.</p></div>
+      <div data-reveal="0.06" style="background:#fff;border-radius:20px;padding:32px;border:1px solid #e6e6e8;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease" style-hover="transform:translateY(-5px);box-shadow:0 22px 44px -26px rgba(36,31,26,.4);border-color:#d4d4d8"><div style="width:48px;height:48px;border-radius:14px;background:#ebebed;display:flex;align-items:center;justify-content:center;font-size:23px;margin-bottom:18px">📊</div><h3 style="font:600 20px 'Space Grotesk',sans-serif;margin:0 0 9px">Dashboards</h3><p style="font:400 15.5px/1.55 'Inter',sans-serif;color:#52525b;margin:0">Paneles que reúnen tus datos y te muestran qué pasa en tu negocio en tiempo real.</p></div>
+      <div data-reveal="0.12" style="background:var(--brand);color:#f4f4f5;border-radius:20px;padding:32px;display:flex;flex-direction:column;justify-content:center"><h3 style="font:600 20px 'Space Grotesk',sans-serif;margin:0 0 9px">¿No sabes por dónde partir?</h3><p style="font:400 15.5px/1.55 'Inter',sans-serif;color:#c5bdb2;margin:0 0 16px">Agenda una reunión y lo vemos juntos, sin compromiso.</p><a href="#contacto" style="font:700 14.5px 'Inter',sans-serif;color:#f4f4f5;transition:opacity .2s" style-hover="opacity:.7">Hablemos →</a></div>
+    </div>
+  </div>
+
+  <!-- ===== PROCESO ===== -->
+  <div id="proceso" style="background:#ebebed;scroll-margin-top:60px">
+    <div style="max-width:1120px;margin:0 auto;padding:clamp(48px,7vw,80px) clamp(20px,4vw,44px)">
+      <div data-reveal="0" style="text-align:center;margin-bottom:clamp(36px,5vw,48px)">
+        <div style="font:700 12px 'Space Mono',monospace;letter-spacing:.14em;color:#a1a1aa;margin-bottom:14px">CÓMO TRABAJO</div>
+        <h2 style="font:700 clamp(30px,4.5vw,42px) 'Space Grotesk',sans-serif;letter-spacing:-.02em;margin:0">Así trabajamos juntos</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px">
+        <div data-reveal="0" style="position:relative;background:#f4f4f5;border-radius:18px;padding:30px 28px;overflow:hidden"><span style="position:absolute;top:14px;right:18px;font:700 44px 'Space Grotesk',sans-serif;color:#dedee1">01</span><div style="font:700 12px 'Space Mono',monospace;color:#111111;margin-bottom:14px;letter-spacing:.06em">DIAGNÓSTICO</div><h3 style="font:600 18px 'Space Grotesk',sans-serif;margin:0 0 8px">Entendemos tu operación</h3><p style="font:400 14.5px/1.55 'Inter',sans-serif;color:#52525b;margin:0">Detectamos los cuellos de botella que te cuestan tiempo y dinero.</p></div>
+        <div data-reveal="0.06" style="position:relative;background:#f4f4f5;border-radius:18px;padding:30px 28px;overflow:hidden"><span style="position:absolute;top:14px;right:18px;font:700 44px 'Space Grotesk',sans-serif;color:#dedee1">02</span><div style="font:700 12px 'Space Mono',monospace;color:#111111;margin-bottom:14px;letter-spacing:.06em">PROPUESTA</div><h3 style="font:600 18px 'Space Grotesk',sans-serif;margin:0 0 8px">Diseñamos la solución</h3><p style="font:400 14.5px/1.55 'Inter',sans-serif;color:#52525b;margin:0">Alcance y retorno esperado, claros y sin letra chica.</p></div>
+        <div data-reveal="0.12" style="position:relative;background:#f4f4f5;border-radius:18px;padding:30px 28px;overflow:hidden"><span style="position:absolute;top:14px;right:18px;font:700 44px 'Space Grotesk',sans-serif;color:#dedee1">03</span><div style="font:700 12px 'Space Mono',monospace;color:#111111;margin-bottom:14px;letter-spacing:.06em">IMPLEMENTACIÓN</div><h3 style="font:600 18px 'Space Grotesk',sans-serif;margin:0 0 8px">Construimos e integramos</h3><p style="font:400 14.5px/1.55 'Inter',sans-serif;color:#52525b;margin:0">Todo probado en tu entorno real, paso a paso.</p></div>
+        <div data-reveal="0.18" style="position:relative;background:#f4f4f5;border-radius:18px;padding:30px 28px;overflow:hidden"><span style="position:absolute;top:14px;right:18px;font:700 44px 'Space Grotesk',sans-serif;color:#dedee1">04</span><div style="font:700 12px 'Space Mono',monospace;color:#111111;margin-bottom:14px;letter-spacing:.06em">ACOMPAÑAMIENTO</div><h3 style="font:600 18px 'Space Grotesk',sans-serif;margin:0 0 8px">Mido y optimizo</h3><p style="font:400 14.5px/1.55 'Inter',sans-serif;color:#52525b;margin:0">Te dejamos con algo que funciona solo y sigue mejorando.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== RESULTADOS ===== -->
+  <div id="resultados" style="max-width:1120px;margin:0 auto;padding:clamp(48px,7vw,80px) clamp(20px,4vw,44px);text-align:center;scroll-margin-top:72px">
+    <div data-reveal="0">
+      <div style="font:700 12px 'Space Mono',monospace;letter-spacing:.14em;color:#a1a1aa;margin-bottom:14px">RESULTADOS</div>
+      <h2 style="font:700 clamp(30px,4.5vw,42px) 'Space Grotesk',sans-serif;letter-spacing:-.02em;margin:0 0 clamp(32px,5vw,44px)">Impacto real en el día a día</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px">
+      <div data-reveal="0" style="background:#fff;border-radius:20px;padding:40px 32px;border:1px solid #e6e6e8"><div style="font:700 clamp(40px,6vw,52px) 'Space Grotesk',sans-serif;color:#111111;margin-bottom:8px;letter-spacing:-.02em">−70%</div><p style="font:500 15.5px/1.5 'Inter',sans-serif;color:#52525b;margin:0">menos tiempo armando cotizaciones</p></div>
+      <div data-reveal="0.08" style="background:#fff;border-radius:20px;padding:40px 32px;border:1px solid #e6e6e8"><div style="font:700 clamp(40px,6vw,52px) 'Space Grotesk',sans-serif;color:#111111;margin-bottom:8px;letter-spacing:-.02em">3×</div><p style="font:500 15.5px/1.5 'Inter',sans-serif;color:#52525b;margin:0">más respuestas a clientes con automatización</p></div>
+      <div data-reveal="0.16" style="background:#fff;border-radius:20px;padding:40px 32px;border:1px solid #e6e6e8"><div style="font:700 clamp(40px,6vw,52px) 'Space Grotesk',sans-serif;color:#111111;margin-bottom:8px;letter-spacing:-.02em">+40h</div><p style="font:500 15.5px/1.5 'Inter',sans-serif;color:#52525b;margin:0">ahorradas al mes por el equipo</p></div>
+    </div>
+  </div>
+
+  <!-- ===== PROYECTOS ===== -->
+  <div id="proyectos" style="max-width:1120px;margin:0 auto;padding:clamp(40px,6vw,68px) clamp(20px,4vw,44px);scroll-margin-top:72px">
+    <div data-reveal="0" style="text-align:center;margin-bottom:clamp(32px,5vw,48px)">
+      <div style="font:700 12px 'Space Mono',monospace;letter-spacing:.14em;color:#a1a1aa;margin-bottom:14px">PROYECTOS</div>
+      <h2 style="font:700 clamp(30px,4.5vw,42px) 'Space Grotesk',sans-serif;letter-spacing:-.02em;margin:0 0 12px">Lo que he construido</h2>
+      <p style="font:400 17px 'Inter',sans-serif;color:#52525b;margin:0">Productos reales en producción, no maquetas.</p>
+    </div>
+
+    <!-- Feature: CheckYourCars -->
+    <div data-reveal="0" style="background:#fff;border:1px solid #e6e6e8;border-radius:26px;overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+      <div style="position:relative;min-height:280px;background:#111111;display:flex;align-items:center;justify-content:center;padding:36px">
+        <img src="checkyourcars.png" alt="CheckYourCars" loading="lazy" style="width:100%;max-width:420px;height:auto;border-radius:16px;box-shadow:0 30px 60px -30px rgba(0,0,0,.6)">
+      </div>
+      <div style="padding:clamp(28px,4vw,44px);display:flex;flex-direction:column;justify-content:center">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <span style="font:700 22px 'Space Grotesk',sans-serif">CheckYourCars</span>
+          <span style="font:600 11px 'Space Mono',monospace;color:#f4f4f5;background:#111111;padding:3px 9px;border-radius:100px;display:inline-flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#f4f4f5;display:inline-block;animation:pulseDot 2.4s infinite"></span>EN VIVO</span>
+        </div>
+        <p style="font:400 16px/1.6 'Inter',sans-serif;color:#52525b;margin:0 0 18px">SaaS y CRM para automotoras chilenas: centraliza inventario, prospectos y ventas en un solo lugar, con embudo visual, reportes y <strong style="color:#111">descripciones de autos generadas con IA</strong>. Diseño, desarrollo e infraestructura, de la idea a producción.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px">
+          <span style="font:600 12.5px 'Inter',sans-serif;color:#3f3f46;background:#f4f4f5;border:1px solid #e4e4e7;padding:6px 12px;border-radius:100px">Creación de SaaS</span>
+          <span style="font:600 12.5px 'Inter',sans-serif;color:#3f3f46;background:#f4f4f5;border:1px solid #e4e4e7;padding:6px 12px;border-radius:100px">IA</span>
+          <span style="font:600 12.5px 'Inter',sans-serif;color:#3f3f46;background:#f4f4f5;border:1px solid #e4e4e7;padding:6px 12px;border-radius:100px">Desarrollo web</span>
+          <span style="font:600 12.5px 'Inter',sans-serif;color:#3f3f46;background:#f4f4f5;border:1px solid #e4e4e7;padding:6px 12px;border-radius:100px">Dashboards</span>
+        </div>
+        <a href="https://www.checkyourcars.cl" target="_blank" rel="noopener" style="align-self:flex-start;padding:14px 26px;background:var(--brand);color:#f4f4f5;border-radius:100px;font:700 14.5px 'Inter',sans-serif;transition:opacity .2s" style-hover="opacity:.85">Visitar checkyourcars.cl ↗</a>
+      </div>
+    </div>
+
+    <!-- Feature: CheckYourWeb -->
+    <div data-reveal="0" style="background:#fff;border:1px solid #e6e6e8;border-radius:26px;overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));margin-top:20px">
+      <div style="padding:clamp(28px,4vw,44px);display:flex;flex-direction:column;justify-content:center;order:2">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <span style="font:700 22px 'Space Grotesk',sans-serif">CheckYourWeb</span>
+          <span style="font:600 11px 'Space Mono',monospace;color:#f4f4f5;background:#111111;padding:3px 9px;border-radius:100px;display:inline-flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#f4f4f5;display:inline-block;animation:pulseDot 2.4s infinite"></span>EN VIVO</span>
+        </div>
+        <p style="font:400 16px/1.6 'Inter',sans-serif;color:#52525b;margin:0 0 18px">Estudio de <strong style="color:#111">desarrollo web con IA</strong> para negocios locales —restaurantes, estética, e-commerce—. Sitios rápidos, responsive y orientados a conversión, con demos navegables por industria y prototipo listo en 7–14 días.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px">
+          <span style="font:600 12.5px 'Inter',sans-serif;color:#3f3f46;background:#f4f4f5;border:1px solid #e4e4e7;padding:6px 12px;border-radius:100px">Desarrollo web</span>
+          <span style="font:600 12.5px 'Inter',sans-serif;color:#3f3f46;background:#f4f4f5;border:1px solid #e4e4e7;padding:6px 12px;border-radius:100px">IA</span>
+          <span style="font:600 12.5px 'Inter',sans-serif;color:#3f3f46;background:#f4f4f5;border:1px solid #e4e4e7;padding:6px 12px;border-radius:100px">Diseño</span>
+          <span style="font:600 12.5px 'Inter',sans-serif;color:#3f3f46;background:#f4f4f5;border:1px solid #e4e4e7;padding:6px 12px;border-radius:100px">Landing</span>
+        </div>
+        <a href="https://check-your-web.vercel.app/" target="_blank" rel="noopener" style="align-self:flex-start;padding:14px 26px;background:var(--brand);color:#f4f4f5;border-radius:100px;font:700 14.5px 'Inter',sans-serif;transition:opacity .2s" style-hover="opacity:.85">Visitar check-your-web ↗</a>
+      </div>
+      <div style="order:1;min-height:280px;background:radial-gradient(120% 120% at 50% 30%,#1a1a1a 0%,#111111 60%,#0c0c0c 100%);color:#f4f4f5;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:44px 32px;gap:18px">
+        <div style="font:700 12px 'Space Mono',monospace;letter-spacing:.16em;color:#8a8a92">CHECKYOURWEB</div>
+        <div style="font:700 clamp(26px,3.4vw,36px)/1.1 'Space Grotesk',sans-serif;letter-spacing:-.02em;max-width:14ch">Tu web no debería verse como una plantilla.</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">
+          <span style="font:600 12px 'Inter',sans-serif;color:#d4d4d8;border:1px solid #3a3a40;padding:6px 13px;border-radius:100px">Restaurantes</span>
+          <span style="font:600 12px 'Inter',sans-serif;color:#d4d4d8;border:1px solid #3a3a40;padding:6px 13px;border-radius:100px">Estética</span>
+          <span style="font:600 12px 'Inter',sans-serif;color:#d4d4d8;border:1px solid #3a3a40;padding:6px 13px;border-radius:100px">E-commerce</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div data-reveal="0" style="background:#111111;color:#f4f4f5;border-radius:20px;padding:clamp(24px,3vw,32px) clamp(28px,4vw,40px);margin-top:20px;display:flex;flex-wrap:wrap;gap:16px 24px;align-items:center;justify-content:space-between">
+      <div><h3 style="font:600 20px 'Space Grotesk',sans-serif;margin:0 0 4px">¿Tu proyecto aquí?</h3><p style="font:400 15px 'Inter',sans-serif;color:#c9c9cf;margin:0">Construimos tu producto de la idea a producción.</p></div>
+      <a href="#contacto" style="padding:14px 26px;background:#f4f4f5;color:#111111;border-radius:100px;font:700 14.5px 'Inter',sans-serif;transition:opacity .2s" style-hover="opacity:.85">Hablemos →</a>
+    </div>
+  </div>
+
+  <!-- ===== SOBRE MÍ ===== -->
+  <div id="sobre-mi" style="max-width:1120px;margin:0 auto;padding:clamp(12px,2vw,24px) clamp(20px,4vw,44px) clamp(56px,8vw,80px);scroll-margin-top:72px">
+    <div data-reveal="0" style="background:#fff;border-radius:26px;border:1px solid #e6e6e8;padding:clamp(28px,4vw,48px);display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:clamp(28px,4vw,44px);align-items:center">
+      <div style="max-width:220px;width:100%;justify-self:center"><div style="aspect-ratio:1;border-radius:50%;overflow:hidden"><img src="profile.jpg" alt="Sebastian Gomez" style="width:100%;height:100%;object-fit:cover;display:block"></div></div>
+      <div style="grid-column:span 2;min-width:min(100%,320px)">
+        <div style="font:700 12px 'Space Mono',monospace;letter-spacing:.14em;color:#a1a1aa;margin-bottom:16px">QUIÉNES SOMOS</div>
+        <h2 style="font:700 clamp(24px,3.5vw,30px) 'Space Grotesk',sans-serif;letter-spacing:-.02em;margin:0 0 14px">La veta detrás de Veta Labs</h2>
+        <p style="font:400 16.5px/1.6 'Inter',sans-serif;color:#52525b;margin:0 0 18px">Veta Labs nace del trabajo de <strong style="color:#111">Sebastián Gómez</strong>, Ingeniero Comercial y <strong style="color:#111">Master in Business Analytics</strong> (UAI, con distinción de honor), con experiencia en análisis de datos, revenue y CRM. Combinamos el lado comercial con el técnico: entendemos tu negocio y también lo construimos. De aquí salieron <a href="https://www.checkyourcars.cl" target="_blank" rel="noopener" style="font-weight:600;border-bottom:2px solid #111111;transition:opacity .2s" style-hover="opacity:.6">checkyourcars.cl</a> y <a href="https://check-your-web.vercel.app/" target="_blank" rel="noopener" style="font-weight:600;border-bottom:2px solid #111111;transition:opacity .2s" style-hover="opacity:.6">CheckYourWeb</a>.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <span style="font:600 12px 'Space Mono',monospace;color:#3f3f46;background:#f4f4f5;border:1px solid #e4e4e7;padding:6px 11px;border-radius:8px">SQL</span>
+          <span style="font:600 12px 'Space Mono',monospace;color:#3f3f46;background:#f4f4f5;border:1px solid #e4e4e7;padding:6px 11px;border-radius:8px">Python</span>
+          <span style="font:600 12px 'Space Mono',monospace;color:#3f3f46;background:#f4f4f5;border:1px solid #e4e4e7;padding:6px 11px;border-radius:8px">Power BI</span>
+          <span style="font:600 12px 'Space Mono',monospace;color:#3f3f46;background:#f4f4f5;border:1px solid #e4e4e7;padding:6px 11px;border-radius:8px">Tableau</span>
+          <span style="font:600 12px 'Space Mono',monospace;color:#3f3f46;background:#f4f4f5;border:1px solid #e4e4e7;padding:6px 11px;border-radius:8px">Salesforce</span>
+          <span style="font:600 12px 'Space Mono',monospace;color:#3f3f46;background:#f4f4f5;border:1px solid #e4e4e7;padding:6px 11px;border-radius:8px">Claude Code</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CONTACTO ===== -->
+  <div id="contacto" style="background:var(--brand);color:#f4f4f5;scroll-margin-top:60px">
+    <div style="max-width:1120px;margin:0 auto;padding:clamp(56px,8vw,88px) clamp(20px,4vw,44px);display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(36px,5vw,56px);align-items:start">
+      <div data-reveal="0">
+        <div style="font:700 12px 'Space Mono',monospace;letter-spacing:.14em;color:#71717a;margin-bottom:20px">CONTACTO</div>
+        <h2 style="font:700 clamp(32px,5vw,46px)/1.08 'Space Grotesk',sans-serif;letter-spacing:-.02em;margin:0 0 18px">¿Hablamos?<br>Cuéntanos tu proceso.</h2>
+        <p style="font:400 17px/1.6 'Inter',sans-serif;color:#b8b2aa;margin:0 0 34px;max-width:400px">Agenda una reunión de 30 minutos. Vemos qué se puede automatizar y con qué retorno. Sin compromiso.</p>
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <a href="https://www.linkedin.com/in/sebastián-gonzalo-gómez-pastén/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:14px;transition:opacity .2s" style-hover="opacity:.7"><span style="width:44px;height:44px;border-radius:12px;background:#2f2f33;display:flex;align-items:center;justify-content:center;font:700 15px 'Space Mono',monospace">in</span><span><span style="display:block;font:700 11px 'Space Mono',monospace;color:#71717a;letter-spacing:.08em">LINKEDIN</span><span style="font:600 16px 'Inter',sans-serif">Sebastián Gómez Pastén</span></span></a>
+        </div>
+      </div>
+
+      <form id="lead-form" data-reveal="0.08" novalidate style="background:#2f2f33;border-radius:20px;padding:clamp(24px,3vw,34px);display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;flex-direction:column;gap:7px"><label style="font:700 12px 'Space Mono',monospace;color:#71717a;text-transform:uppercase;letter-spacing:.08em">Nombre *</label><input id="f-nombre" name="nombre" required autocomplete="name" placeholder="Tu nombre" style="width:100%;box-sizing:border-box;background:#111111;border:1px solid #3f3f46;border-radius:10px;padding:14px 15px;font-size:15px;color:#f4f4f5;transition:border-color .2s"></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+          <div style="display:flex;flex-direction:column;gap:7px"><label style="font:700 12px 'Space Mono',monospace;color:#71717a;text-transform:uppercase;letter-spacing:.08em">Email *</label><input id="f-email" name="email" type="email" required autocomplete="email" placeholder="tucorreo@ejemplo.cl" style="width:100%;box-sizing:border-box;background:#111111;border:1px solid #3f3f46;border-radius:10px;padding:14px 15px;font-size:15px;color:#f4f4f5;transition:border-color .2s"></div>
+          <div style="display:flex;flex-direction:column;gap:7px"><label style="font:700 12px 'Space Mono',monospace;color:#71717a;text-transform:uppercase;letter-spacing:.08em">Teléfono</label><input id="f-telefono" name="telefono" type="tel" autocomplete="tel" placeholder="+56 9 1234 5678" style="width:100%;box-sizing:border-box;background:#111111;border:1px solid #3f3f46;border-radius:10px;padding:14px 15px;font-size:15px;color:#f4f4f5;transition:border-color .2s"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+          <div style="display:flex;flex-direction:column;gap:7px"><label style="font:700 12px 'Space Mono',monospace;color:#71717a;text-transform:uppercase;letter-spacing:.08em">Empresa</label><input id="f-empresa" name="empresa" autocomplete="organization" placeholder="Nombre de tu empresa" style="width:100%;box-sizing:border-box;background:#111111;border:1px solid #3f3f46;border-radius:10px;padding:14px 15px;font-size:15px;color:#f4f4f5;transition:border-color .2s"></div>
+          <div style="display:flex;flex-direction:column;gap:7px"><label style="font:700 12px 'Space Mono',monospace;color:#71717a;text-transform:uppercase;letter-spacing:.08em">Cargo</label><input id="f-cargo" name="cargo" autocomplete="organization-title" placeholder="Tu cargo" style="width:100%;box-sizing:border-box;background:#111111;border:1px solid #3f3f46;border-radius:10px;padding:14px 15px;font-size:15px;color:#f4f4f5;transition:border-color .2s"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:7px"><label style="font:700 12px 'Space Mono',monospace;color:#71717a;text-transform:uppercase;letter-spacing:.08em">Negocio o rubro</label><input id="f-negocio" name="negocio" placeholder="¿A qué te dedicas?" style="width:100%;box-sizing:border-box;background:#111111;border:1px solid #3f3f46;border-radius:10px;padding:14px 15px;font-size:15px;color:#f4f4f5;transition:border-color .2s"></div>
+        <div style="display:flex;flex-direction:column;gap:7px"><label style="font:700 12px 'Space Mono',monospace;color:#71717a;text-transform:uppercase;letter-spacing:.08em">¿Qué quieres automatizar?</label><textarea id="f-mensaje" name="mensaje" placeholder="Cuéntanos brevemente" rows="3" style="width:100%;box-sizing:border-box;background:#111111;border:1px solid #3f3f46;border-radius:10px;padding:14px 15px;font-size:15px;color:#f4f4f5;resize:vertical;min-height:88px;transition:border-color .2s"></textarea></div>
+        <input id="f-website" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;pointer-events:none">
+        <button id="f-enviar" type="submit" style="margin-top:4px;padding:16px;background:#f4f4f5;color:#111111;border:none;border-radius:100px;font:700 15px 'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .2s" style-hover="opacity:.85">Enviar mensaje</button>
+        <p id="f-status" role="status" aria-live="polite" style="display:none;font:600 13.5px/1.5 'Inter',sans-serif;text-align:center;margin:0"></p>
+      </form>
+    </div>
+
+    <div style="border-top:1px solid #2f2f33">
+      <div style="max-width:1120px;margin:0 auto;padding:26px clamp(20px,4vw,44px);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;font:500 13.5px 'Inter',sans-serif;color:#71717a">
+        <span style="display:flex;align-items:center;gap:9px;font:700 15px 'Space Grotesk',sans-serif;letter-spacing:-.02em;color:#f4f4f5"><svg width="20" height="20" viewBox="0 0 64 64" aria-hidden="true" style="flex:none"><g stroke="#f4f4f5" stroke-width="4" stroke-linecap="round" fill="none" opacity=".4"><path d="M4 24H16"/><path d="M48 24H60"/></g><g stroke="#f4f4f5" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M15 13L32 47L49 13"/></g><circle cx="32" cy="47" r="6.5" fill="#f4f4f5"/></svg>Veta Labs</span>
+        <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+          <a href="https://www.linkedin.com/in/sebastián-gonzalo-gómez-pastén/" target="_blank" rel="noopener" style="transition:color .2s" style-hover="color:#f4f4f5">LinkedIn</a>
+          <span>Automatización · IA · Software · © 2026</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
-
-<section id="servicios">
-  <div class="wrap">
-    <span class="eyebrow">Servicios</span>
-    <h2>Tres frentes, un mismo objetivo</h2>
-    <p class="intro">Que dejes de perder horas en trabajo repetitivo y empieces a decidir con información real.</p>
-    <div class="grid">
-      <div class="card">
-        <span class="num">01</span>
-        <h3>Automatización de procesos</h3>
-        <p>Todo lo que hoy alguien copia y pega entre planillas, correos y sistemas.
-           Lo dejamos corriendo solo, con avisos cuando algo necesita tu atención.</p>
-      </div>
-      <div class="card">
-        <span class="num">02</span>
-        <h3>Dashboards y reportes</h3>
-        <p>Un tablero único con lo que de verdad mueve tu negocio, actualizado solo.
-           Sin exportar nada a fin de mes ni cuadrar números a mano.</p>
-      </div>
-      <div class="card">
-        <span class="num">03</span>
-        <h3>IA aplicada</h3>
-        <p>Clasificar correos, redactar respuestas, resumir documentos, calificar leads.
-           IA puesta donde ahorra tiempo de verdad, no donde suena bien.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="paraquien">
-  <div class="wrap">
-    <span class="eyebrow">Para quién</span>
-    <h2>PYMEs de la Región de Coquimbo</h2>
-    <p class="intro">
-      Trabajamos con empresas donde el dueño o el gerente todavía está metido en la
-      operación diaria. Foco inicial en <strong>inmobiliarias, constructoras y empresas
-      de gestión de espacios</strong> de La Serena, Coquimbo y Ovalle, donde conocemos
-      bien el rubro y sus cuellos de botella.
-    </p>
-    <p class="intro" style="margin-top:14px">
-      Somos chicos a propósito: hablás directo con quien hace el trabajo, no con un
-      ejecutivo de cuentas. Y trabajamos en remoto, así que el costo va al desarrollo,
-      no a una oficina.
-    </p>
-  </div>
-</section>
-
-<section id="como">
-  <div class="wrap">
-    <span class="eyebrow">Cómo trabajamos</span>
-    <h2>Del diagnóstico a algo funcionando</h2>
-    <ol class="pasos">
-      <li>
-        <div>
-          <h3>Conversamos</h3>
-          <p>Una llamada de media hora para entender dónde se te va el tiempo. Sin costo y sin compromiso.</p>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3>Diagnóstico</h3>
-          <p>Miramos tus procesos reales y te decimos qué conviene automatizar primero, con una estimación honesta de tiempo y precio.</p>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3>Construimos por partes</h3>
-          <p>Empezamos por lo que más duele y lo dejamos andando. Ves resultados en semanas, no en meses.</p>
-        </div>
-      </li>
-      <li>
-        <div>
-          <h3>Te lo entregamos andando</h3>
-          <p>Con documentación y acompañamiento. La idea es que funcione sin nosotros, no que quedes amarrado.</p>
-        </div>
-      </li>
-    </ol>
-  </div>
-</section>
-
-<section id="contacto">
-  <div class="wrap">
-    <span class="eyebrow">Contacto</span>
-    <h2>Contame qué te está costando tiempo</h2>
-    <p class="intro">Respondemos dentro de un día hábil. Si preferís, escribinos directo por correo.</p>
-
-    <form id="leadForm" novalidate>
-      <div class="row2">
-        <div class="field">
-          <label for="nombre">Nombre *</label>
-          <input type="text" id="nombre" name="nombre" autocomplete="name" required>
-        </div>
-        <div class="field">
-          <label for="email">Correo *</label>
-          <input type="email" id="email" name="email" autocomplete="email" required>
-        </div>
-      </div>
-      <div class="row2">
-        <div class="field">
-          <label for="empresa">Empresa</label>
-          <input type="text" id="empresa" name="empresa" autocomplete="organization">
-        </div>
-        <div class="field">
-          <label for="telefono">Teléfono</label>
-          <input type="tel" id="telefono" name="telefono" autocomplete="tel" placeholder="+56 9 ...">
-        </div>
-      </div>
-      <div class="field">
-        <label for="mensaje">¿Qué te gustaría resolver?</label>
-        <textarea id="mensaje" name="mensaje" rows="4" placeholder="Por ejemplo: paso horas armando el reporte de arriendos todos los meses."></textarea>
-      </div>
-      <button type="submit" id="btnEnviar">Enviar</button>
-      <div class="msg" id="formMsg"></div>
-    </form>
-
-    <p class="directo">
-      O escribinos a <a href="mailto:sebastiangomez2003@gmail.com">sebastiangomez2003@gmail.com</a>
-    </p>
-  </div>
-</section>
-
-<footer>
-  <div class="wrap">
-    <div class="brand">
-      <svg class="iso" width="20" height="20" viewBox="0 0 64 64" aria-hidden="true">
-        <g class="estrato" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none">
-          <path d="M4 24H16"/><path d="M48 24H60"/>
-        </g>
-        <g stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
-          <path d="M15 13L32 47L49 13"/>
-        </g>
-        <circle cx="32" cy="47" r="6.5" fill="currentColor"/>
-      </svg>
-      <span>Veta Labs</span>
-    </div>
-    <span>Región de Coquimbo, Chile · Trabajo remoto</span>
-  </div>
-</footer>
-
 <script>
-const form = document.getElementById('leadForm');
-const msg  = document.getElementById('formMsg');
-const btn  = document.getElementById('btnEnviar');
+(function () {
+  // ===== hover effects (replaces DClogic style-hover attribute) =====
+  document.querySelectorAll('[style-hover]').forEach(function (el) {
+    var hover = el.getAttribute('style-hover');
+    var saved = null;
+    el.addEventListener('mouseenter', function () { saved = el.getAttribute('style'); el.setAttribute('style', (saved || '') + ';' + hover); });
+    el.addEventListener('mouseleave', function () { if (saved !== null) el.setAttribute('style', saved); });
+  });
 
-function mostrar(texto, ok){
-  msg.textContent = texto;
-  msg.className = 'msg show ' + (ok ? 'ok' : 'bad');
-}
-
-form.addEventListener('submit', async e => {
-  e.preventDefault();
-  const datos = Object.fromEntries(new FormData(form).entries());
-
-  if(!datos.nombre.trim() || !datos.email.trim()){
-    mostrar('Necesitamos al menos tu nombre y tu correo.', false); return;
+  // ===== contact form -> CRM + correo (Resend v\u00eda Edge Function) =====
+  var form = document.getElementById('lead-form');
+  var statusEl = document.getElementById('f-status');
+  var sendBtn = document.getElementById('f-enviar');
+  function setStatus(msg, ok) {
+    if (!statusEl) return;
+    statusEl.textContent = msg;
+    statusEl.style.color = ok ? '#4ade80' : '#f87171';
+    statusEl.style.display = 'block';
   }
-  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(datos.email.trim())){
-    mostrar('Ese correo no parece válido, revisalo.', false); return;
-  }
-
-  btn.disabled = true; btn.textContent = 'Enviando…';
-  try{
-    const r = await fetch('/api/lead-form', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(datos)
-    });
-    const cuerpo = await r.json().catch(() => ({}));
-    if(r.ok && cuerpo.ok){
+  if (form) form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var v = function (id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; };
+    var nombre = v('f-nombre'), email = v('f-email');
+    if (!nombre) { setStatus('Escribe tu nombre.', false); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setStatus('Escribe un correo v\u00e1lido.', false); return; }
+    var original = sendBtn.textContent;
+    sendBtn.disabled = true; sendBtn.textContent = 'Enviando\u2026'; sendBtn.style.opacity = '.7';
+    fetch('https://rayvimywyqjnzzmbagpv.supabase.co/functions/v1/nuevo-lead', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nombre: nombre, email: email, telefono: v('f-telefono'),
+        empresa: v('f-empresa'), cargo: v('f-cargo'),
+        negocio: v('f-negocio'), mensaje: v('f-mensaje'), website: v('f-website')
+      })
+    }).then(function (r) {
+      if (!r.ok) throw new Error('bad status');
       form.reset();
-      mostrar('Listo, recibimos tu mensaje. Te respondemos dentro de un día hábil.', true);
-    } else {
-      mostrar('No pudimos enviarlo. Escribinos a sebastiangomez2003@gmail.com y lo vemos.', false);
-    }
-  } catch {
-    mostrar('No pudimos enviarlo. Escribinos a sebastiangomez2003@gmail.com y lo vemos.', false);
-  } finally {
-    btn.disabled = false; btn.textContent = 'Enviar';
+      setStatus('\u00a1Gracias! Recib\u00ed tu mensaje y te contactar\u00e9 pronto.', true);
+    }).catch(function () {
+      setStatus('No se pudo enviar. Intenta de nuevo o escr\u00edbeme por LinkedIn.', false);
+    }).then(function () {
+      sendBtn.disabled = false; sendBtn.textContent = original; sendBtn.style.opacity = '';
+    });
+  });
+
+  // ===== scroll reveal =====
+  var reveal = [].slice.call(document.querySelectorAll('[data-reveal]'));
+  if ('IntersectionObserver' in window && reveal.length) {
+    reveal.forEach(function (el) {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(22px)';
+      el.style.transition = 'opacity .75s cubic-bezier(.2,.7,.2,1), transform .75s cubic-bezier(.2,.7,.2,1)';
+    });
+    var show = function (el) {
+      el.style.transitionDelay = (parseFloat(el.dataset.reveal) || 0) + 's';
+      el.style.opacity = '1'; el.style.transform = 'none';
+    };
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { show(e.target); io.unobserve(e.target); } });
+    }, { threshold: 0.14, rootMargin: '0px 0px -6% 0px' });
+    reveal.forEach(function (el) { io.observe(el); });
+    setTimeout(function () { reveal.forEach(function (el) { if (el.style.opacity === '0') show(el); }); }, 2800);
   }
-});
+
+  // ===== active nav link highlight =====
+  var links = {};
+  document.querySelectorAll('[data-navlink]').forEach(function (a) { links[a.dataset.navlink] = a; });
+  if ('IntersectionObserver' in window) {
+    var secObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          Object.keys(links).forEach(function (k) { links[k].style.color = ''; links[k].style.fontWeight = '500'; });
+          var a = links[e.target.id];
+          if (a) { a.style.color = '#111111'; a.style.fontWeight = '700'; }
+        }
+      });
+    }, { threshold: 0.001, rootMargin: '-45% 0px -50% 0px' });
+    ['servicios', 'proceso', 'resultados', 'proyectos', 'sobre-mi', 'contacto'].forEach(function (id) {
+      var s = document.getElementById(id); if (s) secObs.observe(s);
+    });
+  }
+
+  // ===== interactive dot grid (hero panel) =====
+  function dotGrid(cvsId, panelId, opts) {
+    var cvs = document.getElementById(cvsId), panel = document.getElementById(panelId);
+    if (!cvs || !panel) return;
+    var ctx = cvs.getContext('2d');
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var GAP = opts.gap, R = opts.r, PUSH = opts.push;
+    var dots = [], w = 0, h = 0, mouse = { x: -9999, y: -9999 };
+    function build() {
+      var rect = panel.getBoundingClientRect(); w = rect.width; h = rect.height;
+      if (!w || !h) return;
+      cvs.width = w * dpr; cvs.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      dots = [];
+      var cols = Math.max(2, Math.round(w / GAP)), rows = Math.max(2, Math.round(h / GAP));
+      var gx = w / (cols - 1), gy = h / (rows - 1);
+      for (var i = 0; i < cols; i++) for (var j = 0; j < rows; j++) { var ox = i * gx, oy = j * gy; dots.push({ ox: ox, oy: oy, x: ox, y: oy, vx: 0, vy: 0 }); }
+    }
+    var t = 0;
+    function frame() {
+      t += 0.016; ctx.clearRect(0, 0, w, h);
+      for (var k = 0; k < dots.length; k++) {
+        var d = dots[k];
+        var wave = Math.sin(t * 1.1 + d.ox * 0.03 + d.oy * 0.045), wave2 = Math.cos(t * 0.8 + d.oy * 0.035);
+        var tx = d.ox + wave * 3.2, ty = d.oy + wave2 * 3.2;
+        var glow = 0.12 + Math.max(0, wave) * 0.16;
+        var dx = d.x - mouse.x, dy = d.y - mouse.y, dist = Math.hypot(dx, dy) || 0.0001;
+        if (dist < R) { var f = 1 - dist / R; tx += (dx / dist) * f * PUSH; ty += (dy / dist) * f * PUSH; glow = Math.max(glow, f); }
+        d.vx = (d.vx + (tx - d.x) * 0.14) * 0.74; d.vy = (d.vy + (ty - d.y) * 0.14) * 0.74; d.x += d.vx; d.y += d.vy;
+        var r = 1.5 + glow * 2.4, a = 0.22 + glow * 0.78;
+        ctx.beginPath(); ctx.arc(d.x, d.y, r, 0, 6.2832); ctx.fillStyle = 'rgba(244,244,245,' + a + ')'; ctx.fill();
+      }
+      requestAnimationFrame(frame);
+    }
+    function onMove(e) { var rect = panel.getBoundingClientRect(); mouse.x = e.clientX - rect.left; mouse.y = e.clientY - rect.top; }
+    function onLeave() { mouse.x = -9999; mouse.y = -9999; }
+    panel.addEventListener('pointermove', onMove);
+    panel.addEventListener('mousemove', onMove);
+    panel.addEventListener('pointerleave', onLeave);
+    panel.addEventListener('mouseleave', onLeave);
+    build();
+    if ('ResizeObserver' in window) new ResizeObserver(build).observe(panel);
+    requestAnimationFrame(frame);
+  }
+  dotGrid('dotgrid', 'dotgrid-panel', { gap: 24, r: 116, push: 26 });
+
+  // ===== page background dots =====
+  (function () {
+    var cvs = document.getElementById('bg-dots'); if (!cvs) return;
+    var ctx = cvs.getContext('2d'); var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var GAP = 34, R = 130, PUSH = 16; var dots = [], w = 0, h = 0, mouse = { x: -9999, y: -9999 };
+    function build() {
+      w = window.innerWidth; h = window.innerHeight; cvs.width = w * dpr; cvs.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      dots = []; var cols = Math.ceil(w / GAP) + 1, rows = Math.ceil(h / GAP) + 1;
+      for (var i = 0; i < cols; i++) for (var j = 0; j < rows; j++) { var ox = i * GAP, oy = j * GAP; dots.push({ ox: ox, oy: oy, x: ox, y: oy, vx: 0, vy: 0 }); }
+    }
+    var t = 0;
+    function frame() {
+      t += 0.016; ctx.clearRect(0, 0, w, h);
+      for (var k = 0; k < dots.length; k++) {
+        var d = dots[k];
+        var wave = Math.sin(t * 0.7 + d.ox * 0.02 + d.oy * 0.03);
+        var tx = d.ox + wave * 2.4, ty = d.oy + Math.cos(t * 0.5 + d.oy * 0.025) * 2.4; var glow = 0;
+        var dx = d.x - mouse.x, dy = d.y - mouse.y, dist = Math.hypot(dx, dy) || 0.0001;
+        if (dist < R) { var f = 1 - dist / R; tx += (dx / dist) * f * PUSH; ty += (dy / dist) * f * PUSH; glow = f; }
+        d.vx = (d.vx + (tx - d.x) * 0.12) * 0.76; d.vy = (d.vy + (ty - d.y) * 0.12) * 0.76; d.x += d.vx; d.y += d.vy;
+        var r = 1.1 + glow * 1.4, a = 0.05 + glow * 0.22;
+        ctx.beginPath(); ctx.arc(d.x, d.y, r, 0, 6.2832); ctx.fillStyle = 'rgba(17,17,17,' + a + ')'; ctx.fill();
+      }
+      requestAnimationFrame(frame);
+    }
+    function onBgMove(e) { mouse.x = e.clientX; mouse.y = e.clientY; }
+    window.addEventListener('pointermove', onBgMove);
+    window.addEventListener('mousemove', onBgMove);
+    window.addEventListener('resize', build); build(); requestAnimationFrame(frame);
+  })();
+})();
 </script>
 </body>
 </html>

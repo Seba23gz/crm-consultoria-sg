@@ -4,12 +4,21 @@ Sitio de la consultora y su CRM interno, en un mismo proyecto de Vercel.
 
 | Ruta | Qué es | Acceso |
 |---|---|---|
-| `/` | Landing pública de Veta Labs, con formulario de contacto | público |
+| `/` | Sitio público de Veta Labs: servicios, proceso, resultados, proyectos y contacto | público |
 | `/crm` | CRM interno: pipeline, campañas, empresas y seguimientos | login Supabase |
-| `/api/lead-form` | Endpoint que recibe el formulario y crea el contacto en el CRM | público (POST) |
+| `/api/lead-form` | Endpoint alternativo para recibir leads (hoy sin uso) | público (POST) |
 
-El CRM no se enlaza desde la landing a propósito: se entra por la URL directa y
+El CRM no se enlaza desde el sitio a propósito: se entra por la URL directa y
 queda detrás del login de Supabase.
+
+El sitio venía del proyecto `sebastian-gomez` (repo `Seba23gz/Sebastian-Gomez`),
+que se fusionó acá para tener todo en un solo proyecto de Vercel.
+
+## Entrada de leads
+El formulario del sitio postea a la Edge Function **`nuevo-lead`** de Supabase,
+que es el camino en uso. `api/lead-form.js` hace lo mismo por otra vía y quedó
+sin conectar: si se activa, hay que apagar uno de los dos o cada lead entra
+duplicado.
 
 ## Stack
 - Frontend: HTML/CSS/JS puro (sin build)
