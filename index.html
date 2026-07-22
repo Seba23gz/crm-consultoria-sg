@@ -510,7 +510,7 @@
 <!-- MODAL: completar tarea → crear lead -->
 <div class="overlay" id="modalCompletar">
   <div class="modal">
-    <h3>Completar tarea</h3>
+    <h3>Asignar contacto</h3>
     <p class="modal-sub" id="comp_empresa"></p>
     <div class="field"><label>Contacto a quien se contactará</label><select id="comp_contacto"></select></div>
     <div id="comp_nuevo">
@@ -523,11 +523,10 @@
         <div class="field"><label>Teléfono</label><input id="comp_telefono"></div>
       </div>
     </div>
-    <div class="field"><label>Título del lead</label><input id="comp_titulo"></div>
-    <p class="modal-sub" style="margin:0">Se creará el lead en etapa <strong>Nuevo</strong> y la tarea quedará completada.</p>
+    <p class="modal-sub" style="margin:0">La tarea sigue <strong>pendiente</strong>. Cuando estés listo, pulsa <strong>Prospectar</strong> en la tarea para crear el lead en etapa Nuevo.</p>
     <div class="modal-actions">
       <button class="btn-cancel" id="btnCancelarCompletar">Cerrar</button>
-      <button class="btn-primary" id="btnConfirmarCompletar" style="width:auto">Completar y crear lead</button>
+      <button class="btn-primary" id="btnConfirmarCompletar" style="width:auto">Asignar contacto</button>
     </div>
   </div>
 </div>
@@ -1035,7 +1034,10 @@ function pintarTareas(){
     const e=t.empresas||{}, hecha=t.estado==='completada';
     const vencida = t.fecha_vencimiento && t.fecha_vencimiento < todayStr() && t.estado==='pendiente';
     const acc = t.estado==='pendiente'
-      ? `<button class="btn-sm" data-completar="${t.id}">Completar</button> <button class="btn-sm" data-editar="${t.id}">Editar</button>`
+      ? (t.contacto_id
+          ? `<button class="btn-sm" data-prospectar="${t.id}">Prospectar</button> <button class="btn-sm" data-asignar="${t.id}">Cambiar contacto</button>`
+          : `<button class="btn-sm" data-asignar="${t.id}">Asignar contacto</button>`)
+        + ` <button class="btn-sm" data-editar="${t.id}">Editar</button>`
       : (t.lead_id
           ? `<button class="btn-sm" data-lead="${t.lead_id}">Ver lead</button> <button class="btn-sm" data-editar="${t.id}">Editar</button>`
           : `<button class="btn-sm" data-editar="${t.id}">Editar</button>`);
@@ -1048,7 +1050,8 @@ function pintarTareas(){
       <td style="text-align:right;white-space:nowrap">${acc}</td></tr>`;
   }).join('') : '<tr><td colspan="5" class="row-empty">Sin tareas que coincidan.</td></tr>';
   const b=$('tareasBody');
-  b.querySelectorAll('[data-completar]').forEach(x=>x.onclick=()=>abrirCompletar(Number(x.dataset.completar)));
+  b.querySelectorAll('[data-asignar]').forEach(x=>x.onclick=()=>abrirAsignar(Number(x.dataset.asignar)));
+  b.querySelectorAll('[data-prospectar]').forEach(x=>x.onclick=()=>prospectar(Number(x.dataset.prospectar)));
   b.querySelectorAll('[data-editar]').forEach(x=>x.onclick=()=>abrirTareaModal(tareasCamp.find(t=>t.id===Number(x.dataset.editar))));
   b.querySelectorAll('[data-lead]').forEach(x=>x.onclick=()=>{ showView('leads'); openLead(Number(x.dataset.lead)); });
 }
@@ -1192,16 +1195,15 @@ $('btnConfirmarAgregar').onclick = async () => {
 // --- completar tarea → asignar contacto y crear lead en "nuevo" ---
 function toggleCompNuevo(){ $('comp_nuevo').style.display = $('comp_contacto').value==='nuevo' ? 'block' : 'none'; }
 $('comp_contacto').addEventListener('change', toggleCompNuevo);
-function abrirCompletar(tareaId){
+function abrirAsignar(tareaId){
   const t = tareasCamp.find(x=>x.id===tareaId); if(!t) return;
   completarCtx = { tareaId: t.id, empresaId: t.empresa_id };
   $('comp_empresa').textContent = (t.empresas||{}).nombre || '(sin empresa asignada)';
   const suyos = contactos.filter(c=>c.empresa_id===t.empresa_id);
   $('comp_contacto').innerHTML = suyos.map(c=>`<option value="${c.id}">${esc(c.nombre)}${c.cargo?' — '+esc(c.cargo):''}</option>`).join('')
     + '<option value="nuevo">+ Crear contacto nuevo</option>';
-  $('comp_contacto').value = suyos.length ? String(suyos[0].id) : 'nuevo';
+  $('comp_contacto').value = t.contacto_id ? String(t.contacto_id) : (suyos.length ? String(suyos[0].id) : 'nuevo');
   ['comp_nombre','comp_cargo','comp_email','comp_telefono'].forEach(i=>$(i).value='');
-  $('comp_titulo').value = campanaActual ? campanaActual.nombre : 'Oportunidad';
   toggleCompNuevo();
   $('modalCompletar').classList.add('open');
 }
@@ -1221,21 +1223,38 @@ $('btnConfirmarCompletar').onclick = async () => {
     contactoId = data.id;
   } else contactoId = Number(contactoId);
 
-  const { data: lead, error: le } = await sb.from('leads').insert({
-    empresa_id: completarCtx.empresaId, contacto_id: contactoId,
-    titulo: $('comp_titulo').value.trim() || null, etapa:'nuevo', prioridad:'media', ultimo_contacto: todayStr()
-  }).select('id').single();
-  if(le){ alert('No se pudo crear el lead: '+le.message); return; }
-
-  const { error: te } = await sb.from('tareas').update({
-    estado:'completada', fecha_completada:todayStr(), lead_id:lead.id, contacto_id:contactoId
-  }).eq('id', completarCtx.tareaId);
-  if(te){ alert('Lead creado, pero falló cerrar la tarea: '+te.message); }
+  // Solo asigna el contacto: la tarea sigue pendiente hasta que pulses "Prospectar"
+  const { error: te } = await sb.from('tareas').update({ contacto_id: contactoId }).eq('id', completarCtx.tareaId);
+  if(te){ alert('No se pudo asignar el contacto: '+te.message); return; }
 
   $('modalCompletar').classList.remove('open');
   await loadAll();
   if(campanaActual){ await cargarTareas(campanaActual.id); await refrescarResumen(); renderCampanaDetalle(); }
 };
+
+// Prospectar: crea el lead en etapa "nuevo" y cierra la tarea
+async function prospectar(tareaId){
+  const t = tareasCamp.find(x=>x.id===tareaId); if(!t) return;
+  if(!t.contacto_id){ alert('Primero asigna un contacto a la tarea.'); return; }
+  if(!t.empresa_id){ alert('Esta tarea no tiene empresa asignada. Edítala y asígnale una.'); return; }
+  const quien = (t.contactos||{}).nombre || 'este contacto';
+  const donde = (t.empresas||{}).nombre || 'la empresa';
+  if(!confirm(`¿Prospectar a ${quien} (${donde})?\n\nSe creará el lead en etapa "Nuevo" y la tarea quedará completada.`)) return;
+
+  const { data: lead, error } = await sb.from('leads').insert({
+    empresa_id: t.empresa_id, contacto_id: t.contacto_id,
+    titulo: campanaActual ? campanaActual.nombre : null,
+    etapa:'nuevo', prioridad:'media', ultimo_contacto: todayStr()
+  }).select('id').single();
+  if(error){ alert('No se pudo crear el lead: '+error.message); return; }
+
+  const { error: te } = await sb.from('tareas')
+    .update({ estado:'completada', fecha_completada: todayStr(), lead_id: lead.id }).eq('id', t.id);
+  if(te){ alert('Lead creado, pero falló cerrar la tarea: '+te.message); }
+
+  await loadAll();
+  if(campanaActual){ await cargarTareas(campanaActual.id); await refrescarResumen(); renderCampanaDetalle(); }
+}
 // ---------- EXPORTAR CSV ----------
 function downloadCSV(filename, headers, rows){
   const cell = v => { const s = v==null?'':String(v); return /[",\n\r]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
