@@ -1131,19 +1131,33 @@ function pintarTareas(){
       : (t.lead_id
           ? `<button class="btn-sm" data-lead="${t.lead_id}">Ver lead</button> <button class="btn-sm" data-editar="${t.id}">Editar</button>`
           : `<button class="btn-sm" data-editar="${t.id}">Editar</button>`);
+    const accEmp = t.empresa_id ? ` <button class="btn-sm" data-empresa="${t.empresa_id}">Ver empresa</button>` : '';
     const badge = hecha ? 'ganado' : (t.estado==='descartada' ? 'perdido' : '');
     return `<tr>
       <td><div class="t-name" style="${hecha?'text-decoration:line-through;opacity:.6':''}">${esc(t.titulo)}</div>${t.contactos?`<div class="t-sub">→ ${esc(t.contactos.nombre)}</div>`:''}</td>
       <td><div>${esc(e.nombre_comercial||e.nombre||'—')}</div><div class="t-sub">${esc([e.nombre_comercial?e.nombre:'', e.ciudad].filter(Boolean).join(' · '))}</div></td>
       <td>${t.fecha_vencimiento?`<span class="follow ${vencida?'overdue':''}">${vencida?'⚠ ':''}${t.fecha_vencimiento}</span>`:'<span class="muted">—</span>'}</td>
       <td><span class="badge ${badge}">${esc(t.estado)}</span></td>
-      <td style="text-align:right;white-space:nowrap">${acc}</td></tr>`;
+      <td style="text-align:right;white-space:nowrap">${acc}${accEmp}</td></tr>`;
   }).join('') : '<tr><td colspan="5" class="row-empty">Sin tareas que coincidan.</td></tr>';
   const b=$('tareasBody');
   b.querySelectorAll('[data-asignar]').forEach(x=>x.onclick=()=>abrirAsignar(Number(x.dataset.asignar)));
   b.querySelectorAll('[data-prospectar]').forEach(x=>x.onclick=()=>prospectar(Number(x.dataset.prospectar)));
   b.querySelectorAll('[data-editar]').forEach(x=>x.onclick=()=>abrirTareaModal(tareasCamp.find(t=>t.id===Number(x.dataset.editar))));
   b.querySelectorAll('[data-lead]').forEach(x=>x.onclick=()=>{ showView('leads'); openLead(Number(x.dataset.lead)); });
+  b.querySelectorAll('[data-empresa]').forEach(x=>x.onclick=()=>verEmpresa(Number(x.dataset.empresa)));
+}
+
+// Abre la ficha de una empresa que puede no estar en memoria: solo se precargan
+// las de contactos y leads, y las de una campaña normalmente no lo están.
+async function verEmpresa(id){
+  if(!id) return;
+  if(!empById(id)){
+    const { data, error } = await sb.from('empresas').select('*').eq('id', id).single();
+    if(error || !data){ alert('No se pudo cargar la empresa: ' + (error ? error.message : 'no existe')); return; }
+    empresas.push(data);
+  }
+  openEmpresa(id);
 }
 
 // --- modal campaña ---
