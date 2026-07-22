@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CRM · Veta Labs</title>
+<title>Veta Labs · Automatización, datos e IA para PYMEs</title>
+<meta name="description" content="Automatizamos procesos y convertimos los datos de tu empresa en decisiones. Consultoría para PYMEs de la Región de Coquimbo.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg stroke='%23111111' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' fill='none'%3E%3Cpath d='M14 14L32 48L50 14'/%3E%3C/g%3E%3Ccircle cx='32' cy='48' r='7' fill='%23111111'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --font-display:'Space Grotesk',system-ui,sans-serif;
@@ -16,1293 +16,290 @@
     --font-mono:'Space Mono',ui-monospace,monospace;
     --ink:#111111; --ink-soft:#52525b; --ink-faint:#a1a1aa;
     --paper:#f4f4f5; --card:#ffffff; --line:#e4e4e7;
-    --accent:#111111; --accent-soft:#e9e9ec;
-    --warn:#b45309; --warn-soft:#fbe4cf;
-    --win:#111111; --lost:#a1a1aa;
     --radius:12px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:var(--font-body);background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
-  h1,h2,h3{font-family:var(--font-display);font-weight:700;letter-spacing:-0.02em}
-  a{color:inherit;text-decoration:none}
-  /* Isotipo Veta Labs: una veta que corta los estratos y converge en el hallazgo */
+  body{font-family:var(--font-body);background:var(--paper);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:var(--font-display);font-weight:700;letter-spacing:-0.03em;line-height:1.15}
+  a{color:inherit}
+  img,svg{max-width:100%}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 24px}
+  .eyebrow{font-family:var(--font-mono);font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft)}
+
+  /* marca */
   .iso{flex:none;color:var(--ink)}
   .iso .estrato{opacity:.32}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand .mark{font-family:var(--font-display);font-size:19px;font-weight:700;letter-spacing:-0.02em;white-space:nowrap}
 
-  /* Login */
-  #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-  .login-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:40px;width:100%;max-width:400px}
-  .login-card .eyebrow{font-family:var(--font-mono);font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);font-weight:400;margin-bottom:10px}
-  .login-card h1{font-size:34px;margin-bottom:6px;letter-spacing:-0.03em}
-  .login-card p.sub{color:var(--ink-soft);font-size:14px;margin-bottom:28px}
+  /* header */
+  header{position:sticky;top:0;z-index:10;background:rgba(244,244,245,.88);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  header .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-top:16px;padding-bottom:16px}
+  .btn{display:inline-block;font-family:var(--font-body);font-size:14px;font-weight:600;border-radius:100px;padding:11px 22px;text-decoration:none;border:1px solid var(--ink);transition:opacity .15s}
+  .btn:hover{opacity:.85}
+  .btn-solid{background:var(--ink);color:var(--paper)}
+  .btn-ghost{background:transparent;color:var(--ink)}
+
+  /* hero */
+  .hero{padding:clamp(56px,10vw,104px) 0 clamp(40px,7vw,72px)}
+  .hero h1{font-size:clamp(36px,6.2vw,62px);margin:14px 0 20px;max-width:16ch}
+  .hero p.lead{font-size:clamp(17px,2.1vw,20px);color:var(--ink-soft);max-width:56ch}
+  .hero .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+
+  /* secciones */
+  section{padding:clamp(44px,6vw,72px) 0;border-top:1px solid var(--line)}
+  section h2{font-size:clamp(26px,3.6vw,38px);margin:10px 0 14px}
+  section p.intro{color:var(--ink-soft);max-width:60ch;font-size:16px}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:36px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:26px}
+  .card h3{font-size:19px;margin-bottom:9px}
+  .card p{color:var(--ink-soft);font-size:15px}
+  .card .num{font-family:var(--font-mono);font-size:12px;color:var(--ink-faint);margin-bottom:14px;display:block}
+
+  /* pasos */
+  ol.pasos{list-style:none;counter-reset:p;margin-top:32px;display:grid;gap:14px}
+  ol.pasos li{counter-increment:p;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;display:flex;gap:18px;align-items:flex-start}
+  ol.pasos li::before{content:counter(p);font-family:var(--font-mono);font-size:13px;font-weight:700;flex:none;width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;margin-top:2px}
+  ol.pasos h3{font-size:17px;margin-bottom:4px}
+  ol.pasos p{color:var(--ink-soft);font-size:15px}
+
+  /* contacto */
+  form{margin-top:32px;max-width:620px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:560px){.row2{grid-template-columns:1fr}}
+  .field{margin-bottom:14px}
   label{display:block;font-size:13px;font-weight:500;margin-bottom:6px;color:var(--ink-soft)}
-  input,select,textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:14px;background:var(--card);color:var(--ink)}
-  input:focus,select:focus,textarea:focus{outline:2px solid var(--ink);outline-offset:-1px;border-color:transparent}
-  input:disabled{background:var(--paper);color:var(--ink-soft)}
-  .field{margin-bottom:16px}
-  button{font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;border:none;border-radius:100px;transition:opacity .15s,background .15s}
-  button:hover{opacity:.85}
-  .btn-primary{background:var(--ink);color:var(--paper);padding:12px 22px;width:100%}
-  .msg{font-size:13px;padding:10px 12px;border-radius:10px;margin-bottom:16px;display:none}
-  .msg.err{background:var(--warn-soft);color:var(--warn);display:block}
-  .msg.ok{background:var(--accent-soft);color:var(--ink);display:block}
+  input,textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:15px;background:var(--card);color:var(--ink)}
+  input:focus,textarea:focus{outline:2px solid var(--ink);outline-offset:-1px;border-color:transparent}
+  button[type=submit]{font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;border:none;border-radius:100px;background:var(--ink);color:var(--paper);padding:13px 30px;transition:opacity .15s}
+  button[type=submit]:hover{opacity:.85}
+  button[type=submit]:disabled{opacity:.5;cursor:default}
+  .msg{display:none;margin-top:16px;padding:13px 15px;border-radius:10px;font-size:14px;border:1px solid var(--line)}
+  .msg.show{display:block}
+  .msg.ok{background:#f0f6f2;border-color:#cfe3d6}
+  .msg.bad{background:#fbe4cf;border-color:#f0c9a4;color:#8a4708}
+  .directo{margin-top:26px;font-size:15px;color:var(--ink-soft)}
+  .directo a{font-weight:600;color:var(--ink)}
 
-  /* App shell */
-  #app{display:none}
-  header.top{background:var(--card);border-bottom:1px solid var(--line);padding:0 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;gap:16px;flex-wrap:wrap}
-  .brand{display:flex;align-items:baseline;gap:10px;padding:16px 0}
-  .brand .mark{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-0.02em}
-  .brand .btag{font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em}
-  nav.tabs{display:flex;gap:2px;flex-wrap:wrap;order:3;width:100%;border-top:1px solid var(--line)}
-  nav.tabs a{font-size:14px;font-weight:500;color:var(--ink-soft);padding:12px 12px;border-bottom:2px solid transparent;cursor:pointer}
-  nav.tabs a:hover{color:var(--ink)}
-  nav.tabs a.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
-  .top-actions{display:flex;align-items:center;gap:12px}
-  .user-email{font-size:13px;color:var(--ink-soft)}
-  .btn-sm{padding:8px 16px;background:var(--card);border:1px solid var(--line);color:var(--ink-soft);border-radius:100px}
-  @media(min-width:920px){ header.top{flex-wrap:nowrap} nav.tabs{order:0;width:auto;border-top:none;margin-left:8px} }
-
-  .wrap{padding:24px;max-width:1400px;margin:0 auto}
-  .view{display:none} .view.active{display:block}
-  .page-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:12px;flex-wrap:wrap}
-  .page-head h2{font-size:26px;letter-spacing:-0.02em}
-  .btn-add{background:var(--ink);color:var(--paper);padding:10px 18px;display:inline-flex;align-items:center;gap:6px;border-radius:100px;white-space:nowrap}
-
-  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px}
-  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px}
-  .stat .num{font-family:var(--font-display);font-size:30px;font-weight:700;line-height:1;letter-spacing:-0.03em}
-  .stat .lbl{font-family:var(--font-mono);font-size:11px;color:var(--ink-soft);margin-top:8px;text-transform:uppercase;letter-spacing:.04em}
-  .stat.alert .num{color:var(--warn)}
-
-  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:20px}
-  .panel h3{font-size:18px;margin-bottom:16px}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-  @media(max-width:820px){.grid2{grid-template-columns:1fr}}
-
-  .funnel-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
-  .funnel-row .fl{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);width:96px;flex:none}
-  .funnel-bar{flex:1;background:var(--paper);border-radius:6px;height:22px;overflow:hidden}
-  .funnel-bar span{display:block;height:100%;background:var(--ink);border-radius:6px;min-width:2px}
-  .funnel-row .fn{font-weight:600;font-size:14px;width:34px;text-align:right;flex:none}
-
-  .toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
-  .toolbar input,.toolbar select{width:auto;flex:1;min-width:150px;background:var(--card)}
-  .toolbar .search{flex:2;min-width:200px}
-
-  .board{display:grid;grid-template-columns:repeat(7,minmax(190px,1fr));gap:12px;overflow-x:auto;padding-bottom:12px}
-  .col{background:transparent}
-  .col-head{display:flex;align-items:center;justify-content:space-between;padding:8px 4px;margin-bottom:8px;border-bottom:1.5px solid var(--line)}
-  .col-head .name{font-family:var(--font-mono);font-size:12px;font-weight:400;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft)}
-  .col-head .count{font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);background:var(--card);border:1px solid var(--line);border-radius:100px;padding:1px 8px}
-  .col.won .col-head{border-bottom-color:var(--ink)} .col.won .col-head .name{color:var(--ink)}
-  .col.lost .col-head{border-bottom-color:var(--lost)} .col.lost .col-head .name{color:var(--lost)}
-  .col-body{display:flex;flex-direction:column;gap:10px;min-height:60px;border-radius:12px;transition:background .12s,box-shadow .12s}
-  .col-body.over{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--ink)}
-
-  .lead{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;cursor:grab;transition:border-color .15s,transform .1s,opacity .1s}
-  .lead:active{cursor:grabbing} .lead.dragging{opacity:.4}
-  .lead:hover{border-color:var(--ink);transform:translateY(-1px)}
-  .lead .name{font-weight:600;font-size:14px;margin-bottom:2px}
-  .lead .role{font-size:12px;color:var(--ink-soft);margin-bottom:8px}
-  .lead .co{font-size:12px;color:var(--ink);background:var(--paper);border-radius:8px;padding:3px 8px;display:inline-block;margin-bottom:8px}
-  .lead .val{font-family:var(--font-mono);font-size:11px;color:var(--ink-soft);margin-bottom:6px}
-  .lead .foot{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
-  .pill{font-family:var(--font-mono);font-size:10px;font-weight:400;text-transform:uppercase;letter-spacing:.03em;padding:3px 9px;border-radius:100px;white-space:nowrap}
-  .pill.alta{background:var(--ink);color:var(--paper)}
-  .pill.media{background:var(--card);color:var(--ink-soft);border:1px solid var(--line)}
-  .pill.baja{background:var(--paper);color:var(--ink-faint)}
-  .badge{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.03em;padding:3px 9px;border-radius:100px;border:1px solid var(--line);color:var(--ink-soft);white-space:nowrap}
-  .badge.ganado{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-  .badge.perdido{color:var(--lost)}
-  .follow{font-size:11px;color:var(--ink-faint)} .follow.overdue{color:var(--warn);font-weight:600}
-
-  .table-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow-x:auto}
-  table{width:100%;border-collapse:collapse;font-size:14px}
-  thead th{font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);font-weight:400;text-align:left;padding:12px 16px;border-bottom:1px solid var(--line);white-space:nowrap}
-  tbody td{padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
-  tbody tr{cursor:pointer;transition:background .1s} tbody tr:hover{background:var(--paper)}
-  tbody tr:last-child td{border-bottom:none}
-  td .t-name{font-weight:600} td .t-sub{font-size:12px;color:var(--ink-soft)}
-  .muted{color:var(--ink-faint)} .row-empty{text-align:center;padding:44px;color:var(--ink-faint)}
-
-  .sg-group{margin-bottom:24px}
-  .sg-group h3{font-size:16px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
-  .sg-count{font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);border:1px solid var(--line);border-radius:100px;padding:1px 8px}
-  .sg-row{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer}
-  .sg-row:hover{border-color:var(--ink)}
-  .sg-row .sg-date{font-family:var(--font-mono);font-size:12px;white-space:nowrap;min-width:96px}
-  .sg-row .sg-date.overdue{color:var(--warn)} .sg-row .sg-date.today{color:var(--ink);font-weight:700}
-
-  .overlay{position:fixed;inset:0;background:rgba(17,17,17,.45);display:none;align-items:flex-start;justify-content:center;padding:40px 20px;z-index:50;overflow-y:auto}
-  .overlay.open{display:flex}
-  .modal{background:var(--card);border-radius:16px;width:100%;max-width:560px;padding:28px}
-  .modal h3{font-size:24px;margin-bottom:4px;letter-spacing:-0.02em}
-  .modal .modal-sub{font-size:13px;color:var(--ink-soft);margin-bottom:20px}
-  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .modal-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
-  .modal-actions button{flex:1;padding:12px;min-width:90px}
-  .btn-cancel{background:var(--card);border:1px solid var(--line);color:var(--ink-soft)}
-  .btn-ghost2{background:var(--paper);border:1px solid var(--line);color:var(--ink);flex:0 0 auto;padding:12px 16px}
-  .btn-danger{background:transparent;border:1px solid var(--line);color:var(--warn);flex:0 0 auto;margin-right:auto;padding:12px 18px}
-  .btn-danger:hover{background:var(--warn-soft);border-color:var(--warn);opacity:1}
-  .autocomp{position:absolute;left:0;right:0;top:100%;z-index:5;background:var(--card);border:1px solid var(--line);border-radius:10px;margin-top:4px;max-height:230px;overflow-y:auto;display:none;box-shadow:0 6px 20px rgba(17,17,17,.08)}
-  .autocomp.open{display:block}
-  .autocomp .ac-item{padding:9px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--line)}
-  .autocomp .ac-item:last-child{border-bottom:none}
-  .autocomp .ac-item:hover{background:var(--paper)}
-  .autocomp .ac-sub{font-size:11px;color:var(--ink-soft)}
-  .sub-list{margin-top:20px;border-top:1px solid var(--line);padding-top:16px}
-  .sub-list h4{font-family:var(--font-mono);font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);margin-bottom:10px;font-weight:400}
-  .li{font-size:13px;padding:9px 0;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
-  .li:last-child{border-bottom:none}
-  .li .at{font-weight:600;text-transform:capitalize;color:var(--ink)}
-  .li .ad{color:var(--ink-soft)} .li .af{margin-left:auto;color:var(--ink-faint);font-size:12px;white-space:nowrap}
-  .li.click{cursor:pointer} .li.click:hover{color:var(--ink)}
-  .empty{text-align:center;padding:20px;color:var(--ink-faint);font-size:14px}
-  @media(max-width:640px){.wrap{padding:16px}.row2{grid-template-columns:1fr}}
+  footer{border-top:1px solid var(--line);padding:34px 0;color:var(--ink-soft);font-size:14px}
+  footer .wrap{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="login">
-  <div class="login-card">
-    <div style="display:flex;align-items:center;gap:11px;margin-bottom:18px">
-      <svg class="iso" width="34" height="34" viewBox="0 0 64 64" aria-hidden="true">
-        <g class="estrato" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none">
-          <path d="M4 24H16"/><path d="M48 24H60"/>
-        </g>
-        <g stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
-          <path d="M15 13L32 47L49 13"/>
-        </g>
-        <circle cx="32" cy="47" r="6.5" fill="currentColor"/>
-      </svg>
-      <span style="font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-0.02em">Veta Labs</span>
-    </div>
-    <div class="eyebrow">Automatización · Datos</div>
-    <h1>Tu CRM</h1>
-    <p class="sub">Pipeline de clientes de automatización e inteligencia de datos.</p>
-    <div id="loginMsg" class="msg"></div>
-    <div class="field"><label for="email">Correo</label><input type="email" id="email" placeholder="tucorreo@ejemplo.cl" autocomplete="email"></div>
-    <div class="field"><label for="password">Contraseña</label><input type="password" id="password" placeholder="••••••••" autocomplete="current-password"></div>
-    <button class="btn-primary" id="btnLogin">Entrar</button>
-  </div>
-</div>
-
-<!-- APP -->
-<div id="app">
-  <header class="top">
-    <div class="brand">
-      <svg class="iso" width="26" height="26" viewBox="0 0 64 64" aria-hidden="true" style="align-self:center">
-        <g class="estrato" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none">
-          <path d="M4 24H16"/><path d="M48 24H60"/>
-        </g>
-        <g stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
-          <path d="M15 13L32 47L49 13"/>
-        </g>
-        <circle cx="32" cy="47" r="6.5" fill="currentColor"/>
-      </svg>
-      <span class="mark">Veta Labs</span><span class="btag">CRM</span>
-    </div>
-    <nav class="tabs" id="tabs">
-      <a data-view="dashboard" class="active">Dashboard</a>
-      <a data-view="pipeline">Pipeline</a>
-      <a data-view="leads">Leads</a>
-      <a data-view="contactos">Contactos</a>
-      <a data-view="empresas">Empresas</a>
-      <a data-view="campanas">Campañas</a>
-      <a data-view="seguimientos">Seguimientos</a>
-    </nav>
-    <div class="top-actions"><span class="user-email" id="userEmail"></span><button class="btn-sm" id="btnLogout">Salir</button></div>
-  </header>
-
+<header>
   <div class="wrap">
+    <div class="brand">
+      <svg class="iso" width="26" height="26" viewBox="0 0 64 64" aria-hidden="true">
+        <g class="estrato" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none">
+          <path d="M4 24H16"/><path d="M48 24H60"/>
+        </g>
+        <g stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <path d="M15 13L32 47L49 13"/>
+        </g>
+        <circle cx="32" cy="47" r="6.5" fill="currentColor"/>
+      </svg>
+      <span class="mark">Veta Labs</span>
+    </div>
+    <a class="btn btn-solid" href="#contacto">Conversemos</a>
+  </div>
+</header>
 
-    <!-- DASHBOARD -->
-    <section class="view active" id="view-dashboard">
-      <div class="page-head"><h2>Dashboard</h2></div>
-      <div class="stats" id="dashStats"></div>
-      <div class="grid2">
-        <div class="panel"><h3>Embudo de leads por etapa</h3><div id="funnel"></div></div>
-        <div class="panel"><h3>Próximos seguimientos</h3><div id="dashFollow"></div></div>
+<div class="wrap hero">
+  <span class="eyebrow">Automatización · Datos · IA</span>
+  <h1>Tu empresa ya tiene los datos. Falta extraerlos.</h1>
+  <p class="lead">
+    Una veta es el filón de valor que está ahí, en la roca, esperando que alguien lo
+    encuentre. En tu empresa pasa lo mismo: la información existe, pero vive repartida
+    en planillas, correos y cabezas. Nosotros la sacamos a la superficie y la
+    convertimos en procesos que corren solos y en tableros que te dicen qué hacer.
+  </p>
+  <div class="cta">
+    <a class="btn btn-solid" href="#contacto">Agendar una conversación</a>
+    <a class="btn btn-ghost" href="#servicios">Ver qué hacemos</a>
+  </div>
+</div>
+
+<section id="servicios">
+  <div class="wrap">
+    <span class="eyebrow">Servicios</span>
+    <h2>Tres frentes, un mismo objetivo</h2>
+    <p class="intro">Que dejes de perder horas en trabajo repetitivo y empieces a decidir con información real.</p>
+    <div class="grid">
+      <div class="card">
+        <span class="num">01</span>
+        <h3>Automatización de procesos</h3>
+        <p>Todo lo que hoy alguien copia y pega entre planillas, correos y sistemas.
+           Lo dejamos corriendo solo, con avisos cuando algo necesita tu atención.</p>
       </div>
-    </section>
-
-    <!-- PIPELINE -->
-    <section class="view" id="view-pipeline">
-      <div class="page-head"><h2>Pipeline de leads</h2><button class="btn-add" id="btnNewLeadP">+ Nuevo lead</button></div>
-      <div class="board" id="board"></div>
-    </section>
-
-    <!-- LEADS -->
-    <section class="view" id="view-leads">
-      <div class="page-head"><h2>Leads</h2><div style="display:flex;gap:8px"><button class="btn-sm" id="btnExportLeads">⇩ CSV</button><button class="btn-add" id="btnNewLeadL">+ Nuevo lead</button></div></div>
-      <div class="toolbar">
-        <input class="search" id="lSearch" placeholder="Buscar por contacto, empresa o título…">
-        <select id="lEtapa"><option value="">Todas las etapas</option></select>
-        <select id="lPrioridad"><option value="">Toda prioridad</option><option value="alta">Alta</option><option value="media">Media</option><option value="baja">Baja</option></select>
+      <div class="card">
+        <span class="num">02</span>
+        <h3>Dashboards y reportes</h3>
+        <p>Un tablero único con lo que de verdad mueve tu negocio, actualizado solo.
+           Sin exportar nada a fin de mes ni cuadrar números a mano.</p>
       </div>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Contacto</th><th>Empresa</th><th>Título</th><th>Etapa</th><th>Prioridad</th><th>Valor</th><th>Seguimiento</th></tr></thead>
-        <tbody id="lBody"></tbody>
-      </table></div>
-    </section>
-
-    <!-- CONTACTOS -->
-    <section class="view" id="view-contactos">
-      <div class="page-head"><h2>Contactos</h2><div style="display:flex;gap:8px"><button class="btn-sm" id="btnExportContactos">⇩ CSV</button><button class="btn-add" id="btnNewContacto">+ Nuevo contacto</button></div></div>
-      <div class="toolbar"><input class="search" id="cSearch" placeholder="Buscar por nombre, empresa o email…"></div>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Nombre</th><th>Cargo</th><th>Empresa</th><th>Email</th><th>Teléfono</th><th>Leads</th></tr></thead>
-        <tbody id="cBody"></tbody>
-      </table></div>
-    </section>
-
-    <!-- EMPRESAS -->
-    <section class="view" id="view-empresas">
-      <div class="page-head"><h2>Empresas</h2><div style="display:flex;gap:8px"><button class="btn-sm" id="btnExportEmpresas">⇩ CSV</button><button class="btn-add" id="btnNewEmpresa">+ Nueva empresa</button></div></div>
-      <div class="toolbar"><input class="search" id="eSearch" placeholder="Buscar empresa, rubro o ciudad…">
-        <label class="t-sub" style="display:flex;align-items:center;gap:6px;white-space:nowrap;cursor:pointer"><input type="checkbox" id="eVerArchivadas"> Ver archivadas</label></div>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Empresa</th><th>Rubro</th><th>Ciudad</th><th>Contactos</th><th>Leads</th><th>Sitio web</th></tr></thead>
-        <tbody id="eBody"></tbody>
-      </table></div>
-    </section>
-
-    <!-- CAMPAÑAS -->
-    <section class="view" id="view-campanas">
-      <div id="campLista">
-        <div class="page-head"><h2>Campañas</h2><button class="btn-add" id="btnNuevaCampana">+ Nueva campaña</button></div>
-        <div class="table-wrap"><table>
-          <thead><tr><th>Campaña</th><th>Estado</th><th>Tareas</th><th>Pendientes</th><th>Completadas</th><th>Inicio</th></tr></thead>
-          <tbody id="campBody"></tbody>
-        </table></div>
+      <div class="card">
+        <span class="num">03</span>
+        <h3>IA aplicada</h3>
+        <p>Clasificar correos, redactar respuestas, resumir documentos, calificar leads.
+           IA puesta donde ahorra tiempo de verdad, no donde suena bien.</p>
       </div>
+    </div>
+  </div>
+</section>
 
-      <div id="campDetalle" style="display:none">
-        <div class="page-head">
-          <div>
-            <button class="btn-sm" id="btnVolverCamp" style="margin-bottom:10px">← Campañas</button>
-            <h2 id="campTitulo">Campaña</h2>
-            <p class="modal-sub" id="campObjetivo" style="margin:6px 0 0"></p>
-          </div>
-          <div style="display:flex;gap:8px;align-items:flex-start">
-            <button class="btn-sm" id="btnEditarCampana">Editar</button>
-            <button class="btn-sm" id="btnNuevaTarea">+ Tarea</button>
-            <button class="btn-add" id="btnAgregarEmpresas">+ Tareas en bloque</button>
-          </div>
+<section id="paraquien">
+  <div class="wrap">
+    <span class="eyebrow">Para quién</span>
+    <h2>PYMEs de la Región de Coquimbo</h2>
+    <p class="intro">
+      Trabajamos con empresas donde el dueño o el gerente todavía está metido en la
+      operación diaria. Foco inicial en <strong>inmobiliarias, constructoras y empresas
+      de gestión de espacios</strong> de La Serena, Coquimbo y Ovalle, donde conocemos
+      bien el rubro y sus cuellos de botella.
+    </p>
+    <p class="intro" style="margin-top:14px">
+      Somos chicos a propósito: hablás directo con quien hace el trabajo, no con un
+      ejecutivo de cuentas. Y trabajamos en remoto, así que el costo va al desarrollo,
+      no a una oficina.
+    </p>
+  </div>
+</section>
+
+<section id="como">
+  <div class="wrap">
+    <span class="eyebrow">Cómo trabajamos</span>
+    <h2>Del diagnóstico a algo funcionando</h2>
+    <ol class="pasos">
+      <li>
+        <div>
+          <h3>Conversamos</h3>
+          <p>Una llamada de media hora para entender dónde se te va el tiempo. Sin costo y sin compromiso.</p>
         </div>
-        <div class="stats" id="campStats"></div>
-        <div class="toolbar">
-          <input class="search" id="mSearch" placeholder="Buscar por tarea o empresa…">
-          <select id="mEstado">
-            <option value="">Todos los estados</option>
-            <option value="pendiente">Pendientes</option>
-            <option value="completada">Completadas</option>
-            <option value="descartada">Descartadas</option>
-          </select>
+      </li>
+      <li>
+        <div>
+          <h3>Diagnóstico</h3>
+          <p>Miramos tus procesos reales y te decimos qué conviene automatizar primero, con una estimación honesta de tiempo y precio.</p>
         </div>
-        <div class="table-wrap"><table>
-          <thead><tr><th>Tarea</th><th>Empresa</th><th>Vence</th><th>Estado</th><th></th></tr></thead>
-          <tbody id="tareasBody"></tbody>
-        </table></div>
-      </div>
-    </section>
-
-    <!-- SEGUIMIENTOS -->
-    <section class="view" id="view-seguimientos">
-      <div class="page-head"><h2>Seguimientos</h2></div>
-      <div id="sgContent"></div>
-    </section>
+      </li>
+      <li>
+        <div>
+          <h3>Construimos por partes</h3>
+          <p>Empezamos por lo que más duele y lo dejamos andando. Ves resultados en semanas, no en meses.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <h3>Te lo entregamos andando</h3>
+          <p>Con documentación y acompañamiento. La idea es que funcione sin nosotros, no que quedes amarrado.</p>
+        </div>
+      </li>
+    </ol>
   </div>
-</div>
+</section>
 
-<!-- MODAL: lead -->
-<div class="overlay" id="modalLead">
-  <div class="modal">
-    <h3 id="leadTitle">Lead</h3>
-    <p class="modal-sub">Oportunidad en el pipeline</p>
-    <div class="field"><label>Contacto *</label><select id="l_contacto"></select></div>
-    <div class="field"><label>Empresa (según el contacto)</label><input id="l_empresa_disp" disabled></div>
-    <div class="field"><label>Título / servicio considerado</label><input id="l_titulo" placeholder="Ej: Automatización de cotizaciones"></div>
-    <div class="row2">
-      <div class="field"><label>Etapa</label><select id="l_etapa">
-        <option value="nuevo">Nuevo</option><option value="contactado">Contactado</option>
-        <option value="respondio">Respondió</option><option value="reunion_agendada">Reunión agendada</option>
-        <option value="propuesta_enviada">Propuesta enviada</option><option value="ganado">Ganado</option><option value="perdido">Perdido</option>
-      </select></div>
-      <div class="field"><label>Prioridad</label><select id="l_prioridad"><option value="alta">Alta</option><option value="media">Media</option><option value="baja">Baja</option></select></div>
-    </div>
-    <div class="row2">
-      <div class="field"><label>Valor estimado (CLP)</label><input id="l_valor" type="number" min="0" placeholder="0"></div>
-      <div class="field"><label>Próximo seguimiento</label><input type="date" id="l_seguimiento"></div>
-    </div>
-    <div class="field"><label>Notas</label><textarea id="l_notas" rows="2"></textarea></div>
+<section id="contacto">
+  <div class="wrap">
+    <span class="eyebrow">Contacto</span>
+    <h2>Contame qué te está costando tiempo</h2>
+    <p class="intro">Respondemos dentro de un día hábil. Si preferís, escribinos directo por correo.</p>
 
-    <div class="sub-list" id="l_actsBox" style="display:none">
-      <h4>Registrar actividad</h4>
+    <form id="leadForm" novalidate>
       <div class="row2">
-        <div class="field"><select id="a_tipo"><option value="email">Email</option><option value="llamada">Llamada</option><option value="whatsapp">WhatsApp</option><option value="reunion">Reunión</option><option value="nota">Nota</option></select></div>
-        <div class="field"><button class="btn-sm" id="btnAddAct" style="width:100%">+ Agregar</button></div>
-      </div>
-      <input id="a_desc" placeholder="Descripción de la actividad" style="margin-bottom:12px">
-      <div id="actList"></div>
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn-danger" id="btnDeleteLead" style="display:none">Eliminar</button>
-      <button class="btn-cancel" id="btnCancelLead">Cerrar</button>
-      <button class="btn-primary" id="btnSaveLead" style="width:auto">Guardar</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: contacto -->
-<div class="overlay" id="modalContacto">
-  <div class="modal">
-    <h3 id="contactoTitle">Contacto</h3>
-    <p class="modal-sub">Persona</p>
-    <div class="row2">
-      <div class="field"><label>Nombre</label><input id="c_nombre"></div>
-      <div class="field"><label>Cargo</label><input id="c_cargo"></div>
-    </div>
-    <div class="row2">
-      <div class="field"><label>Email</label><input id="c_email"></div>
-      <div class="field"><label>Teléfono</label><input id="c_telefono"></div>
-    </div>
-    <div class="row2">
-      <div class="field" style="position:relative"><label>Empresa</label>
-        <input id="c_empresa_txt" placeholder="Buscar por nombre o RUT…" autocomplete="off">
-        <input type="hidden" id="c_empresa_id">
-        <div id="c_empresa_res" class="autocomp"></div>
-      </div>
-      <div class="field"><label>LinkedIn</label><input id="c_linkedin" placeholder="URL"></div>
-    </div>
-    <div class="field"><label>Notas</label><textarea id="c_notas" rows="2"></textarea></div>
-
-    <div class="sub-list" id="c_leadsBox" style="display:none">
-      <h4>Leads de este contacto</h4>
-      <div id="c_leadList"></div>
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn-danger" id="btnDeleteContacto" style="display:none">Eliminar</button>
-      <button class="btn-ghost2" id="btnLeadFromContacto" style="display:none">+ Lead</button>
-      <button class="btn-cancel" id="btnCancelContacto">Cerrar</button>
-      <button class="btn-primary" id="btnSaveContacto" style="width:auto">Guardar</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: empresa -->
-<div class="overlay" id="modalEmpresa">
-  <div class="modal">
-    <h3 id="empTitle">Empresa</h3>
-    <p class="modal-sub">Cuenta / organización</p>
-    <div class="row2">
-      <div class="field"><label>Razón social</label><input id="e_nombre"></div>
-      <div class="field"><label>RUT</label><input id="e_rut" placeholder="12345678-9"></div>
-    </div>
-    <div class="field"><label>Nombre comercial</label><input id="e_comercial" placeholder="Nombre de fantasía (si es distinto de la razón social)"></div>
-    <div class="row2">
-      <div class="field"><label>Rubro</label><input id="e_rubro"></div>
-      <div class="field"><label>Ciudad</label><input id="e_ciudad"></div>
-    </div>
-    <div class="row2">
-      <div class="field"><label>Nº empleados</label><input id="e_empleados" type="number" min="0"></div>
-      <div class="field"><label>Teléfono</label><input id="e_telefono"></div>
-    </div>
-    <div class="field"><label>Sitio web</label><input id="e_web" placeholder="https://"></div>
-    <div class="field"><label>Notas</label><textarea id="e_notas" rows="2"></textarea></div>
-    <label class="t-sub" style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:-4px">
-      <input type="checkbox" id="e_archivada"> Archivada — fuera de búsquedas y de campañas (sociedad de inversión, sin operación)</label>
-
-    <div class="sub-list" id="empSii" style="display:none">
-      <h4>Datos SII</h4><div id="empSiiDatos"></div>
-    </div>
-
-    <div class="sub-list" id="empSub" style="display:none">
-      <h4>Contactos</h4><div id="empContactList"></div>
-      <h4 style="margin-top:16px">Leads</h4><div id="empLeadList"></div>
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn-danger" id="btnDeleteEmp" style="display:none">Eliminar</button>
-      <button class="btn-cancel" id="btnCancelEmp">Cerrar</button>
-      <button class="btn-primary" id="btnSaveEmp" style="width:auto">Guardar</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: campaña -->
-<div class="overlay" id="modalCampana">
-  <div class="modal">
-    <h3 id="campModalTitulo">Campaña</h3>
-    <p class="modal-sub">Grupo de empresas a prospectar</p>
-    <div class="field"><label>Nombre</label><input id="k_nombre" placeholder="Ej: Inmobiliarias La Serena · Q3"></div>
-    <div class="field"><label>Objetivo</label><input id="k_objetivo" placeholder="Ej: agendar 10 reuniones"></div>
-    <div class="row2">
-      <div class="field"><label>Estado</label><select id="k_estado">
-        <option value="borrador">Borrador</option><option value="activa">Activa</option>
-        <option value="pausada">Pausada</option><option value="finalizada">Finalizada</option>
-      </select></div>
-      <div class="field"><label>Inicio</label><input type="date" id="k_inicio"></div>
-    </div>
-    <div class="field"><label>Notas</label><textarea id="k_notas" rows="2"></textarea></div>
-    <div class="modal-actions">
-      <button class="btn-danger" id="btnEliminarCampana" style="display:none">Eliminar</button>
-      <button class="btn-cancel" id="btnCancelarCampana">Cerrar</button>
-      <button class="btn-primary" id="btnGuardarCampana" style="width:auto">Guardar</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: tarea (individual) -->
-<div class="overlay" id="modalTarea">
-  <div class="modal">
-    <h3 id="tareaModalTitulo">Nueva tarea</h3>
-    <p class="modal-sub" id="tareaModalSub">Dentro de la campaña</p>
-    <div class="field"><label>Título</label><input id="t_titulo" placeholder="Ej: Buscar contacto y contactar"></div>
-    <div class="field" style="position:relative"><label>Empresa asignada</label>
-      <input id="t_empresa_txt" placeholder="Buscar por nombre o RUT…" autocomplete="off">
-      <input type="hidden" id="t_empresa_id">
-      <div id="t_empresa_res" class="autocomp"></div>
-    </div>
-    <div class="row2">
-      <div class="field"><label>Vence</label><input type="date" id="t_vence"></div>
-      <div class="field"><label>Estado</label><select id="t_estado">
-        <option value="pendiente">Pendiente</option>
-        <option value="completada">Completada</option>
-        <option value="descartada">Descartada</option>
-      </select></div>
-    </div>
-    <div class="field"><label>Descripción</label><textarea id="t_desc" rows="2"></textarea></div>
-    <div class="modal-actions">
-      <button class="btn-danger" id="btnEliminarTarea" style="display:none">Eliminar</button>
-      <button class="btn-cancel" id="btnCancelarTarea">Cerrar</button>
-      <button class="btn-primary" id="btnGuardarTarea" style="width:auto">Guardar</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: agregar empresas a la campaña -->
-<div class="overlay" id="modalAgregar">
-  <div class="modal" style="max-width:640px">
-    <h3>Agregar empresas</h3>
-    <p class="modal-sub">Filtra tu base y agrégalas en bloque. Cada una recibe su tarea.</p>
-    <div class="row2">
-      <div class="field"><label>Nombre o RUT</label><input id="ag_q" placeholder="Buscar…"></div>
-      <div class="field"><label>Comuna</label><input id="ag_comuna" placeholder="Ej: LA SERENA"></div>
-    </div>
-    <div class="row2">
-      <div class="field"><label>Rubro contiene</label><input id="ag_rubro" placeholder="Ej: CONSTRUCCION"></div>
-      <div class="field"><label>Mín. trabajadores</label><input id="ag_min" type="number" min="0" placeholder="0"></div>
-    </div>
-    <div class="field"><label>Tarea para cada empresa</label><input id="ag_tarea" value="Buscar contacto y contactar"></div>
-    <div class="sub-list">
-      <h4>Resultados <span id="ag_conteo" class="muted"></span></h4>
-      <div id="ag_res" style="max-height:240px;overflow-y:auto"><div class="empty">Usa los filtros y pulsa Buscar.</div></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" id="btnCancelarAgregar">Cerrar</button>
-      <button class="btn-ghost2" id="btnBuscarEmpresas">Buscar</button>
-      <button class="btn-primary" id="btnConfirmarAgregar" style="width:auto">Agregar</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: completar tarea → crear lead -->
-<div class="overlay" id="modalCompletar">
-  <div class="modal">
-    <h3>Asignar contacto</h3>
-    <p class="modal-sub" id="comp_empresa"></p>
-    <div class="field"><label>Contacto a quien se contactará</label><select id="comp_contacto"></select></div>
-    <div id="comp_nuevo">
-      <div class="row2">
-        <div class="field"><label>Nombre</label><input id="comp_nombre"></div>
-        <div class="field"><label>Cargo</label><input id="comp_cargo"></div>
+        <div class="field">
+          <label for="nombre">Nombre *</label>
+          <input type="text" id="nombre" name="nombre" autocomplete="name" required>
+        </div>
+        <div class="field">
+          <label for="email">Correo *</label>
+          <input type="email" id="email" name="email" autocomplete="email" required>
+        </div>
       </div>
       <div class="row2">
-        <div class="field"><label>Email</label><input id="comp_email"></div>
-        <div class="field"><label>Teléfono</label><input id="comp_telefono"></div>
+        <div class="field">
+          <label for="empresa">Empresa</label>
+          <input type="text" id="empresa" name="empresa" autocomplete="organization">
+        </div>
+        <div class="field">
+          <label for="telefono">Teléfono</label>
+          <input type="tel" id="telefono" name="telefono" autocomplete="tel" placeholder="+56 9 ...">
+        </div>
       </div>
-    </div>
-    <p class="modal-sub" style="margin:0">La tarea sigue <strong>pendiente</strong>. Cuando estés listo, pulsa <strong>Prospectar</strong> en la tarea para crear el lead en etapa Nuevo.</p>
-    <div class="modal-actions">
-      <button class="btn-cancel" id="btnCancelarCompletar">Cerrar</button>
-      <button class="btn-primary" id="btnConfirmarCompletar" style="width:auto">Asignar contacto</button>
-    </div>
+      <div class="field">
+        <label for="mensaje">¿Qué te gustaría resolver?</label>
+        <textarea id="mensaje" name="mensaje" rows="4" placeholder="Por ejemplo: paso horas armando el reporte de arriendos todos los meses."></textarea>
+      </div>
+      <button type="submit" id="btnEnviar">Enviar</button>
+      <div class="msg" id="formMsg"></div>
+    </form>
+
+    <p class="directo">
+      O escribinos a <a href="mailto:sebastiangomez2003@gmail.com">sebastiangomez2003@gmail.com</a>
+    </p>
   </div>
-</div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="brand">
+      <svg class="iso" width="20" height="20" viewBox="0 0 64 64" aria-hidden="true">
+        <g class="estrato" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none">
+          <path d="M4 24H16"/><path d="M48 24H60"/>
+        </g>
+        <g stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <path d="M15 13L32 47L49 13"/>
+        </g>
+        <circle cx="32" cy="47" r="6.5" fill="currentColor"/>
+      </svg>
+      <span>Veta Labs</span>
+    </div>
+    <span>Región de Coquimbo, Chile · Trabajo remoto</span>
+  </div>
+</footer>
 
 <script>
-// ====== CONFIG ======
-const SUPABASE_URL = 'https://rayvimywyqjnzzmbagpv.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJheXZpbXl3eXFqbnp6bWJhZ3B2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzMjk2MzksImV4cCI6MjA5OTkwNTYzOX0.Dd7AEixH8guWZsk0LxDEpsJvj9RFRglIsAkDidmW5R8';
-// ====================
+const form = document.getElementById('leadForm');
+const msg  = document.getElementById('formMsg');
+const btn  = document.getElementById('btnEnviar');
 
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const $ = id => document.getElementById(id);
-
-const ETAPAS = [
-  {key:'nuevo', label:'Nuevo'},
-  {key:'contactado', label:'Contactado'},
-  {key:'respondio', label:'Respondió'},
-  {key:'reunion_agendada', label:'Reunión'},
-  {key:'propuesta_enviada', label:'Propuesta'},
-  {key:'ganado', label:'Ganado', cls:'won'},
-  {key:'perdido', label:'Perdido', cls:'lost'},
-];
-const CERRADAS = ['ganado','perdido'];
-const etLabel = k => (ETAPAS.find(e=>e.key===k)||{}).label || k;
-
-let empresas=[], contactos=[], leads=[], editLeadId=null, editContactoId=null, editEmpId=null, currentView='dashboard';
-// `empresas` es solo una caché parcial (las que usan contactos/leads + las que se van
-// mostrando en la tabla). El total real vive en el servidor, se cuenta aparte.
-let totalEmpresas = 0;
-// Campañas de prospección
-let campanas=[], resumenTareas=[], campanaActual=null, tareasCamp=[], editCampanaId=null, agResultados=[], completarCtx=null;
-
-const todayStr = () => new Date().toISOString().slice(0,10);
-const money = n => (n==null||n==='') ? '—' : new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n);
-const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const empById = id => empresas.find(x=>x.id===id);
-// Se muestra el nombre comercial cuando existe: es como se conoce a la empresa.
-// La razón social queda como respaldo y sigue siendo el dato legal en `nombre`.
-const empName = id => { const e=empById(id); return e?(e.nombre_comercial||e.nombre):'—'; };
-const cById = id => contactos.find(x=>x.id===id);
-const cName = id => { const c=cById(id); return c?c.nombre:'(sin contacto)'; };
-const contactosDeEmpresa = id => contactos.filter(c=>c.empresa_id===id);
-const leadsDeEmpresa = id => leads.filter(l=>l.empresa_id===id);
-const leadsDeContacto = id => leads.filter(l=>l.contacto_id===id);
-
-// ---------- AUTH ----------
-function showMsg(t, ok){const m=$('loginMsg');m.textContent=t;m.className='msg '+(ok?'ok':'err');}
-function creds(){
-  const email=$('email').value.trim(), password=$('password').value;
-  if(!email){ showMsg('Escribe tu correo.', false); return null; }
-  if(!password){ showMsg('Escribe una contraseña.', false); return null; }
-  return {email, password};
+function mostrar(texto, ok){
+  msg.textContent = texto;
+  msg.className = 'msg show ' + (ok ? 'ok' : 'bad');
 }
-$('btnLogin').onclick = async () => { const c=creds(); if(!c) return; const {error}=await sb.auth.signInWithPassword(c); if(error) showMsg(error.message,false); };
-$('btnLogout').onclick = async () => { await sb.auth.signOut(); };
-sb.auth.onAuthStateChange((_e, session) => {
-  if(session){ $('login').style.display='none'; $('app').style.display='block'; $('userEmail').textContent=session.user.email; loadAll(); }
-  else { $('login').style.display='flex'; $('app').style.display='none'; }
-});
 
-// ---------- NAV ----------
-function showView(name){
-  currentView=name;
-  document.querySelectorAll('nav.tabs a').forEach(a=>a.classList.toggle('active', a.dataset.view===name));
-  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id==='view-'+name));
-  renderActive();
-}
-document.querySelectorAll('nav.tabs a').forEach(a => a.onclick = () => showView(a.dataset.view));
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const datos = Object.fromEntries(new FormData(form).entries());
 
-// ---------- DATA ----------
-// Trae TODAS las filas paginando: la API de Supabase devuelve máx. 1000 por consulta.
-async function fetchAll(tabla, col){
-  const PAG = 1000; let desde = 0, todo = [];
-  for(;;){
-    const { data, error } = await sb.from(tabla).select('*').order(col).range(desde, desde+PAG-1);
-    if(error || !data) break;
-    todo = todo.concat(data);
-    if(data.length < PAG) break;
-    desde += PAG;
+  if(!datos.nombre.trim() || !datos.email.trim()){
+    mostrar('Necesitamos al menos tu nombre y tu correo.', false); return;
   }
-  return todo;
-}
-async function loadAll(){
-  const [c, l] = await Promise.all([
-    fetchAll('contactos','nombre'),
-    fetchAll('leads','created_at')
-  ]);
-  contactos = c; leads = l;
-  // Con miles de empresas no se cargan todas: solo las que usan tus contactos y leads.
-  // El resto se busca en el servidor (tabla Empresas y selector de empresa).
-  const ids = [...new Set([...contactos.map(x=>x.empresa_id), ...leads.map(x=>x.empresa_id)].filter(Boolean))];
-  empresas = ids.length ? ((await sb.from('empresas').select('*').in('id', ids)).data || []) : [];
-  // El dashboard cuenta las empresas vivas: las archivadas están fuera del flujo.
-  totalEmpresas = (await sb.from('empresas').select('id', {count:'exact', head:true}).eq('archivada', false)).count ?? empresas.length;
-  campanas = await fetchAll('campanas','created_at');
-  resumenTareas = (await sb.from('tareas').select('campana_id,estado')).data || [];
-  $('lEtapa').innerHTML = '<option value="">Todas las etapas</option>' + ETAPAS.map(x=>`<option value="${x.key}">${x.label}</option>`).join('');
-  renderActive();
-}
-function renderActive(){
-  ({dashboard:renderDashboard, pipeline:renderPipeline, leads:renderLeads, contactos:renderContactos, empresas:renderEmpresas, campanas:renderCampanas, seguimientos:renderSeguimientos}[currentView]||renderDashboard)();
-}
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(datos.email.trim())){
+    mostrar('Ese correo no parece válido, revisalo.', false); return;
+  }
 
-// ---------- DASHBOARD ----------
-function renderDashboard(){
-  const activos = leads.filter(l=>!CERRADAS.includes(l.etapa));
-  const ganados = leads.filter(l=>l.etapa==='ganado');
-  const vencidos = leads.filter(l=>l.proximo_seguimiento && l.proximo_seguimiento < todayStr() && !CERRADAS.includes(l.etapa));
-  const valor = activos.reduce((s,l)=>s+(l.valor_estimado||0),0);
-  $('dashStats').innerHTML = `
-    <div class="stat"><div class="num">${leads.length}</div><div class="lbl">Leads totales</div></div>
-    <div class="stat"><div class="num">${activos.length}</div><div class="lbl">Pipeline activo</div></div>
-    <div class="stat"><div class="num">${ganados.length}</div><div class="lbl">Ganados</div></div>
-    <div class="stat"><div class="num" style="font-size:22px">${money(valor)}</div><div class="lbl">Valor en pipeline</div></div>
-    <div class="stat ${vencidos.length?'alert':''}"><div class="num">${vencidos.length}</div><div class="lbl">Seguimientos vencidos</div></div>
-    <div class="stat"><div class="num">${contactos.length}</div><div class="lbl">Contactos</div></div>
-    <div class="stat"><div class="num">${totalEmpresas.toLocaleString('es-CL')}</div><div class="lbl">Empresas</div></div>`;
-  const max = Math.max(1, ...ETAPAS.map(et=>leads.filter(l=>l.etapa===et.key).length));
-  $('funnel').innerHTML = ETAPAS.map(et => {
-    const n = leads.filter(l=>l.etapa===et.key).length;
-    return `<div class="funnel-row"><span class="fl">${et.label}</span><span class="funnel-bar"><span style="width:${Math.round(n/max*100)}%"></span></span><span class="fn">${n}</span></div>`;
-  }).join('');
-  const due = dueList();
-  $('dashFollow').innerHTML = due.length ? due.slice(0,6).map(fRow).join('') : '<div class="empty">Sin seguimientos pendientes 🎉</div>';
-  bindFollowRows('dashFollow');
-}
-
-// ---------- PIPELINE ----------
-function renderPipeline(){
-  const board = $('board'); board.innerHTML='';
-  ETAPAS.forEach(et => {
-    const items = leads.filter(l=>l.etapa===et.key);
-    const col = document.createElement('div'); col.className='col'+(et.cls?' '+et.cls:'');
-    col.innerHTML = `<div class="col-head"><span class="name">${et.label}</span><span class="count">${items.length}</span></div>`;
-    const body = document.createElement('div'); body.className='col-body';
-    body.addEventListener('dragover', e => { e.preventDefault(); body.classList.add('over'); });
-    body.addEventListener('dragleave', () => body.classList.remove('over'));
-    body.addEventListener('drop', e => { e.preventDefault(); body.classList.remove('over'); moveEtapa(Number(e.dataTransfer.getData('text/plain')), et.key); });
-    items.forEach(l => body.appendChild(card(l)));
-    col.appendChild(body); board.appendChild(col);
-  });
-}
-function card(l){
-  const c = cById(l.contacto_id);
-  const d = document.createElement('div'); d.className='lead'; d.draggable=true;
-  d.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', String(l.id)); e.dataTransfer.effectAllowed='move'; d.classList.add('dragging'); });
-  d.addEventListener('dragend', () => d.classList.remove('dragging'));
-  const overdue = l.proximo_seguimiento && l.proximo_seguimiento < todayStr();
-  d.innerHTML = `
-    <div class="name">${esc(c?c.nombre:'(sin contacto)')}</div>
-    <div class="role">${esc((c&&c.cargo)||l.titulo||'')}</div>
-    <div class="co">${esc(empName(l.empresa_id))}</div>
-    ${l.valor_estimado?`<div class="val">${money(l.valor_estimado)}</div>`:''}
-    <div class="foot">
-      <span class="pill ${l.prioridad||'media'}">${l.prioridad||'media'}</span>
-      ${l.proximo_seguimiento?`<span class="follow ${overdue?'overdue':''}">${overdue?'⚠ ':''}${l.proximo_seguimiento}</span>`:''}
-    </div>`;
-  d.onclick = () => openLead(l.id);
-  return d;
-}
-async function moveEtapa(id, etapa){
-  const l = leads.find(x=>x.id===id); if(!l || l.etapa===etapa) return;
-  l.etapa = etapa; renderActive();
-  const {error} = await sb.from('leads').update({etapa}).eq('id',id);
-  if(error){ await loadAll(); }
-}
-
-// ---------- LEADS (tabla) ----------
-['lSearch','lEtapa','lPrioridad'].forEach(id => $(id).addEventListener('input', () => { if(currentView==='leads') renderLeads(); }));
-function renderLeads(){
-  const q=$('lSearch').value.trim().toLowerCase(), fe=$('lEtapa').value, fp=$('lPrioridad').value;
-  let rows = leads.filter(l => {
-    if(fe && l.etapa!==fe) return false;
-    if(fp && (l.prioridad||'media')!==fp) return false;
-    if(q){ const hay=[cName(l.contacto_id), empName(l.empresa_id), l.titulo].join(' ').toLowerCase(); if(!hay.includes(q)) return false; }
-    return true;
-  });
-  $('lBody').innerHTML = rows.length ? rows.map(l => {
-    const overdue = l.proximo_seguimiento && l.proximo_seguimiento < todayStr() && !CERRADAS.includes(l.etapa);
-    return `<tr data-id="${l.id}">
-      <td><div class="t-name">${esc(cName(l.contacto_id))}</div></td>
-      <td>${esc(empName(l.empresa_id))}</td>
-      <td>${esc(l.titulo||'—')}</td>
-      <td><span class="badge ${l.etapa}">${etLabel(l.etapa)}</span></td>
-      <td><span class="pill ${l.prioridad||'media'}">${l.prioridad||'media'}</span></td>
-      <td>${money(l.valor_estimado)}</td>
-      <td>${l.proximo_seguimiento?`<span class="follow ${overdue?'overdue':''}">${overdue?'⚠ ':''}${l.proximo_seguimiento}</span>`:'<span class="muted">—</span>'}</td>
-    </tr>`;
-  }).join('') : '<tr><td colspan="7" class="row-empty">Sin leads que coincidan.</td></tr>';
-  $('lBody').querySelectorAll('tr[data-id]').forEach(tr => tr.onclick = () => openLead(Number(tr.dataset.id)));
-}
-
-// ---------- CONTACTOS (tabla) ----------
-$('cSearch').addEventListener('input', () => { if(currentView==='contactos') renderContactos(); });
-function renderContactos(){
-  const q=$('cSearch').value.trim().toLowerCase();
-  let rows = contactos.filter(c => !q || [c.nombre,c.cargo,c.email,empName(c.empresa_id)].join(' ').toLowerCase().includes(q));
-  $('cBody').innerHTML = rows.length ? rows.map(c => `
-    <tr data-id="${c.id}">
-      <td><div class="t-name">${esc(c.nombre)}</div></td>
-      <td>${esc(c.cargo||'—')}</td>
-      <td>${esc(empName(c.empresa_id))}</td>
-      <td><span class="t-sub">${esc(c.email||'—')}</span></td>
-      <td><span class="t-sub">${esc(c.telefono||'—')}</span></td>
-      <td>${leadsDeContacto(c.id).length}</td>
-    </tr>`).join('') : '<tr><td colspan="6" class="row-empty">Sin contactos que coincidan.</td></tr>';
-  $('cBody').querySelectorAll('tr[data-id]').forEach(tr => tr.onclick = () => openContacto(Number(tr.dataset.id)));
-}
-
-// ---------- EMPRESAS (tabla) ----------
-const TOPE_TABLA = 300; // se piden como máximo 300 a la vez; el buscador afina
-let eTimer;
-$('eSearch').addEventListener('input', () => {
-  clearTimeout(eTimer);
-  eTimer = setTimeout(() => { if(currentView==='empresas') renderEmpresas(); }, 250);
-});
-$('eVerArchivadas').addEventListener('change', () => { if(currentView==='empresas') renderEmpresas(); });
-// Busca en el servidor (hay miles de empresas, no están todas en memoria)
-async function renderEmpresas(){
-  const q = $('eSearch').value.trim().replace(/[,()%*]/g,' ').trim();
-  const verArch = $('eVerArchivadas').checked;
-  let consulta = sb.from('empresas').select('*', {count:'exact'}).order('nombre').limit(TOPE_TABLA);
-  if(!verArch) consulta = consulta.eq('archivada', false);
-  if(q) consulta = consulta.or(`nombre.ilike.%${q}%,nombre_comercial.ilike.%${q}%,rubro.ilike.%${q}%,ciudad.ilike.%${q}%,rut.ilike.%${q}%`);
-  const { data, count, error } = await consulta;
-  if(error){ $('eBody').innerHTML = `<tr><td colspan="6" class="row-empty">Error al buscar: ${esc(error.message)}</td></tr>`; return; }
-  const vista = data || [], total = count ?? vista.length;
-  if(!q && !verArch && count != null) totalEmpresas = count; // sin filtros, este count es el total real
-  const cuerpo = vista.length
-    ? vista.map(e => `
-    <tr data-id="${e.id}">
-      <td><div class="t-name" style="${e.archivada?'opacity:.55':''}">${esc(e.nombre_comercial||e.nombre)}${e.archivada?' <span class="badge perdido">archivada</span>':''}</div>${
-        [e.nombre_comercial?e.nombre:'', e.rut].filter(Boolean).map(s=>`<div class="t-sub">${esc(s)}</div>`).join('')}</td>
-      <td>${esc(e.rubro||'—')}</td><td>${esc(e.ciudad||'—')}</td>
-      <td>${contactosDeEmpresa(e.id).length}</td><td>${leadsDeEmpresa(e.id).length}</td>
-      <td>${e.sitio_web?`<span class="t-sub">${esc(e.sitio_web)}</span>`:'<span class="muted">—</span>'}</td>
-    </tr>`).join('')
-    : '<tr><td colspan="6" class="row-empty">Sin empresas que coincidan.</td></tr>';
-  const aviso = total > vista.length
-    ? `<tr><td colspan="6" class="row-empty">Mostrando ${vista.length} de ${total.toLocaleString('es-CL')} empresas · usa el buscador para afinar</td></tr>` : '';
-  $('eBody').innerHTML = cuerpo + aviso;
-  // Guarda en memoria las mostradas para poder abrir su ficha
-  vista.forEach(e => { if(!empresas.some(x=>x.id===e.id)) empresas.push(e); });
-  $('eBody').querySelectorAll('tr[data-id]').forEach(tr => tr.onclick = () => openEmpresa(Number(tr.dataset.id)));
-}
-
-// ---------- SEGUIMIENTOS ----------
-function dueList(){ return leads.filter(l=>l.proximo_seguimiento && !CERRADAS.includes(l.etapa)).sort((a,b)=>a.proximo_seguimiento.localeCompare(b.proximo_seguimiento)); }
-function fRow(l){
-  const hoy=todayStr();
-  const cls = l.proximo_seguimiento<hoy?'overdue':(l.proximo_seguimiento===hoy?'today':'');
-  const txt = l.proximo_seguimiento<hoy?'⚠ '+l.proximo_seguimiento:(l.proximo_seguimiento===hoy?'Hoy':l.proximo_seguimiento);
-  return `<div class="sg-row" data-id="${l.id}">
-    <span class="sg-date ${cls}">${txt}</span>
-    <span><span class="t-name">${esc(cName(l.contacto_id))}</span> <span class="t-sub">· ${esc(empName(l.empresa_id))}</span></span>
-    <span class="badge ${l.etapa}" style="margin-left:auto">${etLabel(l.etapa)}</span></div>`;
-}
-function bindFollowRows(cid){ $(cid).querySelectorAll('.sg-row[data-id]').forEach(r => r.onclick = () => openLead(Number(r.dataset.id))); }
-function renderSeguimientos(){
-  const hoy=todayStr(), all=dueList();
-  const g=(t,arr)=>`<div class="sg-group"><h3>${t} <span class="sg-count">${arr.length}</span></h3>${arr.length?arr.map(fRow).join(''):'<div class="empty">Nada por aquí.</div>'}</div>`;
-  $('sgContent').innerHTML = g('⚠ Vencidos', all.filter(l=>l.proximo_seguimiento<hoy)) + g('Hoy', all.filter(l=>l.proximo_seguimiento===hoy)) + g('Próximos', all.filter(l=>l.proximo_seguimiento>hoy));
-  bindFollowRows('sgContent');
-}
-
-// ---------- MODAL: LEAD ----------
-function fillContactoSelect(sel){
-  if(!contactos.length){ $('l_contacto').innerHTML = '<option value="">(no hay contactos — crea uno primero)</option>'; }
-  else $('l_contacto').innerHTML = contactos.map(c=>`<option value="${c.id}" ${c.id===sel?'selected':''}>${esc(c.nombre)} — ${esc(empName(c.empresa_id))}</option>`).join('');
-  updateLeadEmpresaDisp();
-}
-function updateLeadEmpresaDisp(){ const c=cById(Number($('l_contacto').value)); $('l_empresa_disp').value = c?empName(c.empresa_id):'—'; }
-$('l_contacto').addEventListener('change', updateLeadEmpresaDisp);
-
-function openLead(id, presetContacto){
-  editLeadId = id;
-  const l = leads.find(x=>x.id===id);
-  $('leadTitle').textContent = l ? (cName(l.contacto_id)) : 'Nuevo lead';
-  fillContactoSelect(l?l.contacto_id:presetContacto);
-  $('l_titulo').value=l?.titulo||''; $('l_etapa').value=l?.etapa||'nuevo'; $('l_prioridad').value=l?.prioridad||'media';
-  $('l_valor').value=l?.valor_estimado??''; $('l_seguimiento').value=l?.proximo_seguimiento||''; $('l_notas').value=l?.notas||'';
-  updateLeadEmpresaDisp();
-  $('l_actsBox').style.display = l?'block':'none';
-  $('btnDeleteLead').style.display = l?'inline-flex':'none';
-  if(l) loadActs(id); else $('actList').innerHTML='';
-  $('modalLead').classList.add('open');
-}
-$('btnNewLeadP').onclick = () => newLead();
-$('btnNewLeadL').onclick = () => newLead();
-function newLead(preset){ if(!contactos.length){ alert('Primero crea un contacto (persona). Luego podrás asociarle un lead.'); showView('contactos'); return; } openLead(null, preset); }
-$('btnCancelLead').onclick = () => $('modalLead').classList.remove('open');
-$('btnSaveLead').onclick = async () => {
-  const cid = Number($('l_contacto').value);
-  if(!cid){ alert('Elige un contacto para el lead.'); return; }
-  const valor=$('l_valor').value;
-  const payload = {
-    contacto_id: cid, empresa_id: cById(cid)?.empresa_id ?? null,
-    titulo:$('l_titulo').value.trim()||null, etapa:$('l_etapa').value, prioridad:$('l_prioridad').value,
-    valor_estimado: valor!==''?Number(valor):null, proximo_seguimiento:$('l_seguimiento').value||null, notas:$('l_notas').value.trim()||null
-  };
-  const {error} = editLeadId ? await sb.from('leads').update(payload).eq('id',editLeadId) : await sb.from('leads').insert(payload);
-  if(error){ alert('No se pudo guardar: '+error.message); return; }
-  $('modalLead').classList.remove('open'); loadAll();
-};
-$('btnDeleteLead').onclick = async () => {
-  if(!editLeadId) return;
-  if(!confirm('¿Eliminar este lead? Se borrarán también sus actividades. Esta acción no se puede deshacer.')) return;
-  const {error} = await sb.from('leads').delete().eq('id', editLeadId);
-  if(error){ alert('No se pudo eliminar: '+error.message); return; }
-  $('modalLead').classList.remove('open'); editLeadId=null; loadAll();
-};
-async function loadActs(leadId){
-  const {data} = await sb.from('actividades').select('*').eq('lead_id',leadId).order('fecha',{ascending:false});
-  $('actList').innerHTML = (data||[]).map(a=>`<div class="li"><span class="at">${esc(a.tipo)}</span><span class="ad">${esc(a.descripcion||'')}</span><span class="af">${a.fecha}</span></div>`).join('') || '<div class="empty">Sin actividades aún.</div>';
-}
-$('btnAddAct').onclick = async () => {
-  if(!editLeadId) return;
-  const l = leads.find(x=>x.id===editLeadId);
-  await sb.from('actividades').insert({lead_id:editLeadId, contacto_id:l?l.contacto_id:null, tipo:$('a_tipo').value, descripcion:$('a_desc').value.trim(), fecha:todayStr()});
-  $('a_desc').value=''; loadActs(editLeadId);
-};
-
-// ---------- MODAL: CONTACTO ----------
-// Autocompletado de empresa (busca en el servidor: hay miles)
-let acTimer;
-const acCerrar = () => $('c_empresa_res').classList.remove('open');
-$('c_empresa_txt').addEventListener('input', () => {
-  $('c_empresa_id').value = '';                 // al escribir se deselecciona
-  const q = $('c_empresa_txt').value.trim().replace(/[,()%*]/g,' ').trim();
-  clearTimeout(acTimer);
-  if(q.length < 2){ acCerrar(); return; }
-  acTimer = setTimeout(async () => {
-    const { data } = await sb.from('empresas').select('id,nombre,nombre_comercial,rut,ciudad,rubro')
-      .eq('archivada', false)
-      .or(`nombre.ilike.%${q}%,nombre_comercial.ilike.%${q}%,rut.ilike.%${q}%`).order('nombre').limit(8);
-    const cont = $('c_empresa_res');
-    cont.innerHTML = (data||[]).length
-      ? data.map(e=>`<div class="ac-item" data-id="${e.id}" data-nombre="${esc(e.nombre_comercial||e.nombre)}">${esc(e.nombre_comercial||e.nombre)}<div class="ac-sub">${e.nombre_comercial?esc(e.nombre)+" · ":""}${esc(e.rut||'')} · ${esc(e.ciudad||'')}</div></div>`).join('')
-      : '<div class="ac-item ac-sub">Sin resultados</div>';
-    cont.querySelectorAll('.ac-item[data-id]').forEach(d => d.onclick = () => {
-      $('c_empresa_id').value = d.dataset.id;
-      $('c_empresa_txt').value = d.dataset.nombre;
-      if(!empresas.some(x=>x.id===Number(d.dataset.id))) empresas.push((data||[]).find(e=>e.id===Number(d.dataset.id)));
-      acCerrar();
+  btn.disabled = true; btn.textContent = 'Enviando…';
+  try{
+    const r = await fetch('/api/lead-form', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(datos)
     });
-    cont.classList.add('open');
-  }, 250);
-});
-document.addEventListener('click', e => {
-  if(!e.target.closest('#c_empresa_res') && e.target !== $('c_empresa_txt')) acCerrar();
-});
-function openContacto(id){
-  editContactoId = id;
-  const c = cById(id);
-  $('contactoTitle').textContent = c?c.nombre:'Nuevo contacto';
-  $('c_nombre').value=c?.nombre||''; $('c_cargo').value=c?.cargo||''; $('c_email').value=c?.email||'';
-  $('c_telefono').value=c?.telefono||''; $('c_linkedin').value=c?.linkedin_url||''; $('c_notas').value=c?.notas||'';
-  $('c_empresa_id').value = c?.empresa_id || '';
-  $('c_empresa_txt').value = c?.empresa_id ? empName(c.empresa_id) : '';
-  acCerrar();
-  const ls = c?leadsDeContacto(id):[];
-  $('c_leadsBox').style.display = c?'block':'none';
-  $('btnDeleteContacto').style.display = c?'inline-flex':'none';
-  $('btnLeadFromContacto').style.display = c?'inline-flex':'none';
-  $('c_leadList').innerHTML = ls.length ? ls.map(l=>`<div class="li click" data-id="${l.id}"><span class="at" style="text-transform:none">${esc(l.titulo||'Lead')}</span><span class="af"><span class="badge ${l.etapa}">${etLabel(l.etapa)}</span></span></div>`).join('') : '<div class="empty">Sin leads.</div>';
-  $('c_leadList').querySelectorAll('.li[data-id]').forEach(li => li.onclick = () => { $('modalContacto').classList.remove('open'); openLead(Number(li.dataset.id)); });
-  $('modalContacto').classList.add('open');
-}
-$('btnNewContacto').onclick = () => openContacto(null);
-$('btnCancelContacto').onclick = () => $('modalContacto').classList.remove('open');
-$('btnLeadFromContacto').onclick = () => { const id=editContactoId; $('modalContacto').classList.remove('open'); openLead(null, id); };
-$('btnSaveContacto').onclick = async () => {
-  const payload = {
-    nombre:$('c_nombre').value.trim(), cargo:$('c_cargo').value.trim()||null, email:$('c_email').value.trim()||null,
-    telefono:$('c_telefono').value.trim()||null, linkedin_url:$('c_linkedin').value.trim()||null,
-    empresa_id:$('c_empresa_id').value?Number($('c_empresa_id').value):null, notas:$('c_notas').value.trim()||null
-  };
-  if(!payload.nombre){ alert('El nombre es obligatorio.'); return; }
-  const {error} = editContactoId ? await sb.from('contactos').update(payload).eq('id',editContactoId) : await sb.from('contactos').insert(payload);
-  if(error){ alert('No se pudo guardar: '+error.message); return; }
-  $('modalContacto').classList.remove('open'); loadAll();
-};
-$('btnDeleteContacto').onclick = async () => {
-  if(!editContactoId) return;
-  const n = leadsDeContacto(editContactoId).length;
-  if(!confirm('¿Eliminar este contacto?' + (n?` También se eliminarán sus ${n} lead(s) y actividades.`:'') + ' Esta acción no se puede deshacer.')) return;
-  const {error} = await sb.from('contactos').delete().eq('id', editContactoId);
-  if(error){ alert('No se pudo eliminar: '+error.message); return; }
-  $('modalContacto').classList.remove('open'); editContactoId=null; loadAll();
-};
-
-// ---------- MODAL: EMPRESA ----------
-function openEmpresa(id){
-  editEmpId = id;
-  const e = empById(id);
-  $('empTitle').textContent = e?(e.nombre_comercial||e.nombre):'Nueva empresa';
-  $('e_nombre').value=e?.nombre||''; $('e_comercial').value=e?.nombre_comercial||'';
-  $('e_rut').value=e?.rut||''; $('e_rubro').value=e?.rubro||''; $('e_ciudad').value=e?.ciudad||'';
-  $('e_empleados').value=e?.num_empleados??''; $('e_telefono').value=e?.telefono||''; $('e_web').value=e?.sitio_web||''; $('e_notas').value=e?.notas||'';
-  $('e_archivada').checked = !!e?.archivada;
-  $('btnDeleteEmp').style.display = e?'inline-flex':'none';
-  // Datos del padrón SII (solo lectura)
-  $('empSii').style.display = e?'block':'none';
-  if(e){
-    const filas = [
-      ['Tramo de ventas', e.tramo_ventas!=null?('Tramo '+e.tramo_ventas+' de 13'):null],
-      ['Actividad económica', e.actividad_economica], ['Subrubro', e.subrubro],
-      ['Provincia', e.provincia], ['Región', e.region],
-      ['Tipo contribuyente', e.tipo_contribuyente], ['Subtipo', e.subtipo_contribuyente],
-      ['Inicio actividades', e.fecha_inicio_actividades], ['Primera inscripción', e.fecha_primera_inscripcion],
-      ['Término de giro', e.fecha_termino_giro], ['Tipo término giro', e.tipo_termino_giro],
-      ['Capital propio (tramo)', e.tramo_capital_positivo], ['Capital negativo (tramo)', e.tramo_capital_negativo],
-      ['Régimen tributario', e.otros_regimenes], ['Renta presunta', e.r_presunta],
-      ['Año comercial', e.anio_comercial],
-    ].filter(([,v]) => v!=null && v!=='');
-    $('empSiiDatos').innerHTML = filas.length
-      ? filas.map(([k,v])=>`<div class="li"><span class="ad">${k}</span><span class="af">${esc(String(v))}</span></div>`).join('')
-      : '<div class="empty">Sin datos del SII.</div>';
+    const cuerpo = await r.json().catch(() => ({}));
+    if(r.ok && cuerpo.ok){
+      form.reset();
+      mostrar('Listo, recibimos tu mensaje. Te respondemos dentro de un día hábil.', true);
+    } else {
+      mostrar('No pudimos enviarlo. Escribinos a sebastiangomez2003@gmail.com y lo vemos.', false);
+    }
+  } catch {
+    mostrar('No pudimos enviarlo. Escribinos a sebastiangomez2003@gmail.com y lo vemos.', false);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Enviar';
   }
-  $('empSub').style.display = e?'block':'none';
-  if(e){
-    const cs=contactosDeEmpresa(id), ls=leadsDeEmpresa(id);
-    $('empContactList').innerHTML = cs.length ? cs.map(c=>`<div class="li click" data-cid="${c.id}"><span class="at" style="text-transform:none">${esc(c.nombre)}</span><span class="ad">${esc(c.cargo||'')}</span></div>`).join('') : '<div class="empty">Sin contactos.</div>';
-    $('empLeadList').innerHTML = ls.length ? ls.map(l=>`<div class="li click" data-lid="${l.id}"><span class="at" style="text-transform:none">${esc(cName(l.contacto_id))}</span><span class="af"><span class="badge ${l.etapa}">${etLabel(l.etapa)}</span></span></div>`).join('') : '<div class="empty">Sin leads.</div>';
-    $('empContactList').querySelectorAll('.li[data-cid]').forEach(li=>li.onclick=()=>{ $('modalEmpresa').classList.remove('open'); openContacto(Number(li.dataset.cid)); });
-    $('empLeadList').querySelectorAll('.li[data-lid]').forEach(li=>li.onclick=()=>{ $('modalEmpresa').classList.remove('open'); openLead(Number(li.dataset.lid)); });
-  }
-  $('modalEmpresa').classList.add('open');
-}
-$('btnNewEmpresa').onclick = () => openEmpresa(null);
-$('btnCancelEmp').onclick = () => $('modalEmpresa').classList.remove('open');
-$('btnSaveEmp').onclick = async () => {
-  const emp=$('e_empleados').value;
-  const payload = {
-    nombre:$('e_nombre').value.trim(), nombre_comercial:$('e_comercial').value.trim()||null,
-    rut:$('e_rut').value.trim()||null,
-    rubro:$('e_rubro').value.trim()||null, ciudad:$('e_ciudad').value.trim()||null,
-    num_empleados: emp!==''?Number(emp):null, telefono:$('e_telefono').value.trim()||null, sitio_web:$('e_web').value.trim()||null, notas:$('e_notas').value.trim()||null,
-    archivada: $('e_archivada').checked
-  };
-  if(!payload.nombre){ alert('El nombre de la empresa es obligatorio.'); return; }
-  const {error} = editEmpId ? await sb.from('empresas').update(payload).eq('id',editEmpId) : await sb.from('empresas').insert(payload);
-  if(error){ alert('No se pudo guardar: '+error.message); return; }
-  $('modalEmpresa').classList.remove('open'); loadAll();
-};
-$('btnDeleteEmp').onclick = async () => {
-  if(!editEmpId) return;
-  const nc=contactosDeEmpresa(editEmpId).length, nl=leadsDeEmpresa(editEmpId).length;
-  if(!confirm(`¿Eliminar la empresa?` + ((nc||nl)?` Sus ${nc} contacto(s) y ${nl} lead(s) quedarán sin empresa (no se borran).`:''))) return;
-  if(nc) await sb.from('contactos').update({empresa_id:null}).eq('empresa_id', editEmpId);
-  const {error} = await sb.from('empresas').delete().eq('id', editEmpId);
-  if(error){ alert('No se pudo eliminar: '+error.message); return; }
-  $('modalEmpresa').classList.remove('open'); editEmpId=null; loadAll();
-};
-
-// ---------- CAMPAÑAS ----------
-// Jerarquía: campaña → tareas → cada tarea tiene una empresa asignada.
-// Al completar una tarea se asigna el contacto y nace el lead en etapa "nuevo".
-function renderCampanas(){ campanaActual ? renderCampanaDetalle() : renderCampanaLista(); }
-
-function conteosCampana(id){
-  const t = resumenTareas.filter(x=>x.campana_id===id);
-  return { total:t.length,
-    pendientes:t.filter(x=>x.estado==='pendiente').length,
-    completadas:t.filter(x=>x.estado==='completada').length };
-}
-function renderCampanaLista(){
-  $('campLista').style.display='block'; $('campDetalle').style.display='none';
-  $('campBody').innerHTML = campanas.length ? campanas.map(c=>{
-    const n = conteosCampana(c.id);
-    return `<tr data-id="${c.id}">
-      <td><div class="t-name">${esc(c.nombre)}</div><div class="t-sub">${esc(c.objetivo||'')}</div></td>
-      <td><span class="badge">${esc(c.estado)}</span></td>
-      <td>${n.total}</td><td>${n.pendientes}</td><td>${n.completadas}</td>
-      <td>${c.fecha_inicio||'—'}</td></tr>`;
-  }).join('') : '<tr><td colspan="6" class="row-empty">Sin campañas todavía. Crea la primera.</td></tr>';
-  $('campBody').querySelectorAll('tr[data-id]').forEach(tr=>tr.onclick=()=>abrirCampana(Number(tr.dataset.id)));
-}
-
-async function cargarTareas(campanaId){
-  const { data } = await sb.from('tareas')
-    .select('*, empresas(id,nombre,nombre_comercial,rubro,ciudad,rut), contactos(id,nombre)')
-    .eq('campana_id', campanaId).order('id');
-  tareasCamp = data || [];
-}
-async function refrescarResumen(){
-  resumenTareas = (await sb.from('tareas').select('campana_id,estado')).data || [];
-}
-async function abrirCampana(id){
-  campanaActual = campanas.find(c=>c.id===id) || null;
-  if(!campanaActual) return;
-  await cargarTareas(id);
-  renderCampanaDetalle();
-}
-$('btnVolverCamp').onclick = () => { campanaActual=null; renderCampanaLista(); };
-['mSearch','mEstado'].forEach(id => $(id).addEventListener('input', () => { if(currentView==='campanas' && campanaActual) pintarTareas(); }));
-
-function renderCampanaDetalle(){
-  const c = campanaActual; if(!c) return renderCampanaLista();
-  $('campLista').style.display='none'; $('campDetalle').style.display='block';
-  $('campTitulo').textContent = c.nombre;
-  $('campObjetivo').textContent = c.objetivo || '';
-  const p  = tareasCamp.filter(t=>t.estado==='pendiente').length;
-  const co = tareasCamp.filter(t=>t.estado==='completada').length;
-  const emp = new Set(tareasCamp.map(t=>t.empresa_id).filter(Boolean)).size;
-  $('campStats').innerHTML = `
-    <div class="stat"><div class="num">${tareasCamp.length}</div><div class="lbl">Tareas</div></div>
-    <div class="stat"><div class="num">${p}</div><div class="lbl">Pendientes</div></div>
-    <div class="stat"><div class="num">${co}</div><div class="lbl">Completadas</div></div>
-    <div class="stat"><div class="num">${emp}</div><div class="lbl">Empresas</div></div>`;
-  pintarTareas();
-}
-
-function pintarTareas(){
-  const q=$('mSearch').value.trim().toLowerCase(), fe=$('mEstado').value;
-  const filas = tareasCamp.filter(t=>{
-    if(fe && t.estado!==fe) return false;
-    if(q){ const e=t.empresas||{}; if(![t.titulo,e.nombre,e.nombre_comercial,e.rubro,e.ciudad].join(' ').toLowerCase().includes(q)) return false; }
-    return true;
-  });
-  $('tareasBody').innerHTML = filas.length ? filas.map(t=>{
-    const e=t.empresas||{}, hecha=t.estado==='completada';
-    const vencida = t.fecha_vencimiento && t.fecha_vencimiento < todayStr() && t.estado==='pendiente';
-    const acc = t.estado==='pendiente'
-      ? (t.contacto_id
-          ? `<button class="btn-sm" data-prospectar="${t.id}">Prospectar</button> <button class="btn-sm" data-asignar="${t.id}">Cambiar contacto</button>`
-          : `<button class="btn-sm" data-asignar="${t.id}">Asignar contacto</button>`)
-        + ` <button class="btn-sm" data-editar="${t.id}">Editar</button>`
-      : (t.lead_id
-          ? `<button class="btn-sm" data-lead="${t.lead_id}">Ver lead</button> <button class="btn-sm" data-editar="${t.id}">Editar</button>`
-          : `<button class="btn-sm" data-editar="${t.id}">Editar</button>`);
-    const badge = hecha ? 'ganado' : (t.estado==='descartada' ? 'perdido' : '');
-    return `<tr>
-      <td><div class="t-name" style="${hecha?'text-decoration:line-through;opacity:.6':''}">${esc(t.titulo)}</div>${t.contactos?`<div class="t-sub">→ ${esc(t.contactos.nombre)}</div>`:''}</td>
-      <td><div>${esc(e.nombre_comercial||e.nombre||'—')}</div><div class="t-sub">${esc([e.nombre_comercial?e.nombre:'', e.ciudad].filter(Boolean).join(' · '))}</div></td>
-      <td>${t.fecha_vencimiento?`<span class="follow ${vencida?'overdue':''}">${vencida?'⚠ ':''}${t.fecha_vencimiento}</span>`:'<span class="muted">—</span>'}</td>
-      <td><span class="badge ${badge}">${esc(t.estado)}</span></td>
-      <td style="text-align:right;white-space:nowrap">${acc}</td></tr>`;
-  }).join('') : '<tr><td colspan="5" class="row-empty">Sin tareas que coincidan.</td></tr>';
-  const b=$('tareasBody');
-  b.querySelectorAll('[data-asignar]').forEach(x=>x.onclick=()=>abrirAsignar(Number(x.dataset.asignar)));
-  b.querySelectorAll('[data-prospectar]').forEach(x=>x.onclick=()=>prospectar(Number(x.dataset.prospectar)));
-  b.querySelectorAll('[data-editar]').forEach(x=>x.onclick=()=>abrirTareaModal(tareasCamp.find(t=>t.id===Number(x.dataset.editar))));
-  b.querySelectorAll('[data-lead]').forEach(x=>x.onclick=()=>{ showView('leads'); openLead(Number(x.dataset.lead)); });
-}
-
-// --- modal campaña ---
-function abrirCampanaModal(c){
-  editCampanaId = c ? c.id : null;
-  $('campModalTitulo').textContent = c ? 'Editar campaña' : 'Nueva campaña';
-  $('k_nombre').value=c?.nombre||''; $('k_objetivo').value=c?.objetivo||'';
-  $('k_estado').value=c?.estado||'activa'; $('k_inicio').value=c?.fecha_inicio||todayStr();
-  $('k_notas').value=c?.notas||'';
-  $('btnEliminarCampana').style.display = c ? 'inline-flex' : 'none';
-  $('modalCampana').classList.add('open');
-}
-$('btnNuevaCampana').onclick = () => abrirCampanaModal(null);
-$('btnEditarCampana').onclick = () => abrirCampanaModal(campanaActual);
-$('btnCancelarCampana').onclick = () => $('modalCampana').classList.remove('open');
-$('btnGuardarCampana').onclick = async () => {
-  const payload = { nombre:$('k_nombre').value.trim(), objetivo:$('k_objetivo').value.trim()||null,
-    estado:$('k_estado').value, fecha_inicio:$('k_inicio').value||null, notas:$('k_notas').value.trim()||null };
-  if(!payload.nombre){ alert('Ponle un nombre a la campaña.'); return; }
-  const { error } = editCampanaId
-    ? await sb.from('campanas').update(payload).eq('id',editCampanaId)
-    : await sb.from('campanas').insert(payload);
-  if(error){ alert('No se pudo guardar: '+error.message); return; }
-  $('modalCampana').classList.remove('open');
-  await loadAll();
-  if(campanaActual) campanaActual = campanas.find(x=>x.id===campanaActual.id) || null;
-  renderCampanas();
-};
-$('btnEliminarCampana').onclick = async () => {
-  if(!editCampanaId) return;
-  if(!confirm('¿Eliminar la campaña? Se borran sus tareas. Los leads ya creados NO se borran.')) return;
-  const { error } = await sb.from('campanas').delete().eq('id',editCampanaId);
-  if(error){ alert('No se pudo eliminar: '+error.message); return; }
-  $('modalCampana').classList.remove('open'); campanaActual=null; await loadAll(); renderCampanas();
-};
-
-// --- modal tarea (con autocompletado de empresa) ---
-let tacTimer, editTareaId=null;
-const tacCerrar = () => $('t_empresa_res').classList.remove('open');
-$('t_empresa_txt').addEventListener('input', () => {
-  $('t_empresa_id').value='';
-  const q = $('t_empresa_txt').value.trim().replace(/[,()%*]/g,' ').trim();
-  clearTimeout(tacTimer);
-  if(q.length<2){ tacCerrar(); return; }
-  tacTimer = setTimeout(async () => {
-    const { data } = await sb.from('empresas').select('id,nombre,nombre_comercial,rut,ciudad')
-      .eq('archivada', false)
-      .or(`nombre.ilike.%${q}%,nombre_comercial.ilike.%${q}%,rut.ilike.%${q}%`).order('nombre').limit(8);
-    const cont = $('t_empresa_res');
-    cont.innerHTML = (data||[]).length
-      ? data.map(e=>`<div class="ac-item" data-id="${e.id}" data-nombre="${esc(e.nombre_comercial||e.nombre)}">${esc(e.nombre_comercial||e.nombre)}<div class="ac-sub">${e.nombre_comercial?esc(e.nombre)+" · ":""}${esc(e.rut||'')} · ${esc(e.ciudad||'')}</div></div>`).join('')
-      : '<div class="ac-item ac-sub">Sin resultados</div>';
-    cont.querySelectorAll('.ac-item[data-id]').forEach(d=>d.onclick=()=>{
-      $('t_empresa_id').value=d.dataset.id; $('t_empresa_txt').value=d.dataset.nombre; tacCerrar();
-    });
-    cont.classList.add('open');
-  }, 250);
 });
-document.addEventListener('click', e => { if(!e.target.closest('#t_empresa_res') && e.target!==$('t_empresa_txt')) tacCerrar(); });
-
-function abrirTareaModal(t){
-  editTareaId = t ? t.id : null;
-  $('tareaModalTitulo').textContent = t ? 'Editar tarea' : 'Nueva tarea';
-  $('tareaModalSub').textContent = campanaActual ? campanaActual.nombre : 'Dentro de la campaña';
-  $('t_titulo').value = t?.titulo || 'Buscar contacto y contactar';
-  $('t_empresa_id').value = t?.empresa_id || '';
-  $('t_empresa_txt').value = (t && t.empresas) ? t.empresas.nombre : '';
-  $('t_vence').value = t?.fecha_vencimiento || '';
-  $('t_estado').value = t?.estado || 'pendiente';
-  $('t_desc').value = t?.descripcion || '';
-  $('btnEliminarTarea').style.display = t ? 'inline-flex' : 'none';
-  tacCerrar();
-  $('modalTarea').classList.add('open');
-}
-$('btnNuevaTarea').onclick = () => abrirTareaModal(null);
-$('btnCancelarTarea').onclick = () => $('modalTarea').classList.remove('open');
-$('btnGuardarTarea').onclick = async () => {
-  if(!campanaActual) return;
-  const payload = {
-    campana_id: campanaActual.id,
-    empresa_id: $('t_empresa_id').value ? Number($('t_empresa_id').value) : null,
-    titulo: $('t_titulo').value.trim() || 'Tarea',
-    fecha_vencimiento: $('t_vence').value || null,
-    estado: $('t_estado').value,
-    descripcion: $('t_desc').value.trim() || null
-  };
-  const { error } = editTareaId
-    ? await sb.from('tareas').update(payload).eq('id',editTareaId)
-    : await sb.from('tareas').insert(payload);
-  if(error){ alert('No se pudo guardar: '+error.message); return; }
-  $('modalTarea').classList.remove('open');
-  await cargarTareas(campanaActual.id); await refrescarResumen(); renderCampanaDetalle();
-};
-$('btnEliminarTarea').onclick = async () => {
-  if(!editTareaId) return;
-  if(!confirm('¿Eliminar esta tarea?')) return;
-  const { error } = await sb.from('tareas').delete().eq('id',editTareaId);
-  if(error){ alert('No se pudo eliminar: '+error.message); return; }
-  $('modalTarea').classList.remove('open');
-  await cargarTareas(campanaActual.id); await refrescarResumen(); renderCampanaDetalle();
-};
-
-// --- crear tareas en bloque (una por empresa) ---
-$('btnAgregarEmpresas').onclick = () => {
-  agResultados=[]; $('ag_res').innerHTML='<div class="empty">Usa los filtros y pulsa Buscar.</div>'; $('ag_conteo').textContent='';
-  $('modalAgregar').classList.add('open');
-};
-$('btnCancelarAgregar').onclick = () => $('modalAgregar').classList.remove('open');
-$('btnBuscarEmpresas').onclick = async () => {
-  const lim = s => s.trim().replace(/[,()%*]/g,' ').trim();
-  const q=lim($('ag_q').value), comuna=lim($('ag_comuna').value), rubro=lim($('ag_rubro').value), min=Number($('ag_min').value||0);
-  let cons = sb.from('empresas').select('id,nombre,nombre_comercial,rubro,ciudad,rut,num_empleados')
-    .eq('archivada', false)
-    .order('num_empleados',{ascending:false,nullsFirst:false}).limit(200);
-  if(q) cons = cons.or(`nombre.ilike.%${q}%,nombre_comercial.ilike.%${q}%,rut.ilike.%${q}%`);
-  if(comuna) cons = cons.ilike('ciudad', `%${comuna}%`);
-  if(rubro) cons = cons.ilike('rubro', `%${rubro}%`);
-  if(min>0) cons = cons.gte('num_empleados', min);
-  const { data, error } = await cons;
-  if(error){ $('ag_res').innerHTML = `<div class="empty">Error: ${esc(error.message)}</div>`; return; }
-  const ya = new Set(tareasCamp.map(t=>t.empresa_id).filter(Boolean));
-  agResultados = (data||[]).filter(e=>!ya.has(e.id));
-  $('ag_conteo').textContent = `· ${agResultados.length} sin tarea en esta campaña`;
-  $('ag_res').innerHTML = agResultados.length ? agResultados.map(e=>`
-    <label class="li" style="cursor:pointer"><input type="checkbox" checked data-emp="${e.id}" style="width:auto;margin:0 8px 0 0">
-    <span><span class="t-name">${esc(e.nombre_comercial||e.nombre)}</span><span class="t-sub">${e.nombre_comercial?' · '+esc(e.nombre):''} · ${esc(e.ciudad||'')} · ${e.num_empleados??'?'} trab.</span></span></label>
-  `).join('') : '<div class="empty">Sin resultados nuevos (o ya tienen tarea en esta campaña).</div>';
-};
-$('btnConfirmarAgregar').onclick = async () => {
-  if(!campanaActual) return;
-  const ids = [...$('ag_res').querySelectorAll('input[data-emp]:checked')].map(i=>Number(i.dataset.emp));
-  if(!ids.length){ alert('Selecciona al menos una empresa.'); return; }
-  const titulo = $('ag_tarea').value.trim() || 'Buscar contacto y contactar';
-  const { error } = await sb.from('tareas')
-    .insert(ids.map(empresa_id=>({campana_id:campanaActual.id, empresa_id, titulo})));
-  if(error){ alert('No se pudieron crear las tareas: '+error.message); return; }
-  $('modalAgregar').classList.remove('open');
-  await cargarTareas(campanaActual.id); await refrescarResumen(); renderCampanaDetalle();
-};
-
-// --- completar tarea → asignar contacto y crear lead en "nuevo" ---
-function toggleCompNuevo(){ $('comp_nuevo').style.display = $('comp_contacto').value==='nuevo' ? 'block' : 'none'; }
-$('comp_contacto').addEventListener('change', toggleCompNuevo);
-function abrirAsignar(tareaId){
-  const t = tareasCamp.find(x=>x.id===tareaId); if(!t) return;
-  completarCtx = { tareaId: t.id, empresaId: t.empresa_id };
-  $('comp_empresa').textContent = (t.empresas||{}).nombre || '(sin empresa asignada)';
-  const suyos = contactos.filter(c=>c.empresa_id===t.empresa_id);
-  $('comp_contacto').innerHTML = suyos.map(c=>`<option value="${c.id}">${esc(c.nombre)}${c.cargo?' — '+esc(c.cargo):''}</option>`).join('')
-    + '<option value="nuevo">+ Crear contacto nuevo</option>';
-  $('comp_contacto').value = t.contacto_id ? String(t.contacto_id) : (suyos.length ? String(suyos[0].id) : 'nuevo');
-  ['comp_nombre','comp_cargo','comp_email','comp_telefono'].forEach(i=>$(i).value='');
-  toggleCompNuevo();
-  $('modalCompletar').classList.add('open');
-}
-$('btnCancelarCompletar').onclick = () => $('modalCompletar').classList.remove('open');
-$('btnConfirmarCompletar').onclick = async () => {
-  if(!completarCtx) return;
-  if(!completarCtx.empresaId){ alert('Esta tarea no tiene empresa asignada. Edítala y asígnale una.'); return; }
-  let contactoId = $('comp_contacto').value;
-  if(contactoId === 'nuevo'){
-    const nombre = $('comp_nombre').value.trim();
-    if(!nombre){ alert('Escribe el nombre del contacto.'); return; }
-    const { data, error } = await sb.from('contactos').insert({
-      nombre, cargo:$('comp_cargo').value.trim()||null, email:$('comp_email').value.trim()||null,
-      telefono:$('comp_telefono').value.trim()||null, empresa_id: completarCtx.empresaId
-    }).select('id').single();
-    if(error){ alert('No se pudo crear el contacto: '+error.message); return; }
-    contactoId = data.id;
-  } else contactoId = Number(contactoId);
-
-  // Solo asigna el contacto: la tarea sigue pendiente hasta que pulses "Prospectar"
-  const { error: te } = await sb.from('tareas').update({ contacto_id: contactoId }).eq('id', completarCtx.tareaId);
-  if(te){ alert('No se pudo asignar el contacto: '+te.message); return; }
-
-  $('modalCompletar').classList.remove('open');
-  await loadAll();
-  if(campanaActual){ await cargarTareas(campanaActual.id); await refrescarResumen(); renderCampanaDetalle(); }
-};
-
-// Prospectar: crea el lead en etapa "nuevo" y cierra la tarea
-async function prospectar(tareaId){
-  const t = tareasCamp.find(x=>x.id===tareaId); if(!t) return;
-  if(!t.contacto_id){ alert('Primero asigna un contacto a la tarea.'); return; }
-  if(!t.empresa_id){ alert('Esta tarea no tiene empresa asignada. Edítala y asígnale una.'); return; }
-  const quien = (t.contactos||{}).nombre || 'este contacto';
-  const donde = (t.empresas||{}).nombre || 'la empresa';
-  if(!confirm(`¿Prospectar a ${quien} (${donde})?\n\nSe creará el lead en etapa "Nuevo" y la tarea quedará completada.`)) return;
-
-  const { data: lead, error } = await sb.from('leads').insert({
-    empresa_id: t.empresa_id, contacto_id: t.contacto_id,
-    titulo: campanaActual ? campanaActual.nombre : null,
-    etapa:'nuevo', prioridad:'media', ultimo_contacto: todayStr()
-  }).select('id').single();
-  if(error){ alert('No se pudo crear el lead: '+error.message); return; }
-
-  const { error: te } = await sb.from('tareas')
-    .update({ estado:'completada', fecha_completada: todayStr(), lead_id: lead.id }).eq('id', t.id);
-  if(te){ alert('Lead creado, pero falló cerrar la tarea: '+te.message); }
-
-  await loadAll();
-  if(campanaActual){ await cargarTareas(campanaActual.id); await refrescarResumen(); renderCampanaDetalle(); }
-  // Abre de inmediato la ficha del lead recién creado. La campaña queda abierta
-  // por detrás (no se toca campanaActual), así que al volver a la pestaña sigue ahí.
-  showView('leads');
-  openLead(lead.id);
-}
-// ---------- EXPORTAR CSV ----------
-function downloadCSV(filename, headers, rows){
-  const cell = v => { const s = v==null?'':String(v); return /[",\n\r]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
-  const csv = [headers.map(cell).join(','), ...rows.map(r=>r.map(cell).join(','))].join('\r\n');
-  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = filename; a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
-}
-$('btnExportLeads').onclick = () => downloadCSV('leads.csv',
-  ['Contacto','Empresa','Titulo','Etapa','Prioridad','Valor estimado','Proximo seguimiento','Notas'],
-  leads.map(l=>[cName(l.contacto_id), empName(l.empresa_id), l.titulo, etLabel(l.etapa), l.prioridad, l.valor_estimado, l.proximo_seguimiento, l.notas]));
-$('btnExportContactos').onclick = () => downloadCSV('contactos.csv',
-  ['Nombre','Cargo','Empresa','Email','Telefono','LinkedIn','Notas'],
-  contactos.map(c=>[c.nombre, c.cargo, empName(c.empresa_id), c.email, c.telefono, c.linkedin_url, c.notas]));
-$('btnExportEmpresas').onclick = () => downloadCSV('empresas.csv',
-  ['Razon social','Nombre comercial','Rubro','Ciudad','Empleados','Telefono','Sitio web','Notas'],
-  empresas.map(e=>[e.nombre, e.nombre_comercial, e.rubro, e.ciudad, e.num_empleados, e.telefono, e.sitio_web, e.notas]));
-
-// cerrar modales al hacer clic fuera
-document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
 </script>
 </body>
 </html>

@@ -13,10 +13,12 @@ Este CRM sirve para gestionar el pipeline de clientes de esa consultora
 
 ## Estado actual (lo que YA está hecho)
 
-- **App construida**: `index.html`, una sola página, HTML/CSS/JS puro sin build.
+- **App construida**: `crm/index.html`, una sola página, HTML/CSS/JS puro sin build.
+  En la raíz vive `index.html`, la landing pública de Veta Labs; el CRM queda en `/crm`
+  y no se enlaza desde ella.
   Login con Supabase Auth + tablero de pipeline por columnas + registro de actividades.
 - **Base de datos creada y funcionando** en Supabase.
-- **Credenciales ya insertadas** en `index.html` (URL + clave anon pública).
+- **Credenciales ya insertadas** en `crm/index.html` (URL + clave anon pública).
 - **Git inicializado** con un commit inicial.
 - **RLS activo** en las tres tablas (solo usuarios autenticados acceden).
 
@@ -37,7 +39,7 @@ Este CRM sirve para gestionar el pipeline de clientes de esa consultora
 - Proyecto: **CRM-Consultoria-SG** (id: `rayvimywyqjnzzmbagpv`, región us-east-2).
   Conserva el nombre anterior al rebrand a Veta Labs; renombrarlo en Supabase es opcional.
 - URL: `https://rayvimywyqjnzzmbagpv.supabase.co`
-- La clave anon (pública) está en `index.html`. La clave `service_role` NO está
+- La clave anon (pública) está en `crm/index.html`. La clave `service_role` NO está
   aquí y no debe exponerse nunca.
 
 ### Tablas
