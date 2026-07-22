@@ -301,6 +301,20 @@
             <option value="completada">Completadas</option>
             <option value="descartada">Descartadas</option>
           </select>
+          <select id="mCiudad"><option value="">Todas las ciudades</option></select>
+          <select id="mVence">
+            <option value="">Cualquier fecha</option>
+            <option value="vencidas">Vencidas</option>
+            <option value="hoy">Vencen hoy</option>
+            <option value="semana">Próximos 7 días</option>
+            <option value="sinfecha">Sin fecha</option>
+          </select>
+          <select id="mContacto">
+            <option value="">Con y sin contacto</option>
+            <option value="sin">Sin contacto asignado</option>
+            <option value="con">Con contacto asignado</option>
+          </select>
+          <button class="btn-sm" id="mLimpiar">Limpiar</button>
         </div>
         <div class="table-wrap"><table>
           <thead><tr><th>Tarea</th><th>Empresa</th><th>Vence</th><th>Estado</th><th></th></tr></thead>
@@ -599,7 +613,7 @@ sb.auth.onAuthStateChange((_e, session) => {
 // (vista, campaña abierta, filtros y scroll) para dejarte en el mismo lugar.
 const LLAVE_ESTADO = 'veta-crm-estado';
 const VISTAS = ['dashboard','pipeline','leads','contactos','empresas','campanas','seguimientos'];
-const CAMPOS_FILTRO = ['lSearch','lEtapa','lPrioridad','cSearch','eSearch','mSearch','mEstado'];
+const CAMPOS_FILTRO = ['lSearch','lEtapa','lPrioridad','cSearch','eSearch','mSearch','mEstado','mCiudad','mVence','mContacto'];
 let restaurando = false, primeraCarga = true;
 
 function guardarEstado(){
@@ -625,12 +639,19 @@ async function restaurarEstado(){
   restaurando = true;
   try{
     const filtros = e.filtros || {};
-    CAMPOS_FILTRO.forEach(id => { const el = $(id); if(el && filtros[id] != null) el.value = filtros[id]; });
-    if($('eVerArchivadas')) $('eVerArchivadas').checked = !!filtros.eVerArchivadas;
+    const aplicarFiltros = () => {
+      CAMPOS_FILTRO.forEach(id => { const el = $(id); if(el && filtros[id] != null) el.value = filtros[id]; });
+      if($('eVerArchivadas')) $('eVerArchivadas').checked = !!filtros.eVerArchivadas;
+    };
+    aplicarFiltros();
     showView(e.view);
     // La campaña pudo borrarse entremedio: si ya no está, queda la lista.
     if(e.view === 'campanas' && e.campanaId && campanas.some(c => c.id === e.campanaId)){
       await abrirCampana(e.campanaId);
+      // El filtro de ciudad se puebla recién al abrir la campaña, así que sus
+      // opciones no existían en el primer intento.
+      aplicarFiltros();
+      pintarTareas();
     }
   } finally { restaurando = false; }
 
@@ -1095,7 +1116,13 @@ async function abrirCampana(id){
   guardarEstado();
 }
 $('btnVolverCamp').onclick = () => { campanaActual=null; renderCampanaLista(); guardarEstado(); };
-['mSearch','mEstado'].forEach(id => $(id).addEventListener('input', () => { if(currentView==='campanas' && campanaActual) pintarTareas(); }));
+['mSearch','mEstado','mCiudad','mVence','mContacto'].forEach(id =>
+  $(id).addEventListener('input', () => { if(currentView==='campanas' && campanaActual) pintarTareas(); }));
+$('mLimpiar').onclick = () => {
+  ['mSearch','mEstado','mCiudad','mVence','mContacto'].forEach(id => $(id).value = '');
+  if(currentView==='campanas' && campanaActual) pintarTareas();
+  guardarEstado();
+};
 
 function renderCampanaDetalle(){
   const c = campanaActual; if(!c) return renderCampanaLista();
@@ -1110,13 +1137,36 @@ function renderCampanaDetalle(){
     <div class="stat"><div class="num">${p}</div><div class="lbl">Pendientes</div></div>
     <div class="stat"><div class="num">${co}</div><div class="lbl">Completadas</div></div>
     <div class="stat"><div class="num">${emp}</div><div class="lbl">Empresas</div></div>`;
+  poblarCiudades();
   pintarTareas();
+}
+
+// Las ciudades salen de las tareas de la campaña abierta, no de toda la base.
+function poblarCiudades(){
+  const sel = $('mCiudad'), actual = sel.value;
+  const ciudades = [...new Set(tareasCamp.map(t => (t.empresas||{}).ciudad).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">Todas las ciudades</option>'
+    + ciudades.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  if(ciudades.includes(actual)) sel.value = actual;
 }
 
 function pintarTareas(){
   const q=$('mSearch').value.trim().toLowerCase(), fe=$('mEstado').value;
+  const fc=$('mCiudad').value, fv=$('mVence').value, fk=$('mContacto').value;
+  const hoy = todayStr();
+  const en7 = new Date(Date.now() + 7*86400000).toISOString().slice(0,10);
   const filas = tareasCamp.filter(t=>{
     if(fe && t.estado!==fe) return false;
+    if(fc && ((t.empresas||{}).ciudad || '') !== fc) return false;
+    if(fk==='sin' && t.contacto_id) return false;
+    if(fk==='con' && !t.contacto_id) return false;
+    if(fv){
+      const f = t.fecha_vencimiento;
+      if(fv==='sinfecha' && f) return false;
+      if(fv==='vencidas' && !(f && f < hoy)) return false;
+      if(fv==='hoy'      && f !== hoy) return false;
+      if(fv==='semana'   && !(f && f >= hoy && f <= en7)) return false;
+    }
     if(q){ const e=t.empresas||{}; if(![t.titulo,e.nombre,e.nombre_comercial,e.rubro,e.ciudad].join(' ').toLowerCase().includes(q)) return false; }
     return true;
   });
@@ -1140,6 +1190,9 @@ function pintarTareas(){
       <td><span class="badge ${badge}">${esc(t.estado)}</span></td>
       <td style="text-align:right;white-space:nowrap">${acc}${accEmp}</td></tr>`;
   }).join('') : '<tr><td colspan="5" class="row-empty">Sin tareas que coincidan.</td></tr>';
+  if(filas.length && filas.length < tareasCamp.length){
+    $('tareasBody').innerHTML += `<tr><td colspan="5" class="row-empty">Mostrando ${filas.length} de ${tareasCamp.length} tareas</td></tr>`;
+  }
   const b=$('tareasBody');
   b.querySelectorAll('[data-asignar]').forEach(x=>x.onclick=()=>abrirAsignar(Number(x.dataset.asignar)));
   b.querySelectorAll('[data-prospectar]').forEach(x=>x.onclick=()=>prospectar(Number(x.dataset.prospectar)));
