@@ -1,10 +1,10 @@
-# Contexto del proyecto — CRM Consultoría SG
+# Contexto del proyecto — CRM Veta Labs
 
 Este archivo le da contexto a Codex sobre el proyecto y de dónde viene.
 
 ## Qué es
 
-CRM propio para la consultora de Sebastián Gómez: un negocio remoto de
+CRM propio para Veta Labs, la consultora de Sebastián Gómez: un negocio remoto de
 **automatización de procesos, IA y dashboards para PYMEs** (foco inicial en
 inmobiliarias y empresas de gestión de espacios de la Región de Coquimbo, Chile).
 
@@ -35,6 +35,7 @@ Este CRM sirve para gestionar el pipeline de clientes de esa consultora
 ## Supabase
 
 - Proyecto: **CRM-Consultoria-SG** (id: `rayvimywyqjnzzmbagpv`, región us-east-2).
+  Conserva el nombre anterior al rebrand a Veta Labs; renombrarlo en Supabase es opcional.
 - URL: `https://rayvimywyqjnzzmbagpv.supabase.co`
 - La clave anon (pública) está en `index.html`. La clave `service_role` NO está
   aquí y no debe exponerse nunca.

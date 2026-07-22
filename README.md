@@ -1,4 +1,4 @@
-# CRM · Consultoría SG
+# CRM · Veta Labs
 
 Mini-CRM para gestionar el pipeline de clientes de automatización e IA.
 App de una sola página (HTML + JS) conectada a Supabase (base de datos + login).

@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CRM · Nodo Labs</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg stroke='%23111111' stroke-width='8' stroke-linecap='round' fill='none'%3E%3Cpath d='M15 49V15'/%3E%3Cpath d='M15 15l34 34'/%3E%3Cpath d='M49 49V15'/%3E%3C/g%3E%3C/svg%3E">
+<title>CRM · Veta Labs</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg stroke='%23111111' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' fill='none'%3E%3Cpath d='M14 14L32 48L50 14'/%3E%3C/g%3E%3Ccircle cx='32' cy='48' r='7' fill='%23111111'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -25,9 +25,9 @@
   body{font-family:var(--font-body);background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
   h1,h2,h3{font-family:var(--font-display);font-weight:700;letter-spacing:-0.02em}
   a{color:inherit;text-decoration:none}
-  /* Isotipo Nodo Labs: 4 nodos conectados formando una N */
+  /* Isotipo Veta Labs: una veta que corta los estratos y converge en el hallazgo */
   .iso{flex:none;color:var(--ink)}
-  .iso .nodo-hueco{fill:var(--card)}
+  .iso .estrato{opacity:.32}
 
   /* Login */
   #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
@@ -169,15 +169,15 @@
   <div class="login-card">
     <div style="display:flex;align-items:center;gap:11px;margin-bottom:18px">
       <svg class="iso" width="34" height="34" viewBox="0 0 64 64" aria-hidden="true">
-        <g stroke="currentColor" stroke-width="5" stroke-linecap="round" fill="none">
-          <path d="M15 49V15"/><path d="M15 15l34 34"/><path d="M49 49V15"/>
+        <g class="estrato" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none">
+          <path d="M4 24H16"/><path d="M48 24H60"/>
         </g>
-        <circle cx="15" cy="49" r="6.5" fill="currentColor"/>
-        <circle cx="15" cy="15" r="6.5" fill="currentColor"/>
-        <circle cx="49" cy="49" r="6.5" fill="currentColor"/>
-        <circle class="nodo-hueco" cx="49" cy="15" r="6" stroke="currentColor" stroke-width="4"/>
+        <g stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <path d="M15 13L32 47L49 13"/>
+        </g>
+        <circle cx="32" cy="47" r="6.5" fill="currentColor"/>
       </svg>
-      <span style="font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-0.02em">Nodo Labs</span>
+      <span style="font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-0.02em">Veta Labs</span>
     </div>
     <div class="eyebrow">Automatización · Datos</div>
     <h1>Tu CRM</h1>
@@ -194,15 +194,15 @@
   <header class="top">
     <div class="brand">
       <svg class="iso" width="26" height="26" viewBox="0 0 64 64" aria-hidden="true" style="align-self:center">
-        <g stroke="currentColor" stroke-width="5" stroke-linecap="round" fill="none">
-          <path d="M15 49V15"/><path d="M15 15l34 34"/><path d="M49 49V15"/>
+        <g class="estrato" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none">
+          <path d="M4 24H16"/><path d="M48 24H60"/>
         </g>
-        <circle cx="15" cy="49" r="6.5" fill="currentColor"/>
-        <circle cx="15" cy="15" r="6.5" fill="currentColor"/>
-        <circle cx="49" cy="49" r="6.5" fill="currentColor"/>
-        <circle class="nodo-hueco" cx="49" cy="15" r="6" stroke="currentColor" stroke-width="4"/>
+        <g stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <path d="M15 13L32 47L49 13"/>
+        </g>
+        <circle cx="32" cy="47" r="6.5" fill="currentColor"/>
       </svg>
-      <span class="mark">Nodo Labs</span><span class="btag">CRM</span>
+      <span class="mark">Veta Labs</span><span class="btag">CRM</span>
     </div>
     <nav class="tabs" id="tabs">
       <a data-view="dashboard" class="active">Dashboard</a>
