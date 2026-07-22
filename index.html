@@ -210,6 +210,7 @@
       <a data-view="leads">Leads</a>
       <a data-view="contactos">Contactos</a>
       <a data-view="empresas">Empresas</a>
+      <a data-view="campanas">Campañas</a>
       <a data-view="seguimientos">Seguimientos</a>
     </nav>
     <div class="top-actions"><span class="user-email" id="userEmail"></span><button class="btn-sm" id="btnLogout">Salir</button></div>
@@ -265,6 +266,45 @@
         <thead><tr><th>Empresa</th><th>Rubro</th><th>Ciudad</th><th>Contactos</th><th>Leads</th><th>Sitio web</th></tr></thead>
         <tbody id="eBody"></tbody>
       </table></div>
+    </section>
+
+    <!-- CAMPAÑAS -->
+    <section class="view" id="view-campanas">
+      <div id="campLista">
+        <div class="page-head"><h2>Campañas</h2><button class="btn-add" id="btnNuevaCampana">+ Nueva campaña</button></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Campaña</th><th>Estado</th><th>Empresas</th><th>Pendientes</th><th>Convertidas</th><th>Inicio</th></tr></thead>
+          <tbody id="campBody"></tbody>
+        </table></div>
+      </div>
+
+      <div id="campDetalle" style="display:none">
+        <div class="page-head">
+          <div>
+            <button class="btn-sm" id="btnVolverCamp" style="margin-bottom:10px">← Campañas</button>
+            <h2 id="campTitulo">Campaña</h2>
+            <p class="modal-sub" id="campObjetivo" style="margin:6px 0 0"></p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start">
+            <button class="btn-sm" id="btnEditarCampana">Editar</button>
+            <button class="btn-add" id="btnAgregarEmpresas">+ Agregar empresas</button>
+          </div>
+        </div>
+        <div class="stats" id="campStats"></div>
+        <div class="toolbar">
+          <input class="search" id="mSearch" placeholder="Buscar empresa en la campaña…">
+          <select id="mEstado">
+            <option value="">Todos los estados</option>
+            <option value="pendiente">Pendientes</option>
+            <option value="convertida">Convertidas</option>
+            <option value="descartada">Descartadas</option>
+          </select>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Empresa</th><th>Rubro</th><th>Comuna</th><th>Tarea</th><th>Estado</th><th></th></tr></thead>
+          <tbody id="miembrosBody"></tbody>
+        </table></div>
+      </div>
     </section>
 
     <!-- SEGUIMIENTOS -->
@@ -389,6 +429,80 @@
   </div>
 </div>
 
+<!-- MODAL: campaña -->
+<div class="overlay" id="modalCampana">
+  <div class="modal">
+    <h3 id="campModalTitulo">Campaña</h3>
+    <p class="modal-sub">Grupo de empresas a prospectar</p>
+    <div class="field"><label>Nombre</label><input id="k_nombre" placeholder="Ej: Inmobiliarias La Serena · Q3"></div>
+    <div class="field"><label>Objetivo</label><input id="k_objetivo" placeholder="Ej: agendar 10 reuniones"></div>
+    <div class="row2">
+      <div class="field"><label>Estado</label><select id="k_estado">
+        <option value="borrador">Borrador</option><option value="activa">Activa</option>
+        <option value="pausada">Pausada</option><option value="finalizada">Finalizada</option>
+      </select></div>
+      <div class="field"><label>Inicio</label><input type="date" id="k_inicio"></div>
+    </div>
+    <div class="field"><label>Notas</label><textarea id="k_notas" rows="2"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-danger" id="btnEliminarCampana" style="display:none">Eliminar</button>
+      <button class="btn-cancel" id="btnCancelarCampana">Cerrar</button>
+      <button class="btn-primary" id="btnGuardarCampana" style="width:auto">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: agregar empresas a la campaña -->
+<div class="overlay" id="modalAgregar">
+  <div class="modal" style="max-width:640px">
+    <h3>Agregar empresas</h3>
+    <p class="modal-sub">Filtra tu base y agrégalas en bloque. Cada una recibe su tarea.</p>
+    <div class="row2">
+      <div class="field"><label>Nombre o RUT</label><input id="ag_q" placeholder="Buscar…"></div>
+      <div class="field"><label>Comuna</label><input id="ag_comuna" placeholder="Ej: LA SERENA"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Rubro contiene</label><input id="ag_rubro" placeholder="Ej: CONSTRUCCION"></div>
+      <div class="field"><label>Mín. trabajadores</label><input id="ag_min" type="number" min="0" placeholder="0"></div>
+    </div>
+    <div class="field"><label>Tarea para cada empresa</label><input id="ag_tarea" value="Buscar contacto y contactar"></div>
+    <div class="sub-list">
+      <h4>Resultados <span id="ag_conteo" class="muted"></span></h4>
+      <div id="ag_res" style="max-height:240px;overflow-y:auto"><div class="empty">Usa los filtros y pulsa Buscar.</div></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btnCancelarAgregar">Cerrar</button>
+      <button class="btn-ghost2" id="btnBuscarEmpresas">Buscar</button>
+      <button class="btn-primary" id="btnConfirmarAgregar" style="width:auto">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: completar tarea → crear lead -->
+<div class="overlay" id="modalCompletar">
+  <div class="modal">
+    <h3>Completar tarea</h3>
+    <p class="modal-sub" id="comp_empresa"></p>
+    <div class="field"><label>Contacto a quien se contactará</label><select id="comp_contacto"></select></div>
+    <div id="comp_nuevo">
+      <div class="row2">
+        <div class="field"><label>Nombre</label><input id="comp_nombre"></div>
+        <div class="field"><label>Cargo</label><input id="comp_cargo"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Email</label><input id="comp_email"></div>
+        <div class="field"><label>Teléfono</label><input id="comp_telefono"></div>
+      </div>
+    </div>
+    <div class="field"><label>Título del lead</label><input id="comp_titulo"></div>
+    <p class="modal-sub" style="margin:0">Se creará el lead en etapa <strong>Nuevo</strong> y la tarea quedará completada.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btnCancelarCompletar">Cerrar</button>
+      <button class="btn-primary" id="btnConfirmarCompletar" style="width:auto">Completar y crear lead</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ====== CONFIG ======
 const SUPABASE_URL = 'https://rayvimywyqjnzzmbagpv.supabase.co';
@@ -411,6 +525,8 @@ const CERRADAS = ['ganado','perdido'];
 const etLabel = k => (ETAPAS.find(e=>e.key===k)||{}).label || k;
 
 let empresas=[], contactos=[], leads=[], editLeadId=null, editContactoId=null, editEmpId=null, currentView='dashboard';
+// Campañas de prospección
+let campanas=[], resumenMiembros=[], campanaActual=null, miembros=[], editCampanaId=null, agResultados=[], completarCtx=null;
 
 const todayStr = () => new Date().toISOString().slice(0,10);
 const money = n => (n==null||n==='') ? '—' : new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n);
@@ -470,11 +586,13 @@ async function loadAll(){
   // El resto se busca en el servidor (tabla Empresas y selector de empresa).
   const ids = [...new Set([...contactos.map(x=>x.empresa_id), ...leads.map(x=>x.empresa_id)].filter(Boolean))];
   empresas = ids.length ? ((await sb.from('empresas').select('*').in('id', ids)).data || []) : [];
+  campanas = await fetchAll('campanas','created_at');
+  resumenMiembros = (await sb.from('campana_empresas').select('campana_id,estado')).data || [];
   $('lEtapa').innerHTML = '<option value="">Todas las etapas</option>' + ETAPAS.map(x=>`<option value="${x.key}">${x.label}</option>`).join('');
   renderActive();
 }
 function renderActive(){
-  ({dashboard:renderDashboard, pipeline:renderPipeline, leads:renderLeads, contactos:renderContactos, empresas:renderEmpresas, seguimientos:renderSeguimientos}[currentView]||renderDashboard)();
+  ({dashboard:renderDashboard, pipeline:renderPipeline, leads:renderLeads, contactos:renderContactos, empresas:renderEmpresas, campanas:renderCampanas, seguimientos:renderSeguimientos}[currentView]||renderDashboard)();
 }
 
 // ---------- DASHBOARD ----------
@@ -817,6 +935,217 @@ $('btnDeleteEmp').onclick = async () => {
   const {error} = await sb.from('empresas').delete().eq('id', editEmpId);
   if(error){ alert('No se pudo eliminar: '+error.message); return; }
   $('modalEmpresa').classList.remove('open'); editEmpId=null; loadAll();
+};
+
+// ---------- CAMPAÑAS ----------
+function renderCampanas(){ campanaActual ? renderCampanaDetalle() : renderCampanaLista(); }
+
+function conteosCampana(id){
+  const m = resumenMiembros.filter(x=>x.campana_id===id);
+  return { total:m.length,
+    pendientes:m.filter(x=>x.estado==='pendiente').length,
+    convertidas:m.filter(x=>x.estado==='convertida').length,
+    descartadas:m.filter(x=>x.estado==='descartada').length };
+}
+function renderCampanaLista(){
+  $('campLista').style.display='block'; $('campDetalle').style.display='none';
+  $('campBody').innerHTML = campanas.length ? campanas.map(c=>{
+    const n = conteosCampana(c.id);
+    return `<tr data-id="${c.id}">
+      <td><div class="t-name">${esc(c.nombre)}</div><div class="t-sub">${esc(c.objetivo||'')}</div></td>
+      <td><span class="badge">${esc(c.estado)}</span></td>
+      <td>${n.total}</td><td>${n.pendientes}</td><td>${n.convertidas}</td>
+      <td>${c.fecha_inicio||'—'}</td></tr>`;
+  }).join('') : '<tr><td colspan="6" class="row-empty">Sin campañas todavía. Crea la primera.</td></tr>';
+  $('campBody').querySelectorAll('tr[data-id]').forEach(tr=>tr.onclick=()=>abrirCampana(Number(tr.dataset.id)));
+}
+
+async function cargarMiembros(campanaId){
+  const { data } = await sb.from('campana_empresas')
+    .select('*, empresas(id,nombre,rubro,ciudad,rut), tareas(id,titulo,estado,fecha_completada,lead_id)')
+    .eq('campana_id', campanaId).order('id');
+  miembros = data || [];
+}
+async function refrescarResumen(){
+  resumenMiembros = (await sb.from('campana_empresas').select('campana_id,estado')).data || [];
+}
+async function abrirCampana(id){
+  campanaActual = campanas.find(c=>c.id===id) || null;
+  if(!campanaActual) return;
+  await cargarMiembros(id);
+  renderCampanaDetalle();
+}
+$('btnVolverCamp').onclick = () => { campanaActual=null; renderCampanaLista(); };
+['mSearch','mEstado'].forEach(id => $(id).addEventListener('input', () => { if(currentView==='campanas' && campanaActual) pintarMiembros(); }));
+
+function renderCampanaDetalle(){
+  const c = campanaActual; if(!c) return renderCampanaLista();
+  $('campLista').style.display='none'; $('campDetalle').style.display='block';
+  $('campTitulo').textContent = c.nombre;
+  $('campObjetivo').textContent = c.objetivo || '';
+  const p = miembros.filter(m=>m.estado==='pendiente').length;
+  const cv = miembros.filter(m=>m.estado==='convertida').length;
+  const d = miembros.filter(m=>m.estado==='descartada').length;
+  $('campStats').innerHTML = `
+    <div class="stat"><div class="num">${miembros.length}</div><div class="lbl">Empresas</div></div>
+    <div class="stat"><div class="num">${p}</div><div class="lbl">Tareas pendientes</div></div>
+    <div class="stat"><div class="num">${cv}</div><div class="lbl">Convertidas a lead</div></div>
+    <div class="stat"><div class="num">${d}</div><div class="lbl">Descartadas</div></div>`;
+  pintarMiembros();
+}
+
+function pintarMiembros(){
+  const q=$('mSearch').value.trim().toLowerCase(), fe=$('mEstado').value;
+  const filas = miembros.filter(m=>{
+    if(fe && m.estado!==fe) return false;
+    if(q){ const e=m.empresas||{}; if(![e.nombre,e.rubro,e.ciudad].join(' ').toLowerCase().includes(q)) return false; }
+    return true;
+  });
+  $('miembrosBody').innerHTML = filas.length ? filas.map(m=>{
+    const e=m.empresas||{}, t=(m.tareas||[])[0], hecha = t && t.estado==='completada';
+    const acc = m.estado==='pendiente'
+      ? `<button class="btn-sm" data-completar="${m.id}">Completar</button> <button class="btn-sm" data-descartar="${m.id}">Descartar</button>`
+      : (m.estado==='convertida' && t && t.lead_id
+          ? `<button class="btn-sm" data-lead="${t.lead_id}">Ver lead</button>`
+          : `<button class="btn-sm" data-reabrir="${m.id}">Reabrir</button>`);
+    const badge = m.estado==='convertida' ? 'ganado' : (m.estado==='descartada' ? 'perdido' : '');
+    return `<tr>
+      <td><div class="t-name">${esc(e.nombre||'—')}</div><div class="t-sub">${esc(e.rut||'')}</div></td>
+      <td>${esc(e.rubro||'—')}</td><td>${esc(e.ciudad||'—')}</td>
+      <td>${t?`<span class="${hecha?'muted':''}">${esc(t.titulo)}</span>`:'<span class="muted">—</span>'}</td>
+      <td><span class="badge ${badge}">${esc(m.estado)}</span></td>
+      <td style="text-align:right;white-space:nowrap">${acc}</td></tr>`;
+  }).join('') : '<tr><td colspan="6" class="row-empty">Sin empresas que coincidan.</td></tr>';
+  const b=$('miembrosBody');
+  b.querySelectorAll('[data-completar]').forEach(x=>x.onclick=()=>abrirCompletar(Number(x.dataset.completar)));
+  b.querySelectorAll('[data-descartar]').forEach(x=>x.onclick=()=>cambiarEstadoMiembro(Number(x.dataset.descartar),'descartada'));
+  b.querySelectorAll('[data-reabrir]').forEach(x=>x.onclick=()=>cambiarEstadoMiembro(Number(x.dataset.reabrir),'pendiente'));
+  b.querySelectorAll('[data-lead]').forEach(x=>x.onclick=()=>{ showView('leads'); openLead(Number(x.dataset.lead)); });
+}
+async function cambiarEstadoMiembro(id, estado){
+  const { error } = await sb.from('campana_empresas').update({estado}).eq('id',id);
+  if(error){ alert('No se pudo actualizar: '+error.message); return; }
+  await cargarMiembros(campanaActual.id); await refrescarResumen(); renderCampanaDetalle();
+}
+
+// --- modal campaña ---
+function abrirCampanaModal(c){
+  editCampanaId = c ? c.id : null;
+  $('campModalTitulo').textContent = c ? 'Editar campaña' : 'Nueva campaña';
+  $('k_nombre').value=c?.nombre||''; $('k_objetivo').value=c?.objetivo||'';
+  $('k_estado').value=c?.estado||'activa'; $('k_inicio').value=c?.fecha_inicio||todayStr();
+  $('k_notas').value=c?.notas||'';
+  $('btnEliminarCampana').style.display = c ? 'inline-flex' : 'none';
+  $('modalCampana').classList.add('open');
+}
+$('btnNuevaCampana').onclick = () => abrirCampanaModal(null);
+$('btnEditarCampana').onclick = () => abrirCampanaModal(campanaActual);
+$('btnCancelarCampana').onclick = () => $('modalCampana').classList.remove('open');
+$('btnGuardarCampana').onclick = async () => {
+  const payload = { nombre:$('k_nombre').value.trim(), objetivo:$('k_objetivo').value.trim()||null,
+    estado:$('k_estado').value, fecha_inicio:$('k_inicio').value||null, notas:$('k_notas').value.trim()||null };
+  if(!payload.nombre){ alert('Ponle un nombre a la campaña.'); return; }
+  const { error } = editCampanaId
+    ? await sb.from('campanas').update(payload).eq('id',editCampanaId)
+    : await sb.from('campanas').insert(payload);
+  if(error){ alert('No se pudo guardar: '+error.message); return; }
+  $('modalCampana').classList.remove('open');
+  await loadAll();
+  if(campanaActual) campanaActual = campanas.find(x=>x.id===campanaActual.id) || null;
+  renderCampanas();
+};
+$('btnEliminarCampana').onclick = async () => {
+  if(!editCampanaId) return;
+  if(!confirm('¿Eliminar la campaña? Se quitan sus empresas y tareas. Los leads ya creados NO se borran.')) return;
+  const { error } = await sb.from('campanas').delete().eq('id',editCampanaId);
+  if(error){ alert('No se pudo eliminar: '+error.message); return; }
+  $('modalCampana').classList.remove('open'); campanaActual=null; await loadAll(); renderCampanas();
+};
+
+// --- agregar empresas en bloque ---
+$('btnAgregarEmpresas').onclick = () => {
+  agResultados=[]; $('ag_res').innerHTML='<div class="empty">Usa los filtros y pulsa Buscar.</div>'; $('ag_conteo').textContent='';
+  $('modalAgregar').classList.add('open');
+};
+$('btnCancelarAgregar').onclick = () => $('modalAgregar').classList.remove('open');
+$('btnBuscarEmpresas').onclick = async () => {
+  const lim = s => s.trim().replace(/[,()%*]/g,' ').trim();
+  const q=lim($('ag_q').value), comuna=lim($('ag_comuna').value), rubro=lim($('ag_rubro').value), min=Number($('ag_min').value||0);
+  let cons = sb.from('empresas').select('id,nombre,rubro,ciudad,rut,num_empleados')
+    .order('num_empleados',{ascending:false,nullsFirst:false}).limit(200);
+  if(q) cons = cons.or(`nombre.ilike.%${q}%,rut.ilike.%${q}%`);
+  if(comuna) cons = cons.ilike('ciudad', `%${comuna}%`);
+  if(rubro) cons = cons.ilike('rubro', `%${rubro}%`);
+  if(min>0) cons = cons.gte('num_empleados', min);
+  const { data, error } = await cons;
+  if(error){ $('ag_res').innerHTML = `<div class="empty">Error: ${esc(error.message)}</div>`; return; }
+  const ya = new Set(miembros.map(m=>m.empresa_id));
+  agResultados = (data||[]).filter(e=>!ya.has(e.id));
+  $('ag_conteo').textContent = `· ${agResultados.length} disponibles`;
+  $('ag_res').innerHTML = agResultados.length ? agResultados.map(e=>`
+    <label class="li" style="cursor:pointer"><input type="checkbox" checked data-emp="${e.id}" style="width:auto;margin:0 8px 0 0">
+    <span><span class="t-name">${esc(e.nombre)}</span><span class="t-sub"> · ${esc(e.ciudad||'')} · ${e.num_empleados??'?'} trab.</span></span></label>
+  `).join('') : '<div class="empty">Sin resultados nuevos (o ya están en la campaña).</div>';
+};
+$('btnConfirmarAgregar').onclick = async () => {
+  if(!campanaActual) return;
+  const ids = [...$('ag_res').querySelectorAll('input[data-emp]:checked')].map(i=>Number(i.dataset.emp));
+  if(!ids.length){ alert('Selecciona al menos una empresa.'); return; }
+  const titulo = $('ag_tarea').value.trim() || 'Buscar contacto y contactar';
+  const { data: ins, error } = await sb.from('campana_empresas')
+    .insert(ids.map(empresa_id=>({campana_id:campanaActual.id, empresa_id}))).select('id');
+  if(error){ alert('No se pudo agregar: '+error.message); return; }
+  const { error: te } = await sb.from('tareas').insert((ins||[]).map(r=>({campana_empresa_id:r.id, titulo})));
+  if(te){ alert('Empresas agregadas, pero falló crear las tareas: '+te.message); }
+  $('modalAgregar').classList.remove('open');
+  await cargarMiembros(campanaActual.id); await refrescarResumen(); renderCampanaDetalle();
+};
+
+// --- completar tarea → asignar contacto y crear lead en "nuevo" ---
+function toggleCompNuevo(){ $('comp_nuevo').style.display = $('comp_contacto').value==='nuevo' ? 'block' : 'none'; }
+$('comp_contacto').addEventListener('change', toggleCompNuevo);
+function abrirCompletar(miembroId){
+  const m = miembros.find(x=>x.id===miembroId); if(!m) return;
+  const t = (m.tareas||[])[0];
+  completarCtx = { miembroId, tareaId: t?t.id:null, empresaId: m.empresa_id };
+  $('comp_empresa').textContent = (m.empresas||{}).nombre || '';
+  const suyos = contactos.filter(c=>c.empresa_id===m.empresa_id);
+  $('comp_contacto').innerHTML = suyos.map(c=>`<option value="${c.id}">${esc(c.nombre)}${c.cargo?' — '+esc(c.cargo):''}</option>`).join('')
+    + '<option value="nuevo">+ Crear contacto nuevo</option>';
+  $('comp_contacto').value = suyos.length ? String(suyos[0].id) : 'nuevo';
+  ['comp_nombre','comp_cargo','comp_email','comp_telefono'].forEach(i=>$(i).value='');
+  $('comp_titulo').value = campanaActual ? campanaActual.nombre : 'Oportunidad';
+  toggleCompNuevo();
+  $('modalCompletar').classList.add('open');
+}
+$('btnCancelarCompletar').onclick = () => $('modalCompletar').classList.remove('open');
+$('btnConfirmarCompletar').onclick = async () => {
+  if(!completarCtx) return;
+  let contactoId = $('comp_contacto').value;
+  if(contactoId === 'nuevo'){
+    const nombre = $('comp_nombre').value.trim();
+    if(!nombre){ alert('Escribe el nombre del contacto.'); return; }
+    const { data, error } = await sb.from('contactos').insert({
+      nombre, cargo:$('comp_cargo').value.trim()||null, email:$('comp_email').value.trim()||null,
+      telefono:$('comp_telefono').value.trim()||null, empresa_id: completarCtx.empresaId
+    }).select('id').single();
+    if(error){ alert('No se pudo crear el contacto: '+error.message); return; }
+    contactoId = data.id;
+  } else contactoId = Number(contactoId);
+
+  const { data: lead, error: le } = await sb.from('leads').insert({
+    empresa_id: completarCtx.empresaId, contacto_id: contactoId,
+    titulo: $('comp_titulo').value.trim() || null, etapa:'nuevo', prioridad:'media', ultimo_contacto: todayStr()
+  }).select('id').single();
+  if(le){ alert('No se pudo crear el lead: '+le.message); return; }
+
+  if(completarCtx.tareaId)
+    await sb.from('tareas').update({estado:'completada', fecha_completada:todayStr(), lead_id:lead.id}).eq('id', completarCtx.tareaId);
+  await sb.from('campana_empresas').update({estado:'convertida', fecha_contacto:todayStr()}).eq('id', completarCtx.miembroId);
+
+  $('modalCompletar').classList.remove('open');
+  await loadAll();
+  if(campanaActual){ await cargarMiembros(campanaActual.id); await refrescarResumen(); renderCampanaDetalle(); }
 };
 
 // ---------- EXPORTAR CSV ----------
