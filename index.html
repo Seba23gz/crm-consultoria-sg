@@ -261,7 +261,8 @@
     <!-- EMPRESAS -->
     <section class="view" id="view-empresas">
       <div class="page-head"><h2>Empresas</h2><div style="display:flex;gap:8px"><button class="btn-sm" id="btnExportEmpresas">⇩ CSV</button><button class="btn-add" id="btnNewEmpresa">+ Nueva empresa</button></div></div>
-      <div class="toolbar"><input class="search" id="eSearch" placeholder="Buscar empresa, rubro o ciudad…"></div>
+      <div class="toolbar"><input class="search" id="eSearch" placeholder="Buscar empresa, rubro o ciudad…">
+        <label class="t-sub" style="display:flex;align-items:center;gap:6px;white-space:nowrap;cursor:pointer"><input type="checkbox" id="eVerArchivadas"> Ver archivadas</label></div>
       <div class="table-wrap"><table>
         <thead><tr><th>Empresa</th><th>Rubro</th><th>Ciudad</th><th>Contactos</th><th>Leads</th><th>Sitio web</th></tr></thead>
         <tbody id="eBody"></tbody>
@@ -413,6 +414,8 @@
     </div>
     <div class="field"><label>Sitio web</label><input id="e_web" placeholder="https://"></div>
     <div class="field"><label>Notas</label><textarea id="e_notas" rows="2"></textarea></div>
+    <label class="t-sub" style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:-4px">
+      <input type="checkbox" id="e_archivada"> Archivada — fuera de búsquedas y de campañas (sociedad de inversión, sin operación)</label>
 
     <div class="sub-list" id="empSii" style="display:none">
       <h4>Datos SII</h4><div id="empSiiDatos"></div>
@@ -620,7 +623,8 @@ async function loadAll(){
   // El resto se busca en el servidor (tabla Empresas y selector de empresa).
   const ids = [...new Set([...contactos.map(x=>x.empresa_id), ...leads.map(x=>x.empresa_id)].filter(Boolean))];
   empresas = ids.length ? ((await sb.from('empresas').select('*').in('id', ids)).data || []) : [];
-  totalEmpresas = (await sb.from('empresas').select('id', {count:'exact', head:true})).count ?? empresas.length;
+  // El dashboard cuenta las empresas vivas: las archivadas están fuera del flujo.
+  totalEmpresas = (await sb.from('empresas').select('id', {count:'exact', head:true}).eq('archivada', false)).count ?? empresas.length;
   campanas = await fetchAll('campanas','created_at');
   resumenTareas = (await sb.from('tareas').select('campana_id,estado')).data || [];
   $('lEtapa').innerHTML = '<option value="">Todas las etapas</option>' + ETAPAS.map(x=>`<option value="${x.key}">${x.label}</option>`).join('');
@@ -743,19 +747,22 @@ $('eSearch').addEventListener('input', () => {
   clearTimeout(eTimer);
   eTimer = setTimeout(() => { if(currentView==='empresas') renderEmpresas(); }, 250);
 });
+$('eVerArchivadas').addEventListener('change', () => { if(currentView==='empresas') renderEmpresas(); });
 // Busca en el servidor (hay miles de empresas, no están todas en memoria)
 async function renderEmpresas(){
   const q = $('eSearch').value.trim().replace(/[,()%*]/g,' ').trim();
+  const verArch = $('eVerArchivadas').checked;
   let consulta = sb.from('empresas').select('*', {count:'exact'}).order('nombre').limit(TOPE_TABLA);
+  if(!verArch) consulta = consulta.eq('archivada', false);
   if(q) consulta = consulta.or(`nombre.ilike.%${q}%,nombre_comercial.ilike.%${q}%,rubro.ilike.%${q}%,ciudad.ilike.%${q}%,rut.ilike.%${q}%`);
   const { data, count, error } = await consulta;
   if(error){ $('eBody').innerHTML = `<tr><td colspan="6" class="row-empty">Error al buscar: ${esc(error.message)}</td></tr>`; return; }
   const vista = data || [], total = count ?? vista.length;
-  if(!q && count != null) totalEmpresas = count; // sin filtro, este count es el total real
+  if(!q && !verArch && count != null) totalEmpresas = count; // sin filtros, este count es el total real
   const cuerpo = vista.length
     ? vista.map(e => `
     <tr data-id="${e.id}">
-      <td><div class="t-name">${esc(e.nombre_comercial||e.nombre)}</div>${
+      <td><div class="t-name" style="${e.archivada?'opacity:.55':''}">${esc(e.nombre_comercial||e.nombre)}${e.archivada?' <span class="badge perdido">archivada</span>':''}</div>${
         [e.nombre_comercial?e.nombre:'', e.rut].filter(Boolean).map(s=>`<div class="t-sub">${esc(s)}</div>`).join('')}</td>
       <td>${esc(e.rubro||'—')}</td><td>${esc(e.ciudad||'—')}</td>
       <td>${contactosDeEmpresa(e.id).length}</td><td>${leadsDeEmpresa(e.id).length}</td>
@@ -856,7 +863,8 @@ $('c_empresa_txt').addEventListener('input', () => {
   clearTimeout(acTimer);
   if(q.length < 2){ acCerrar(); return; }
   acTimer = setTimeout(async () => {
-    const { data } = await sb.from('empresas').select('id,nombre,rut,ciudad,rubro')
+    const { data } = await sb.from('empresas').select('id,nombre,nombre_comercial,rut,ciudad,rubro')
+      .eq('archivada', false)
       .or(`nombre.ilike.%${q}%,nombre_comercial.ilike.%${q}%,rut.ilike.%${q}%`).order('nombre').limit(8);
     const cont = $('c_empresa_res');
     cont.innerHTML = (data||[]).length
@@ -922,6 +930,7 @@ function openEmpresa(id){
   $('e_nombre').value=e?.nombre||''; $('e_comercial').value=e?.nombre_comercial||'';
   $('e_rut').value=e?.rut||''; $('e_rubro').value=e?.rubro||''; $('e_ciudad').value=e?.ciudad||'';
   $('e_empleados').value=e?.num_empleados??''; $('e_telefono').value=e?.telefono||''; $('e_web').value=e?.sitio_web||''; $('e_notas').value=e?.notas||'';
+  $('e_archivada').checked = !!e?.archivada;
   $('btnDeleteEmp').style.display = e?'inline-flex':'none';
   // Datos del padrón SII (solo lectura)
   $('empSii').style.display = e?'block':'none';
@@ -959,7 +968,8 @@ $('btnSaveEmp').onclick = async () => {
     nombre:$('e_nombre').value.trim(), nombre_comercial:$('e_comercial').value.trim()||null,
     rut:$('e_rut').value.trim()||null,
     rubro:$('e_rubro').value.trim()||null, ciudad:$('e_ciudad').value.trim()||null,
-    num_empleados: emp!==''?Number(emp):null, telefono:$('e_telefono').value.trim()||null, sitio_web:$('e_web').value.trim()||null, notas:$('e_notas').value.trim()||null
+    num_empleados: emp!==''?Number(emp):null, telefono:$('e_telefono').value.trim()||null, sitio_web:$('e_web').value.trim()||null, notas:$('e_notas').value.trim()||null,
+    archivada: $('e_archivada').checked
   };
   if(!payload.nombre){ alert('El nombre de la empresa es obligatorio.'); return; }
   const {error} = editEmpId ? await sb.from('empresas').update(payload).eq('id',editEmpId) : await sb.from('empresas').insert(payload);
@@ -1110,7 +1120,8 @@ $('t_empresa_txt').addEventListener('input', () => {
   clearTimeout(tacTimer);
   if(q.length<2){ tacCerrar(); return; }
   tacTimer = setTimeout(async () => {
-    const { data } = await sb.from('empresas').select('id,nombre,rut,ciudad')
+    const { data } = await sb.from('empresas').select('id,nombre,nombre_comercial,rut,ciudad')
+      .eq('archivada', false)
       .or(`nombre.ilike.%${q}%,nombre_comercial.ilike.%${q}%,rut.ilike.%${q}%`).order('nombre').limit(8);
     const cont = $('t_empresa_res');
     cont.innerHTML = (data||[]).length
@@ -1175,7 +1186,8 @@ $('btnCancelarAgregar').onclick = () => $('modalAgregar').classList.remove('open
 $('btnBuscarEmpresas').onclick = async () => {
   const lim = s => s.trim().replace(/[,()%*]/g,' ').trim();
   const q=lim($('ag_q').value), comuna=lim($('ag_comuna').value), rubro=lim($('ag_rubro').value), min=Number($('ag_min').value||0);
-  let cons = sb.from('empresas').select('id,nombre,rubro,ciudad,rut,num_empleados')
+  let cons = sb.from('empresas').select('id,nombre,nombre_comercial,rubro,ciudad,rut,num_empleados')
+    .eq('archivada', false)
     .order('num_empleados',{ascending:false,nullsFirst:false}).limit(200);
   if(q) cons = cons.or(`nombre.ilike.%${q}%,nombre_comercial.ilike.%${q}%,rut.ilike.%${q}%`);
   if(comuna) cons = cons.ilike('ciudad', `%${comuna}%`);
