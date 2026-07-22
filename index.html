@@ -553,6 +553,9 @@ const CERRADAS = ['ganado','perdido'];
 const etLabel = k => (ETAPAS.find(e=>e.key===k)||{}).label || k;
 
 let empresas=[], contactos=[], leads=[], editLeadId=null, editContactoId=null, editEmpId=null, currentView='dashboard';
+// `empresas` es solo una caché parcial (las que usan contactos/leads + las que se van
+// mostrando en la tabla). El total real vive en el servidor, se cuenta aparte.
+let totalEmpresas = 0;
 // Campañas de prospección
 let campanas=[], resumenTareas=[], campanaActual=null, tareasCamp=[], editCampanaId=null, agResultados=[], completarCtx=null;
 
@@ -614,6 +617,7 @@ async function loadAll(){
   // El resto se busca en el servidor (tabla Empresas y selector de empresa).
   const ids = [...new Set([...contactos.map(x=>x.empresa_id), ...leads.map(x=>x.empresa_id)].filter(Boolean))];
   empresas = ids.length ? ((await sb.from('empresas').select('*').in('id', ids)).data || []) : [];
+  totalEmpresas = (await sb.from('empresas').select('id', {count:'exact', head:true})).count ?? empresas.length;
   campanas = await fetchAll('campanas','created_at');
   resumenTareas = (await sb.from('tareas').select('campana_id,estado')).data || [];
   $('lEtapa').innerHTML = '<option value="">Todas las etapas</option>' + ETAPAS.map(x=>`<option value="${x.key}">${x.label}</option>`).join('');
@@ -636,7 +640,7 @@ function renderDashboard(){
     <div class="stat"><div class="num" style="font-size:22px">${money(valor)}</div><div class="lbl">Valor en pipeline</div></div>
     <div class="stat ${vencidos.length?'alert':''}"><div class="num">${vencidos.length}</div><div class="lbl">Seguimientos vencidos</div></div>
     <div class="stat"><div class="num">${contactos.length}</div><div class="lbl">Contactos</div></div>
-    <div class="stat"><div class="num">${empresas.length}</div><div class="lbl">Empresas</div></div>`;
+    <div class="stat"><div class="num">${totalEmpresas.toLocaleString('es-CL')}</div><div class="lbl">Empresas</div></div>`;
   const max = Math.max(1, ...ETAPAS.map(et=>leads.filter(l=>l.etapa===et.key).length));
   $('funnel').innerHTML = ETAPAS.map(et => {
     const n = leads.filter(l=>l.etapa===et.key).length;
@@ -744,6 +748,7 @@ async function renderEmpresas(){
   const { data, count, error } = await consulta;
   if(error){ $('eBody').innerHTML = `<tr><td colspan="6" class="row-empty">Error al buscar: ${esc(error.message)}</td></tr>`; return; }
   const vista = data || [], total = count ?? vista.length;
+  if(!q && count != null) totalEmpresas = count; // sin filtro, este count es el total real
   const cuerpo = vista.length
     ? vista.map(e => `
     <tr data-id="${e.id}">
