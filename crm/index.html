@@ -585,11 +585,75 @@ function creds(){
   return {email, password};
 }
 $('btnLogin').onclick = async () => { const c=creds(); if(!c) return; const {error}=await sb.auth.signInWithPassword(c); if(error) showMsg(error.message,false); };
-$('btnLogout').onclick = async () => { await sb.auth.signOut(); };
+$('btnLogout').onclick = async () => {
+  try{ localStorage.removeItem(LLAVE_ESTADO); }catch(e){ }
+  await sb.auth.signOut();
+};
 sb.auth.onAuthStateChange((_e, session) => {
   if(session){ $('login').style.display='none'; $('app').style.display='block'; $('userEmail').textContent=session.user.email; loadAll(); }
   else { $('login').style.display='flex'; $('app').style.display='none'; }
 });
+
+// ---------- ESTADO ENTRE RECARGAS ----------
+// Al recargar, la app volvía siempre al dashboard. Se guarda dónde estabas
+// (vista, campaña abierta, filtros y scroll) para dejarte en el mismo lugar.
+const LLAVE_ESTADO = 'veta-crm-estado';
+const VISTAS = ['dashboard','pipeline','leads','contactos','empresas','campanas','seguimientos'];
+const CAMPOS_FILTRO = ['lSearch','lEtapa','lPrioridad','cSearch','eSearch','mSearch','mEstado'];
+let restaurando = false, primeraCarga = true;
+
+function guardarEstado(){
+  if(restaurando) return; // durante la restauración el estado guardado manda
+  const filtros = {};
+  CAMPOS_FILTRO.forEach(id => { const el = $(id); if(el && el.value) filtros[id] = el.value; });
+  if($('eVerArchivadas') && $('eVerArchivadas').checked) filtros.eVerArchivadas = true;
+  try{
+    localStorage.setItem(LLAVE_ESTADO, JSON.stringify({
+      view: currentView,
+      campanaId: campanaActual ? campanaActual.id : null,
+      scrollY: Math.round(window.scrollY),
+      filtros
+    }));
+  }catch(e){ /* navegación privada o storage lleno: seguir sin persistir */ }
+}
+
+async function restaurarEstado(){
+  let e = null;
+  try{ e = JSON.parse(localStorage.getItem(LLAVE_ESTADO) || 'null'); }catch(_){ }
+  if(!e || !VISTAS.includes(e.view)){ renderActive(); return; }
+
+  restaurando = true;
+  try{
+    const filtros = e.filtros || {};
+    CAMPOS_FILTRO.forEach(id => { const el = $(id); if(el && filtros[id] != null) el.value = filtros[id]; });
+    if($('eVerArchivadas')) $('eVerArchivadas').checked = !!filtros.eVerArchivadas;
+    showView(e.view);
+    // La campaña pudo borrarse entremedio: si ya no está, queda la lista.
+    if(e.view === 'campanas' && e.campanaId && campanas.some(c => c.id === e.campanaId)){
+      await abrirCampana(e.campanaId);
+    }
+  } finally { restaurando = false; }
+
+  if(e.scrollY) restaurarScroll(e.scrollY);
+}
+
+// Empresas trae sus filas del servidor después del primer render, así que la
+// página todavía no tiene alto suficiente para scrollear. Se reintenta un rato
+// corto y se corta apenas se alcanza la posición.
+function restaurarScroll(y){
+  let intentos = 0;
+  const tick = () => {
+    window.scrollTo(0, y);
+    if(++intentos < 8 && Math.abs(window.scrollY - y) > 2) setTimeout(tick, 90);
+  };
+  requestAnimationFrame(tick);
+}
+
+let scrollTimer;
+window.addEventListener('scroll', () => { clearTimeout(scrollTimer); scrollTimer = setTimeout(guardarEstado, 200); });
+window.addEventListener('pagehide', guardarEstado);
+CAMPOS_FILTRO.forEach(id => { const el = $(id); if(el) el.addEventListener('input', guardarEstado); });
+if($('eVerArchivadas')) $('eVerArchivadas').addEventListener('change', guardarEstado);
 
 // ---------- NAV ----------
 function showView(name){
@@ -597,6 +661,7 @@ function showView(name){
   document.querySelectorAll('nav.tabs a').forEach(a=>a.classList.toggle('active', a.dataset.view===name));
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active', v.id==='view-'+name));
   renderActive();
+  guardarEstado();
 }
 document.querySelectorAll('nav.tabs a').forEach(a => a.onclick = () => showView(a.dataset.view));
 
@@ -628,7 +693,10 @@ async function loadAll(){
   campanas = await fetchAll('campanas','created_at');
   resumenTareas = (await sb.from('tareas').select('campana_id,estado')).data || [];
   $('lEtapa').innerHTML = '<option value="">Todas las etapas</option>' + ETAPAS.map(x=>`<option value="${x.key}">${x.label}</option>`).join('');
-  renderActive();
+  // Solo la primera carga restaura: después loadAll() se llama al guardar y no
+  // debe moverte de donde estás.
+  if(primeraCarga){ primeraCarga = false; await restaurarEstado(); }
+  else renderActive();
 }
 function renderActive(){
   ({dashboard:renderDashboard, pipeline:renderPipeline, leads:renderLeads, contactos:renderContactos, empresas:renderEmpresas, campanas:renderCampanas, seguimientos:renderSeguimientos}[currentView]||renderDashboard)();
@@ -1024,8 +1092,9 @@ async function abrirCampana(id){
   if(!campanaActual) return;
   await cargarTareas(id);
   renderCampanaDetalle();
+  guardarEstado();
 }
-$('btnVolverCamp').onclick = () => { campanaActual=null; renderCampanaLista(); };
+$('btnVolverCamp').onclick = () => { campanaActual=null; renderCampanaLista(); guardarEstado(); };
 ['mSearch','mEstado'].forEach(id => $(id).addEventListener('input', () => { if(currentView==='campanas' && campanaActual) pintarTareas(); }));
 
 function renderCampanaDetalle(){
