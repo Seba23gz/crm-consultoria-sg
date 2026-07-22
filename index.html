@@ -399,9 +399,10 @@
     <h3 id="empTitle">Empresa</h3>
     <p class="modal-sub">Cuenta / organización</p>
     <div class="row2">
-      <div class="field"><label>Nombre</label><input id="e_nombre"></div>
+      <div class="field"><label>Razón social</label><input id="e_nombre"></div>
       <div class="field"><label>RUT</label><input id="e_rut" placeholder="12345678-9"></div>
     </div>
+    <div class="field"><label>Nombre comercial</label><input id="e_comercial" placeholder="Nombre de fantasía (si es distinto de la razón social)"></div>
     <div class="row2">
       <div class="field"><label>Rubro</label><input id="e_rubro"></div>
       <div class="field"><label>Ciudad</label><input id="e_ciudad"></div>
@@ -563,7 +564,9 @@ const todayStr = () => new Date().toISOString().slice(0,10);
 const money = n => (n==null||n==='') ? '—' : new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n);
 const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const empById = id => empresas.find(x=>x.id===id);
-const empName = id => { const e=empById(id); return e?e.nombre:'—'; };
+// Se muestra el nombre comercial cuando existe: es como se conoce a la empresa.
+// La razón social queda como respaldo y sigue siendo el dato legal en `nombre`.
+const empName = id => { const e=empById(id); return e?(e.nombre_comercial||e.nombre):'—'; };
 const cById = id => contactos.find(x=>x.id===id);
 const cName = id => { const c=cById(id); return c?c.nombre:'(sin contacto)'; };
 const contactosDeEmpresa = id => contactos.filter(c=>c.empresa_id===id);
@@ -744,7 +747,7 @@ $('eSearch').addEventListener('input', () => {
 async function renderEmpresas(){
   const q = $('eSearch').value.trim().replace(/[,()%*]/g,' ').trim();
   let consulta = sb.from('empresas').select('*', {count:'exact'}).order('nombre').limit(TOPE_TABLA);
-  if(q) consulta = consulta.or(`nombre.ilike.%${q}%,rubro.ilike.%${q}%,ciudad.ilike.%${q}%,rut.ilike.%${q}%`);
+  if(q) consulta = consulta.or(`nombre.ilike.%${q}%,nombre_comercial.ilike.%${q}%,rubro.ilike.%${q}%,ciudad.ilike.%${q}%,rut.ilike.%${q}%`);
   const { data, count, error } = await consulta;
   if(error){ $('eBody').innerHTML = `<tr><td colspan="6" class="row-empty">Error al buscar: ${esc(error.message)}</td></tr>`; return; }
   const vista = data || [], total = count ?? vista.length;
@@ -752,7 +755,8 @@ async function renderEmpresas(){
   const cuerpo = vista.length
     ? vista.map(e => `
     <tr data-id="${e.id}">
-      <td><div class="t-name">${esc(e.nombre)}</div>${e.rut?`<div class="t-sub">${esc(e.rut)}</div>`:''}</td>
+      <td><div class="t-name">${esc(e.nombre_comercial||e.nombre)}</div>${
+        [e.nombre_comercial?e.nombre:'', e.rut].filter(Boolean).map(s=>`<div class="t-sub">${esc(s)}</div>`).join('')}</td>
       <td>${esc(e.rubro||'—')}</td><td>${esc(e.ciudad||'—')}</td>
       <td>${contactosDeEmpresa(e.id).length}</td><td>${leadsDeEmpresa(e.id).length}</td>
       <td>${e.sitio_web?`<span class="t-sub">${esc(e.sitio_web)}</span>`:'<span class="muted">—</span>'}</td>
@@ -853,10 +857,10 @@ $('c_empresa_txt').addEventListener('input', () => {
   if(q.length < 2){ acCerrar(); return; }
   acTimer = setTimeout(async () => {
     const { data } = await sb.from('empresas').select('id,nombre,rut,ciudad,rubro')
-      .or(`nombre.ilike.%${q}%,rut.ilike.%${q}%`).order('nombre').limit(8);
+      .or(`nombre.ilike.%${q}%,nombre_comercial.ilike.%${q}%,rut.ilike.%${q}%`).order('nombre').limit(8);
     const cont = $('c_empresa_res');
     cont.innerHTML = (data||[]).length
-      ? data.map(e=>`<div class="ac-item" data-id="${e.id}" data-nombre="${esc(e.nombre)}">${esc(e.nombre)}<div class="ac-sub">${esc(e.rut||'')} · ${esc(e.ciudad||'')}</div></div>`).join('')
+      ? data.map(e=>`<div class="ac-item" data-id="${e.id}" data-nombre="${esc(e.nombre_comercial||e.nombre)}">${esc(e.nombre_comercial||e.nombre)}<div class="ac-sub">${e.nombre_comercial?esc(e.nombre)+" · ":""}${esc(e.rut||'')} · ${esc(e.ciudad||'')}</div></div>`).join('')
       : '<div class="ac-item ac-sub">Sin resultados</div>';
     cont.querySelectorAll('.ac-item[data-id]').forEach(d => d.onclick = () => {
       $('c_empresa_id').value = d.dataset.id;
@@ -914,8 +918,9 @@ $('btnDeleteContacto').onclick = async () => {
 function openEmpresa(id){
   editEmpId = id;
   const e = empById(id);
-  $('empTitle').textContent = e?e.nombre:'Nueva empresa';
-  $('e_nombre').value=e?.nombre||''; $('e_rut').value=e?.rut||''; $('e_rubro').value=e?.rubro||''; $('e_ciudad').value=e?.ciudad||'';
+  $('empTitle').textContent = e?(e.nombre_comercial||e.nombre):'Nueva empresa';
+  $('e_nombre').value=e?.nombre||''; $('e_comercial').value=e?.nombre_comercial||'';
+  $('e_rut').value=e?.rut||''; $('e_rubro').value=e?.rubro||''; $('e_ciudad').value=e?.ciudad||'';
   $('e_empleados').value=e?.num_empleados??''; $('e_telefono').value=e?.telefono||''; $('e_web').value=e?.sitio_web||''; $('e_notas').value=e?.notas||'';
   $('btnDeleteEmp').style.display = e?'inline-flex':'none';
   // Datos del padrón SII (solo lectura)
@@ -951,7 +956,8 @@ $('btnCancelEmp').onclick = () => $('modalEmpresa').classList.remove('open');
 $('btnSaveEmp').onclick = async () => {
   const emp=$('e_empleados').value;
   const payload = {
-    nombre:$('e_nombre').value.trim(), rut:$('e_rut').value.trim()||null,
+    nombre:$('e_nombre').value.trim(), nombre_comercial:$('e_comercial').value.trim()||null,
+    rut:$('e_rut').value.trim()||null,
     rubro:$('e_rubro').value.trim()||null, ciudad:$('e_ciudad').value.trim()||null,
     num_empleados: emp!==''?Number(emp):null, telefono:$('e_telefono').value.trim()||null, sitio_web:$('e_web').value.trim()||null, notas:$('e_notas').value.trim()||null
   };
@@ -996,7 +1002,7 @@ function renderCampanaLista(){
 
 async function cargarTareas(campanaId){
   const { data } = await sb.from('tareas')
-    .select('*, empresas(id,nombre,rubro,ciudad,rut), contactos(id,nombre)')
+    .select('*, empresas(id,nombre,nombre_comercial,rubro,ciudad,rut), contactos(id,nombre)')
     .eq('campana_id', campanaId).order('id');
   tareasCamp = data || [];
 }
@@ -1032,7 +1038,7 @@ function pintarTareas(){
   const q=$('mSearch').value.trim().toLowerCase(), fe=$('mEstado').value;
   const filas = tareasCamp.filter(t=>{
     if(fe && t.estado!==fe) return false;
-    if(q){ const e=t.empresas||{}; if(![t.titulo,e.nombre,e.rubro,e.ciudad].join(' ').toLowerCase().includes(q)) return false; }
+    if(q){ const e=t.empresas||{}; if(![t.titulo,e.nombre,e.nombre_comercial,e.rubro,e.ciudad].join(' ').toLowerCase().includes(q)) return false; }
     return true;
   });
   $('tareasBody').innerHTML = filas.length ? filas.map(t=>{
@@ -1049,7 +1055,7 @@ function pintarTareas(){
     const badge = hecha ? 'ganado' : (t.estado==='descartada' ? 'perdido' : '');
     return `<tr>
       <td><div class="t-name" style="${hecha?'text-decoration:line-through;opacity:.6':''}">${esc(t.titulo)}</div>${t.contactos?`<div class="t-sub">→ ${esc(t.contactos.nombre)}</div>`:''}</td>
-      <td><div>${esc(e.nombre||'—')}</div><div class="t-sub">${esc(e.ciudad||'')}</div></td>
+      <td><div>${esc(e.nombre_comercial||e.nombre||'—')}</div><div class="t-sub">${esc([e.nombre_comercial?e.nombre:'', e.ciudad].filter(Boolean).join(' · '))}</div></td>
       <td>${t.fecha_vencimiento?`<span class="follow ${vencida?'overdue':''}">${vencida?'⚠ ':''}${t.fecha_vencimiento}</span>`:'<span class="muted">—</span>'}</td>
       <td><span class="badge ${badge}">${esc(t.estado)}</span></td>
       <td style="text-align:right;white-space:nowrap">${acc}</td></tr>`;
@@ -1105,10 +1111,10 @@ $('t_empresa_txt').addEventListener('input', () => {
   if(q.length<2){ tacCerrar(); return; }
   tacTimer = setTimeout(async () => {
     const { data } = await sb.from('empresas').select('id,nombre,rut,ciudad')
-      .or(`nombre.ilike.%${q}%,rut.ilike.%${q}%`).order('nombre').limit(8);
+      .or(`nombre.ilike.%${q}%,nombre_comercial.ilike.%${q}%,rut.ilike.%${q}%`).order('nombre').limit(8);
     const cont = $('t_empresa_res');
     cont.innerHTML = (data||[]).length
-      ? data.map(e=>`<div class="ac-item" data-id="${e.id}" data-nombre="${esc(e.nombre)}">${esc(e.nombre)}<div class="ac-sub">${esc(e.rut||'')} · ${esc(e.ciudad||'')}</div></div>`).join('')
+      ? data.map(e=>`<div class="ac-item" data-id="${e.id}" data-nombre="${esc(e.nombre_comercial||e.nombre)}">${esc(e.nombre_comercial||e.nombre)}<div class="ac-sub">${e.nombre_comercial?esc(e.nombre)+" · ":""}${esc(e.rut||'')} · ${esc(e.ciudad||'')}</div></div>`).join('')
       : '<div class="ac-item ac-sub">Sin resultados</div>';
     cont.querySelectorAll('.ac-item[data-id]').forEach(d=>d.onclick=()=>{
       $('t_empresa_id').value=d.dataset.id; $('t_empresa_txt').value=d.dataset.nombre; tacCerrar();
@@ -1171,7 +1177,7 @@ $('btnBuscarEmpresas').onclick = async () => {
   const q=lim($('ag_q').value), comuna=lim($('ag_comuna').value), rubro=lim($('ag_rubro').value), min=Number($('ag_min').value||0);
   let cons = sb.from('empresas').select('id,nombre,rubro,ciudad,rut,num_empleados')
     .order('num_empleados',{ascending:false,nullsFirst:false}).limit(200);
-  if(q) cons = cons.or(`nombre.ilike.%${q}%,rut.ilike.%${q}%`);
+  if(q) cons = cons.or(`nombre.ilike.%${q}%,nombre_comercial.ilike.%${q}%,rut.ilike.%${q}%`);
   if(comuna) cons = cons.ilike('ciudad', `%${comuna}%`);
   if(rubro) cons = cons.ilike('rubro', `%${rubro}%`);
   if(min>0) cons = cons.gte('num_empleados', min);
@@ -1182,7 +1188,7 @@ $('btnBuscarEmpresas').onclick = async () => {
   $('ag_conteo').textContent = `· ${agResultados.length} sin tarea en esta campaña`;
   $('ag_res').innerHTML = agResultados.length ? agResultados.map(e=>`
     <label class="li" style="cursor:pointer"><input type="checkbox" checked data-emp="${e.id}" style="width:auto;margin:0 8px 0 0">
-    <span><span class="t-name">${esc(e.nombre)}</span><span class="t-sub"> · ${esc(e.ciudad||'')} · ${e.num_empleados??'?'} trab.</span></span></label>
+    <span><span class="t-name">${esc(e.nombre_comercial||e.nombre)}</span><span class="t-sub">${e.nombre_comercial?' · '+esc(e.nombre):''} · ${esc(e.ciudad||'')} · ${e.num_empleados??'?'} trab.</span></span></label>
   `).join('') : '<div class="empty">Sin resultados nuevos (o ya tienen tarea en esta campaña).</div>';
 };
 $('btnConfirmarAgregar').onclick = async () => {
@@ -1280,8 +1286,8 @@ $('btnExportContactos').onclick = () => downloadCSV('contactos.csv',
   ['Nombre','Cargo','Empresa','Email','Telefono','LinkedIn','Notas'],
   contactos.map(c=>[c.nombre, c.cargo, empName(c.empresa_id), c.email, c.telefono, c.linkedin_url, c.notas]));
 $('btnExportEmpresas').onclick = () => downloadCSV('empresas.csv',
-  ['Nombre','Rubro','Ciudad','Empleados','Telefono','Sitio web','Notas'],
-  empresas.map(e=>[e.nombre, e.rubro, e.ciudad, e.num_empleados, e.telefono, e.sitio_web, e.notas]));
+  ['Razon social','Nombre comercial','Rubro','Ciudad','Empleados','Telefono','Sitio web','Notas'],
+  empresas.map(e=>[e.nombre, e.nombre_comercial, e.rubro, e.ciudad, e.num_empleados, e.telefono, e.sitio_web, e.notas]));
 
 // cerrar modales al hacer clic fuera
 document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
