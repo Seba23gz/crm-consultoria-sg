@@ -25,3 +25,23 @@ Abrir `index.html` en el navegador. Supabase se conecta por internet.
 
 ## Deploy en Vercel
 Importar este repositorio en vercel.com/new. Sin build: framework "Other", output = raíz.
+
+## Integración con tu web
+Tu formulario puede enviar los datos al endpoint:
+
+https://TU-APP.vercel.app/api/lead-form
+
+Ejemplo de payload:
+
+```json
+{
+  "nombre": "Juan Pérez",
+  "email": "juan@ejemplo.com",
+  "telefono": "+56912345678",
+  "empresa": "Mi Empresa",
+  "cargo": "Dueño",
+  "mensaje": "Quiero cotizar"
+}
+```
+
+Cuando llega, el CRM crea o registra el contacto y lo deja en etapa `contactado`. Si configuras `RESEND_API_KEY` y `CRM_OWNER_EMAIL` en Vercel, además te enviará un correo.
