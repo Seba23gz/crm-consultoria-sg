@@ -1259,6 +1259,10 @@ async function prospectar(tareaId){
 
   await loadAll();
   if(campanaActual){ await cargarTareas(campanaActual.id); await refrescarResumen(); renderCampanaDetalle(); }
+  // Abre de inmediato la ficha del lead recién creado. La campaña queda abierta
+  // por detrás (no se toca campanaActual), así que al volver a la pestaña sigue ahí.
+  showView('leads');
+  openLead(lead.id);
 }
 // ---------- EXPORTAR CSV ----------
 function downloadCSV(filename, headers, rows){
