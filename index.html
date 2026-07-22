@@ -273,7 +273,7 @@
       <div id="campLista">
         <div class="page-head"><h2>Campañas</h2><button class="btn-add" id="btnNuevaCampana">+ Nueva campaña</button></div>
         <div class="table-wrap"><table>
-          <thead><tr><th>Campaña</th><th>Estado</th><th>Empresas</th><th>Pendientes</th><th>Convertidas</th><th>Inicio</th></tr></thead>
+          <thead><tr><th>Campaña</th><th>Estado</th><th>Tareas</th><th>Pendientes</th><th>Completadas</th><th>Inicio</th></tr></thead>
           <tbody id="campBody"></tbody>
         </table></div>
       </div>
@@ -287,22 +287,23 @@
           </div>
           <div style="display:flex;gap:8px;align-items:flex-start">
             <button class="btn-sm" id="btnEditarCampana">Editar</button>
-            <button class="btn-add" id="btnAgregarEmpresas">+ Agregar empresas</button>
+            <button class="btn-sm" id="btnNuevaTarea">+ Tarea</button>
+            <button class="btn-add" id="btnAgregarEmpresas">+ Tareas en bloque</button>
           </div>
         </div>
         <div class="stats" id="campStats"></div>
         <div class="toolbar">
-          <input class="search" id="mSearch" placeholder="Buscar empresa en la campaña…">
+          <input class="search" id="mSearch" placeholder="Buscar por tarea o empresa…">
           <select id="mEstado">
             <option value="">Todos los estados</option>
             <option value="pendiente">Pendientes</option>
-            <option value="convertida">Convertidas</option>
+            <option value="completada">Completadas</option>
             <option value="descartada">Descartadas</option>
           </select>
         </div>
         <div class="table-wrap"><table>
-          <thead><tr><th>Empresa</th><th>Rubro</th><th>Comuna</th><th>Tarea</th><th>Estado</th><th></th></tr></thead>
-          <tbody id="miembrosBody"></tbody>
+          <thead><tr><th>Tarea</th><th>Empresa</th><th>Vence</th><th>Estado</th><th></th></tr></thead>
+          <tbody id="tareasBody"></tbody>
         </table></div>
       </div>
     </section>
@@ -452,6 +453,34 @@
   </div>
 </div>
 
+<!-- MODAL: tarea (individual) -->
+<div class="overlay" id="modalTarea">
+  <div class="modal">
+    <h3 id="tareaModalTitulo">Nueva tarea</h3>
+    <p class="modal-sub" id="tareaModalSub">Dentro de la campaña</p>
+    <div class="field"><label>Título</label><input id="t_titulo" placeholder="Ej: Buscar contacto y contactar"></div>
+    <div class="field" style="position:relative"><label>Empresa asignada</label>
+      <input id="t_empresa_txt" placeholder="Buscar por nombre o RUT…" autocomplete="off">
+      <input type="hidden" id="t_empresa_id">
+      <div id="t_empresa_res" class="autocomp"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Vence</label><input type="date" id="t_vence"></div>
+      <div class="field"><label>Estado</label><select id="t_estado">
+        <option value="pendiente">Pendiente</option>
+        <option value="completada">Completada</option>
+        <option value="descartada">Descartada</option>
+      </select></div>
+    </div>
+    <div class="field"><label>Descripción</label><textarea id="t_desc" rows="2"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-danger" id="btnEliminarTarea" style="display:none">Eliminar</button>
+      <button class="btn-cancel" id="btnCancelarTarea">Cerrar</button>
+      <button class="btn-primary" id="btnGuardarTarea" style="width:auto">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: agregar empresas a la campaña -->
 <div class="overlay" id="modalAgregar">
   <div class="modal" style="max-width:640px">
@@ -526,7 +555,7 @@ const etLabel = k => (ETAPAS.find(e=>e.key===k)||{}).label || k;
 
 let empresas=[], contactos=[], leads=[], editLeadId=null, editContactoId=null, editEmpId=null, currentView='dashboard';
 // Campañas de prospección
-let campanas=[], resumenMiembros=[], campanaActual=null, miembros=[], editCampanaId=null, agResultados=[], completarCtx=null;
+let campanas=[], resumenTareas=[], campanaActual=null, tareasCamp=[], editCampanaId=null, agResultados=[], completarCtx=null;
 
 const todayStr = () => new Date().toISOString().slice(0,10);
 const money = n => (n==null||n==='') ? '—' : new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n);
@@ -587,7 +616,7 @@ async function loadAll(){
   const ids = [...new Set([...contactos.map(x=>x.empresa_id), ...leads.map(x=>x.empresa_id)].filter(Boolean))];
   empresas = ids.length ? ((await sb.from('empresas').select('*').in('id', ids)).data || []) : [];
   campanas = await fetchAll('campanas','created_at');
-  resumenMiembros = (await sb.from('campana_empresas').select('campana_id,estado')).data || [];
+  resumenTareas = (await sb.from('tareas').select('campana_id,estado')).data || [];
   $('lEtapa').innerHTML = '<option value="">Todas las etapas</option>' + ETAPAS.map(x=>`<option value="${x.key}">${x.label}</option>`).join('');
   renderActive();
 }
@@ -938,14 +967,15 @@ $('btnDeleteEmp').onclick = async () => {
 };
 
 // ---------- CAMPAÑAS ----------
+// Jerarquía: campaña → tareas → cada tarea tiene una empresa asignada.
+// Al completar una tarea se asigna el contacto y nace el lead en etapa "nuevo".
 function renderCampanas(){ campanaActual ? renderCampanaDetalle() : renderCampanaLista(); }
 
 function conteosCampana(id){
-  const m = resumenMiembros.filter(x=>x.campana_id===id);
-  return { total:m.length,
-    pendientes:m.filter(x=>x.estado==='pendiente').length,
-    convertidas:m.filter(x=>x.estado==='convertida').length,
-    descartadas:m.filter(x=>x.estado==='descartada').length };
+  const t = resumenTareas.filter(x=>x.campana_id===id);
+  return { total:t.length,
+    pendientes:t.filter(x=>x.estado==='pendiente').length,
+    completadas:t.filter(x=>x.estado==='completada').length };
 }
 function renderCampanaLista(){
   $('campLista').style.display='block'; $('campDetalle').style.display='none';
@@ -954,78 +984,73 @@ function renderCampanaLista(){
     return `<tr data-id="${c.id}">
       <td><div class="t-name">${esc(c.nombre)}</div><div class="t-sub">${esc(c.objetivo||'')}</div></td>
       <td><span class="badge">${esc(c.estado)}</span></td>
-      <td>${n.total}</td><td>${n.pendientes}</td><td>${n.convertidas}</td>
+      <td>${n.total}</td><td>${n.pendientes}</td><td>${n.completadas}</td>
       <td>${c.fecha_inicio||'—'}</td></tr>`;
   }).join('') : '<tr><td colspan="6" class="row-empty">Sin campañas todavía. Crea la primera.</td></tr>';
   $('campBody').querySelectorAll('tr[data-id]').forEach(tr=>tr.onclick=()=>abrirCampana(Number(tr.dataset.id)));
 }
 
-async function cargarMiembros(campanaId){
-  const { data } = await sb.from('campana_empresas')
-    .select('*, empresas(id,nombre,rubro,ciudad,rut), tareas(id,titulo,estado,fecha_completada,lead_id)')
+async function cargarTareas(campanaId){
+  const { data } = await sb.from('tareas')
+    .select('*, empresas(id,nombre,rubro,ciudad,rut), contactos(id,nombre)')
     .eq('campana_id', campanaId).order('id');
-  miembros = data || [];
+  tareasCamp = data || [];
 }
 async function refrescarResumen(){
-  resumenMiembros = (await sb.from('campana_empresas').select('campana_id,estado')).data || [];
+  resumenTareas = (await sb.from('tareas').select('campana_id,estado')).data || [];
 }
 async function abrirCampana(id){
   campanaActual = campanas.find(c=>c.id===id) || null;
   if(!campanaActual) return;
-  await cargarMiembros(id);
+  await cargarTareas(id);
   renderCampanaDetalle();
 }
 $('btnVolverCamp').onclick = () => { campanaActual=null; renderCampanaLista(); };
-['mSearch','mEstado'].forEach(id => $(id).addEventListener('input', () => { if(currentView==='campanas' && campanaActual) pintarMiembros(); }));
+['mSearch','mEstado'].forEach(id => $(id).addEventListener('input', () => { if(currentView==='campanas' && campanaActual) pintarTareas(); }));
 
 function renderCampanaDetalle(){
   const c = campanaActual; if(!c) return renderCampanaLista();
   $('campLista').style.display='none'; $('campDetalle').style.display='block';
   $('campTitulo').textContent = c.nombre;
   $('campObjetivo').textContent = c.objetivo || '';
-  const p = miembros.filter(m=>m.estado==='pendiente').length;
-  const cv = miembros.filter(m=>m.estado==='convertida').length;
-  const d = miembros.filter(m=>m.estado==='descartada').length;
+  const p  = tareasCamp.filter(t=>t.estado==='pendiente').length;
+  const co = tareasCamp.filter(t=>t.estado==='completada').length;
+  const emp = new Set(tareasCamp.map(t=>t.empresa_id).filter(Boolean)).size;
   $('campStats').innerHTML = `
-    <div class="stat"><div class="num">${miembros.length}</div><div class="lbl">Empresas</div></div>
-    <div class="stat"><div class="num">${p}</div><div class="lbl">Tareas pendientes</div></div>
-    <div class="stat"><div class="num">${cv}</div><div class="lbl">Convertidas a lead</div></div>
-    <div class="stat"><div class="num">${d}</div><div class="lbl">Descartadas</div></div>`;
-  pintarMiembros();
+    <div class="stat"><div class="num">${tareasCamp.length}</div><div class="lbl">Tareas</div></div>
+    <div class="stat"><div class="num">${p}</div><div class="lbl">Pendientes</div></div>
+    <div class="stat"><div class="num">${co}</div><div class="lbl">Completadas</div></div>
+    <div class="stat"><div class="num">${emp}</div><div class="lbl">Empresas</div></div>`;
+  pintarTareas();
 }
 
-function pintarMiembros(){
+function pintarTareas(){
   const q=$('mSearch').value.trim().toLowerCase(), fe=$('mEstado').value;
-  const filas = miembros.filter(m=>{
-    if(fe && m.estado!==fe) return false;
-    if(q){ const e=m.empresas||{}; if(![e.nombre,e.rubro,e.ciudad].join(' ').toLowerCase().includes(q)) return false; }
+  const filas = tareasCamp.filter(t=>{
+    if(fe && t.estado!==fe) return false;
+    if(q){ const e=t.empresas||{}; if(![t.titulo,e.nombre,e.rubro,e.ciudad].join(' ').toLowerCase().includes(q)) return false; }
     return true;
   });
-  $('miembrosBody').innerHTML = filas.length ? filas.map(m=>{
-    const e=m.empresas||{}, t=(m.tareas||[])[0], hecha = t && t.estado==='completada';
-    const acc = m.estado==='pendiente'
-      ? `<button class="btn-sm" data-completar="${m.id}">Completar</button> <button class="btn-sm" data-descartar="${m.id}">Descartar</button>`
-      : (m.estado==='convertida' && t && t.lead_id
-          ? `<button class="btn-sm" data-lead="${t.lead_id}">Ver lead</button>`
-          : `<button class="btn-sm" data-reabrir="${m.id}">Reabrir</button>`);
-    const badge = m.estado==='convertida' ? 'ganado' : (m.estado==='descartada' ? 'perdido' : '');
+  $('tareasBody').innerHTML = filas.length ? filas.map(t=>{
+    const e=t.empresas||{}, hecha=t.estado==='completada';
+    const vencida = t.fecha_vencimiento && t.fecha_vencimiento < todayStr() && t.estado==='pendiente';
+    const acc = t.estado==='pendiente'
+      ? `<button class="btn-sm" data-completar="${t.id}">Completar</button> <button class="btn-sm" data-editar="${t.id}">Editar</button>`
+      : (t.lead_id
+          ? `<button class="btn-sm" data-lead="${t.lead_id}">Ver lead</button> <button class="btn-sm" data-editar="${t.id}">Editar</button>`
+          : `<button class="btn-sm" data-editar="${t.id}">Editar</button>`);
+    const badge = hecha ? 'ganado' : (t.estado==='descartada' ? 'perdido' : '');
     return `<tr>
-      <td><div class="t-name">${esc(e.nombre||'—')}</div><div class="t-sub">${esc(e.rut||'')}</div></td>
-      <td>${esc(e.rubro||'—')}</td><td>${esc(e.ciudad||'—')}</td>
-      <td>${t?`<span class="${hecha?'muted':''}">${esc(t.titulo)}</span>`:'<span class="muted">—</span>'}</td>
-      <td><span class="badge ${badge}">${esc(m.estado)}</span></td>
+      <td><div class="t-name" style="${hecha?'text-decoration:line-through;opacity:.6':''}">${esc(t.titulo)}</div>${t.contactos?`<div class="t-sub">→ ${esc(t.contactos.nombre)}</div>`:''}</td>
+      <td><div>${esc(e.nombre||'—')}</div><div class="t-sub">${esc(e.ciudad||'')}</div></td>
+      <td>${t.fecha_vencimiento?`<span class="follow ${vencida?'overdue':''}">${vencida?'⚠ ':''}${t.fecha_vencimiento}</span>`:'<span class="muted">—</span>'}</td>
+      <td><span class="badge ${badge}">${esc(t.estado)}</span></td>
       <td style="text-align:right;white-space:nowrap">${acc}</td></tr>`;
-  }).join('') : '<tr><td colspan="6" class="row-empty">Sin empresas que coincidan.</td></tr>';
-  const b=$('miembrosBody');
+  }).join('') : '<tr><td colspan="5" class="row-empty">Sin tareas que coincidan.</td></tr>';
+  const b=$('tareasBody');
   b.querySelectorAll('[data-completar]').forEach(x=>x.onclick=()=>abrirCompletar(Number(x.dataset.completar)));
-  b.querySelectorAll('[data-descartar]').forEach(x=>x.onclick=()=>cambiarEstadoMiembro(Number(x.dataset.descartar),'descartada'));
-  b.querySelectorAll('[data-reabrir]').forEach(x=>x.onclick=()=>cambiarEstadoMiembro(Number(x.dataset.reabrir),'pendiente'));
+  b.querySelectorAll('[data-editar]').forEach(x=>x.onclick=()=>abrirTareaModal(tareasCamp.find(t=>t.id===Number(x.dataset.editar))));
   b.querySelectorAll('[data-lead]').forEach(x=>x.onclick=()=>{ showView('leads'); openLead(Number(x.dataset.lead)); });
-}
-async function cambiarEstadoMiembro(id, estado){
-  const { error } = await sb.from('campana_empresas').update({estado}).eq('id',id);
-  if(error){ alert('No se pudo actualizar: '+error.message); return; }
-  await cargarMiembros(campanaActual.id); await refrescarResumen(); renderCampanaDetalle();
 }
 
 // --- modal campaña ---
@@ -1056,13 +1081,78 @@ $('btnGuardarCampana').onclick = async () => {
 };
 $('btnEliminarCampana').onclick = async () => {
   if(!editCampanaId) return;
-  if(!confirm('¿Eliminar la campaña? Se quitan sus empresas y tareas. Los leads ya creados NO se borran.')) return;
+  if(!confirm('¿Eliminar la campaña? Se borran sus tareas. Los leads ya creados NO se borran.')) return;
   const { error } = await sb.from('campanas').delete().eq('id',editCampanaId);
   if(error){ alert('No se pudo eliminar: '+error.message); return; }
   $('modalCampana').classList.remove('open'); campanaActual=null; await loadAll(); renderCampanas();
 };
 
-// --- agregar empresas en bloque ---
+// --- modal tarea (con autocompletado de empresa) ---
+let tacTimer, editTareaId=null;
+const tacCerrar = () => $('t_empresa_res').classList.remove('open');
+$('t_empresa_txt').addEventListener('input', () => {
+  $('t_empresa_id').value='';
+  const q = $('t_empresa_txt').value.trim().replace(/[,()%*]/g,' ').trim();
+  clearTimeout(tacTimer);
+  if(q.length<2){ tacCerrar(); return; }
+  tacTimer = setTimeout(async () => {
+    const { data } = await sb.from('empresas').select('id,nombre,rut,ciudad')
+      .or(`nombre.ilike.%${q}%,rut.ilike.%${q}%`).order('nombre').limit(8);
+    const cont = $('t_empresa_res');
+    cont.innerHTML = (data||[]).length
+      ? data.map(e=>`<div class="ac-item" data-id="${e.id}" data-nombre="${esc(e.nombre)}">${esc(e.nombre)}<div class="ac-sub">${esc(e.rut||'')} · ${esc(e.ciudad||'')}</div></div>`).join('')
+      : '<div class="ac-item ac-sub">Sin resultados</div>';
+    cont.querySelectorAll('.ac-item[data-id]').forEach(d=>d.onclick=()=>{
+      $('t_empresa_id').value=d.dataset.id; $('t_empresa_txt').value=d.dataset.nombre; tacCerrar();
+    });
+    cont.classList.add('open');
+  }, 250);
+});
+document.addEventListener('click', e => { if(!e.target.closest('#t_empresa_res') && e.target!==$('t_empresa_txt')) tacCerrar(); });
+
+function abrirTareaModal(t){
+  editTareaId = t ? t.id : null;
+  $('tareaModalTitulo').textContent = t ? 'Editar tarea' : 'Nueva tarea';
+  $('tareaModalSub').textContent = campanaActual ? campanaActual.nombre : 'Dentro de la campaña';
+  $('t_titulo').value = t?.titulo || 'Buscar contacto y contactar';
+  $('t_empresa_id').value = t?.empresa_id || '';
+  $('t_empresa_txt').value = (t && t.empresas) ? t.empresas.nombre : '';
+  $('t_vence').value = t?.fecha_vencimiento || '';
+  $('t_estado').value = t?.estado || 'pendiente';
+  $('t_desc').value = t?.descripcion || '';
+  $('btnEliminarTarea').style.display = t ? 'inline-flex' : 'none';
+  tacCerrar();
+  $('modalTarea').classList.add('open');
+}
+$('btnNuevaTarea').onclick = () => abrirTareaModal(null);
+$('btnCancelarTarea').onclick = () => $('modalTarea').classList.remove('open');
+$('btnGuardarTarea').onclick = async () => {
+  if(!campanaActual) return;
+  const payload = {
+    campana_id: campanaActual.id,
+    empresa_id: $('t_empresa_id').value ? Number($('t_empresa_id').value) : null,
+    titulo: $('t_titulo').value.trim() || 'Tarea',
+    fecha_vencimiento: $('t_vence').value || null,
+    estado: $('t_estado').value,
+    descripcion: $('t_desc').value.trim() || null
+  };
+  const { error } = editTareaId
+    ? await sb.from('tareas').update(payload).eq('id',editTareaId)
+    : await sb.from('tareas').insert(payload);
+  if(error){ alert('No se pudo guardar: '+error.message); return; }
+  $('modalTarea').classList.remove('open');
+  await cargarTareas(campanaActual.id); await refrescarResumen(); renderCampanaDetalle();
+};
+$('btnEliminarTarea').onclick = async () => {
+  if(!editTareaId) return;
+  if(!confirm('¿Eliminar esta tarea?')) return;
+  const { error } = await sb.from('tareas').delete().eq('id',editTareaId);
+  if(error){ alert('No se pudo eliminar: '+error.message); return; }
+  $('modalTarea').classList.remove('open');
+  await cargarTareas(campanaActual.id); await refrescarResumen(); renderCampanaDetalle();
+};
+
+// --- crear tareas en bloque (una por empresa) ---
 $('btnAgregarEmpresas').onclick = () => {
   agResultados=[]; $('ag_res').innerHTML='<div class="empty">Usa los filtros y pulsa Buscar.</div>'; $('ag_conteo').textContent='';
   $('modalAgregar').classList.add('open');
@@ -1079,37 +1169,34 @@ $('btnBuscarEmpresas').onclick = async () => {
   if(min>0) cons = cons.gte('num_empleados', min);
   const { data, error } = await cons;
   if(error){ $('ag_res').innerHTML = `<div class="empty">Error: ${esc(error.message)}</div>`; return; }
-  const ya = new Set(miembros.map(m=>m.empresa_id));
+  const ya = new Set(tareasCamp.map(t=>t.empresa_id).filter(Boolean));
   agResultados = (data||[]).filter(e=>!ya.has(e.id));
-  $('ag_conteo').textContent = `· ${agResultados.length} disponibles`;
+  $('ag_conteo').textContent = `· ${agResultados.length} sin tarea en esta campaña`;
   $('ag_res').innerHTML = agResultados.length ? agResultados.map(e=>`
     <label class="li" style="cursor:pointer"><input type="checkbox" checked data-emp="${e.id}" style="width:auto;margin:0 8px 0 0">
     <span><span class="t-name">${esc(e.nombre)}</span><span class="t-sub"> · ${esc(e.ciudad||'')} · ${e.num_empleados??'?'} trab.</span></span></label>
-  `).join('') : '<div class="empty">Sin resultados nuevos (o ya están en la campaña).</div>';
+  `).join('') : '<div class="empty">Sin resultados nuevos (o ya tienen tarea en esta campaña).</div>';
 };
 $('btnConfirmarAgregar').onclick = async () => {
   if(!campanaActual) return;
   const ids = [...$('ag_res').querySelectorAll('input[data-emp]:checked')].map(i=>Number(i.dataset.emp));
   if(!ids.length){ alert('Selecciona al menos una empresa.'); return; }
   const titulo = $('ag_tarea').value.trim() || 'Buscar contacto y contactar';
-  const { data: ins, error } = await sb.from('campana_empresas')
-    .insert(ids.map(empresa_id=>({campana_id:campanaActual.id, empresa_id}))).select('id');
-  if(error){ alert('No se pudo agregar: '+error.message); return; }
-  const { error: te } = await sb.from('tareas').insert((ins||[]).map(r=>({campana_empresa_id:r.id, titulo})));
-  if(te){ alert('Empresas agregadas, pero falló crear las tareas: '+te.message); }
+  const { error } = await sb.from('tareas')
+    .insert(ids.map(empresa_id=>({campana_id:campanaActual.id, empresa_id, titulo})));
+  if(error){ alert('No se pudieron crear las tareas: '+error.message); return; }
   $('modalAgregar').classList.remove('open');
-  await cargarMiembros(campanaActual.id); await refrescarResumen(); renderCampanaDetalle();
+  await cargarTareas(campanaActual.id); await refrescarResumen(); renderCampanaDetalle();
 };
 
 // --- completar tarea → asignar contacto y crear lead en "nuevo" ---
 function toggleCompNuevo(){ $('comp_nuevo').style.display = $('comp_contacto').value==='nuevo' ? 'block' : 'none'; }
 $('comp_contacto').addEventListener('change', toggleCompNuevo);
-function abrirCompletar(miembroId){
-  const m = miembros.find(x=>x.id===miembroId); if(!m) return;
-  const t = (m.tareas||[])[0];
-  completarCtx = { miembroId, tareaId: t?t.id:null, empresaId: m.empresa_id };
-  $('comp_empresa').textContent = (m.empresas||{}).nombre || '';
-  const suyos = contactos.filter(c=>c.empresa_id===m.empresa_id);
+function abrirCompletar(tareaId){
+  const t = tareasCamp.find(x=>x.id===tareaId); if(!t) return;
+  completarCtx = { tareaId: t.id, empresaId: t.empresa_id };
+  $('comp_empresa').textContent = (t.empresas||{}).nombre || '(sin empresa asignada)';
+  const suyos = contactos.filter(c=>c.empresa_id===t.empresa_id);
   $('comp_contacto').innerHTML = suyos.map(c=>`<option value="${c.id}">${esc(c.nombre)}${c.cargo?' — '+esc(c.cargo):''}</option>`).join('')
     + '<option value="nuevo">+ Crear contacto nuevo</option>';
   $('comp_contacto').value = suyos.length ? String(suyos[0].id) : 'nuevo';
@@ -1121,6 +1208,7 @@ function abrirCompletar(miembroId){
 $('btnCancelarCompletar').onclick = () => $('modalCompletar').classList.remove('open');
 $('btnConfirmarCompletar').onclick = async () => {
   if(!completarCtx) return;
+  if(!completarCtx.empresaId){ alert('Esta tarea no tiene empresa asignada. Edítala y asígnale una.'); return; }
   let contactoId = $('comp_contacto').value;
   if(contactoId === 'nuevo'){
     const nombre = $('comp_nombre').value.trim();
@@ -1139,15 +1227,15 @@ $('btnConfirmarCompletar').onclick = async () => {
   }).select('id').single();
   if(le){ alert('No se pudo crear el lead: '+le.message); return; }
 
-  if(completarCtx.tareaId)
-    await sb.from('tareas').update({estado:'completada', fecha_completada:todayStr(), lead_id:lead.id}).eq('id', completarCtx.tareaId);
-  await sb.from('campana_empresas').update({estado:'convertida', fecha_contacto:todayStr()}).eq('id', completarCtx.miembroId);
+  const { error: te } = await sb.from('tareas').update({
+    estado:'completada', fecha_completada:todayStr(), lead_id:lead.id, contacto_id:contactoId
+  }).eq('id', completarCtx.tareaId);
+  if(te){ alert('Lead creado, pero falló cerrar la tarea: '+te.message); }
 
   $('modalCompletar').classList.remove('open');
   await loadAll();
-  if(campanaActual){ await cargarMiembros(campanaActual.id); await refrescarResumen(); renderCampanaDetalle(); }
+  if(campanaActual){ await cargarTareas(campanaActual.id); await refrescarResumen(); renderCampanaDetalle(); }
 };
-
 // ---------- EXPORTAR CSV ----------
 function downloadCSV(filename, headers, rows){
   const cell = v => { const s = v==null?'':String(v); return /[",\n\r]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
