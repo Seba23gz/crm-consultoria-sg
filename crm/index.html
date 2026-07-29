@@ -426,7 +426,10 @@
       <div class="field"><label>Nº empleados</label><input id="e_empleados" type="number" min="0"></div>
       <div class="field"><label>Teléfono</label><input id="e_telefono"></div>
     </div>
-    <div class="field"><label>Sitio web</label><input id="e_web" placeholder="https://"></div>
+    <div class="row2">
+      <div class="field"><label>Sitio web</label><input id="e_web" placeholder="https://"></div>
+      <div class="field"><label>Correo del negocio</label><input id="e_email" type="email" placeholder="contacto@ejemplo.cl"></div>
+    </div>
     <div class="field"><label>Notas</label><textarea id="e_notas" rows="2"></textarea></div>
     <label class="t-sub" style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:-4px">
       <input type="checkbox" id="e_archivada"> Archivada — fuera de búsquedas y de campañas (sociedad de inversión, sin operación)</label>
@@ -843,7 +846,7 @@ async function renderEmpresas(){
   const verArch = $('eVerArchivadas').checked;
   let consulta = sb.from('empresas').select('*', {count:'exact'}).order('nombre').limit(TOPE_TABLA);
   if(!verArch) consulta = consulta.eq('archivada', false);
-  if(q) consulta = consulta.or(`nombre.ilike.%${q}%,nombre_comercial.ilike.%${q}%,rubro.ilike.%${q}%,ciudad.ilike.%${q}%,rut.ilike.%${q}%`);
+  if(q) consulta = consulta.or(`nombre.ilike.%${q}%,nombre_comercial.ilike.%${q}%,rubro.ilike.%${q}%,ciudad.ilike.%${q}%,rut.ilike.%${q}%,email.ilike.%${q}%`);
   const { data, count, error } = await consulta;
   if(error){ $('eBody').innerHTML = `<tr><td colspan="6" class="row-empty">Error al buscar: ${esc(error.message)}</td></tr>`; return; }
   const vista = data || [], total = count ?? vista.length;
@@ -855,7 +858,7 @@ async function renderEmpresas(){
         [e.nombre_comercial?e.nombre:'', e.rut].filter(Boolean).map(s=>`<div class="t-sub">${esc(s)}</div>`).join('')}</td>
       <td>${esc(e.rubro||'—')}</td><td>${esc(e.ciudad||'—')}</td>
       <td>${contactosDeEmpresa(e.id).length}</td><td>${leadsDeEmpresa(e.id).length}</td>
-      <td>${e.sitio_web?`<span class="t-sub">${esc(e.sitio_web)}</span>`:'<span class="muted">—</span>'}</td>
+      <td>${[e.sitio_web, e.email].filter(Boolean).map(s=>`<div class="t-sub">${esc(s)}</div>`).join('') || '<span class="muted">—</span>'}</td>
     </tr>`).join('')
     : '<tr><td colspan="6" class="row-empty">Sin empresas que coincidan.</td></tr>';
   const aviso = total > vista.length
@@ -1018,7 +1021,8 @@ function openEmpresa(id){
   $('empTitle').textContent = e?(e.nombre_comercial||e.nombre):'Nueva empresa';
   $('e_nombre').value=e?.nombre||''; $('e_comercial').value=e?.nombre_comercial||'';
   $('e_rut').value=e?.rut||''; $('e_rubro').value=e?.rubro||''; $('e_ciudad').value=e?.ciudad||'';
-  $('e_empleados').value=e?.num_empleados??''; $('e_telefono').value=e?.telefono||''; $('e_web').value=e?.sitio_web||''; $('e_notas').value=e?.notas||'';
+  $('e_empleados').value=e?.num_empleados??''; $('e_telefono').value=e?.telefono||''; $('e_web').value=e?.sitio_web||'';
+  $('e_email').value=e?.email||''; $('e_notas').value=e?.notas||'';
   $('e_archivada').checked = !!e?.archivada;
   $('btnDeleteEmp').style.display = e?'inline-flex':'none';
   // Datos del padrón SII (solo lectura)
@@ -1057,7 +1061,8 @@ $('btnSaveEmp').onclick = async () => {
     nombre:$('e_nombre').value.trim(), nombre_comercial:$('e_comercial').value.trim()||null,
     rut:$('e_rut').value.trim()||null,
     rubro:$('e_rubro').value.trim()||null, ciudad:$('e_ciudad').value.trim()||null,
-    num_empleados: emp!==''?Number(emp):null, telefono:$('e_telefono').value.trim()||null, sitio_web:$('e_web').value.trim()||null, notas:$('e_notas').value.trim()||null,
+    num_empleados: emp!==''?Number(emp):null, telefono:$('e_telefono').value.trim()||null, sitio_web:$('e_web').value.trim()||null,
+    email:$('e_email').value.trim()||null, notas:$('e_notas').value.trim()||null,
     archivada: $('e_archivada').checked
   };
   if(!payload.nombre){ alert('El nombre de la empresa es obligatorio.'); return; }
@@ -1434,8 +1439,8 @@ $('btnExportContactos').onclick = () => downloadCSV('contactos.csv',
   ['Nombre','Cargo','Empresa','Email','Telefono','LinkedIn','Notas'],
   contactos.map(c=>[c.nombre, c.cargo, empName(c.empresa_id), c.email, c.telefono, c.linkedin_url, c.notas]));
 $('btnExportEmpresas').onclick = () => downloadCSV('empresas.csv',
-  ['Razon social','Nombre comercial','Rubro','Ciudad','Empleados','Telefono','Sitio web','Notas'],
-  empresas.map(e=>[e.nombre, e.nombre_comercial, e.rubro, e.ciudad, e.num_empleados, e.telefono, e.sitio_web, e.notas]));
+  ['Razon social','Nombre comercial','Rubro','Ciudad','Empleados','Telefono','Correo','Sitio web','Notas'],
+  empresas.map(e=>[e.nombre, e.nombre_comercial, e.rubro, e.ciudad, e.num_empleados, e.telefono, e.email, e.sitio_web, e.notas]));
 
 // cerrar modales al hacer clic fuera
 document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
