@@ -15,10 +15,49 @@ El sitio venía del proyecto `sebastian-gomez` (repo `Seba23gz/Sebastian-Gomez`)
 que se fusionó acá para tener todo en un solo proyecto de Vercel.
 
 ## Entrada de leads
-El formulario del sitio postea a la Edge Function **`nuevo-lead`** de Supabase,
-que es el camino en uso. `api/lead-form.js` hace lo mismo por otra vía y quedó
-sin conectar: si se activa, hay que apagar uno de los dos o cada lead entra
-duplicado.
+
+Hay dos vías, y cada lead queda marcado con su `origen` en la tabla `leads`:
+
+| Vía | Función | Origen |
+|---|---|---|
+| Formulario del sitio | Edge Function `nuevo-lead` | `web` |
+| Formularios de Meta (Facebook/Instagram) | Edge Function `meta-lead` | `meta_ads` |
+
+`api/lead-form.js` hace lo mismo que `nuevo-lead` por otra vía y quedó sin
+conectar: si se activa, hay que apagar uno de los dos o cada lead entra duplicado.
+
+### Meta Lead Ads — configuración
+
+Meta **no** manda los datos en el webhook: manda un `leadgen_id` y hay que ir a
+buscarlos a la Graph API. Por eso hacen falta tres secretos en Supabase
+(Edge Functions → Secrets):
+
+| Secreto | De dónde sale |
+|---|---|
+| `META_VERIFY_TOKEN` | Lo inventas tú; se pega igual en Meta al crear el webhook |
+| `META_APP_SECRET` | App de Meta → Configuración → Básica |
+| `META_PAGE_ACCESS_TOKEN` | Token de larga duración de la página (Graph API Explorer) |
+
+Pasos en Meta (developers.facebook.com):
+
+1. Crear una app tipo **Negocio** y agregarle el producto **Webhooks**.
+2. Suscribirse al objeto **Page**, campo **`leadgen`**.
+3. URL de retrollamada:
+   `https://rayvimywyqjnzzmbagpv.supabase.co/functions/v1/meta-lead`
+   Token de verificación: el mismo `META_VERIFY_TOKEN`.
+4. Conectar la página de Veta Labs a la app y suscribirla al webhook.
+5. Permiso **`leads_retrieval`**: funciona de inmediato para administradores de la
+   app, pero requiere **revisión de Meta** para operar con la cuenta en producción.
+
+El endpoint valida la firma `X-Hub-Signature-256` (HMAC del cuerpo con el app
+secret), responde 200 de inmediato y procesa en segundo plano, porque Meta
+reintenta si tarda. Los reintentos no duplican: hay un índice único sobre
+`(origen, origen_id)`.
+
+### Píxel de Meta
+El ID va en la constante `window.META_PIXEL_ID` de `index.html`. Mientras esté
+vacía no se carga el script ni se envía nada a Meta. Con el ID puesto, dispara
+`PageView` al cargar y `Lead` cuando el formulario se envía con éxito.
 
 ## Stack
 - Frontend: HTML/CSS/JS puro (sin build)
