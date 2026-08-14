@@ -15,9 +15,9 @@
     --font-body:'Inter',system-ui,sans-serif;
     --font-mono:'Space Mono',ui-monospace,monospace;
     --ink:#111111; --ink-soft:#52525b; --ink-faint:#a1a1aa;
-    --paper:#f4f4f5; --card:#ffffff; --line:#e4e4e7;
-    --accent:#111111; --accent-soft:#e9e9ec;
-    --warn:#b45309; --warn-soft:#fbe4cf;
+    --paper:#f4f4f5; --card:#ffffff; --line:#ebebed;
+    --accent:#111111; --accent-soft:#ebebed;
+    --warn:#111111; --warn-soft:#ebebed;
     --win:#111111; --lost:#a1a1aa;
     --radius:12px;
   }
@@ -71,7 +71,7 @@
   .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px}
   .stat .num{font-family:var(--font-display);font-size:30px;font-weight:700;line-height:1;letter-spacing:-0.03em}
   .stat .lbl{font-family:var(--font-mono);font-size:11px;color:var(--ink-soft);margin-top:8px;text-transform:uppercase;letter-spacing:.04em}
-  .stat.alert .num{color:var(--warn)}
+  .stat.alert .num{color:var(--warn)} .stat.alert{border-color:var(--ink);border-width:2px}
 
   .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:20px}
   .panel h3{font-size:18px;margin-bottom:16px}
@@ -113,7 +113,7 @@
   .badge{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.03em;padding:3px 9px;border-radius:100px;border:1px solid var(--line);color:var(--ink-soft);white-space:nowrap}
   .badge.ganado{background:var(--ink);color:var(--paper);border-color:var(--ink)}
   .badge.perdido{color:var(--lost)}
-  .follow{font-size:11px;color:var(--ink-faint)} .follow.overdue{color:var(--warn);font-weight:600}
+  .follow{font-size:11px;color:var(--ink-faint)} .follow.overdue{color:var(--warn);font-weight:700;text-decoration:underline;text-underline-offset:3px}
 
   .table-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow-x:auto}
   table{width:100%;border-collapse:collapse;font-size:14px}
@@ -130,7 +130,7 @@
   .sg-row{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer}
   .sg-row:hover{border-color:var(--ink)}
   .sg-row .sg-date{font-family:var(--font-mono);font-size:12px;white-space:nowrap;min-width:96px}
-  .sg-row .sg-date.overdue{color:var(--warn)} .sg-row .sg-date.today{color:var(--ink);font-weight:700}
+  .sg-row .sg-date.overdue{color:var(--warn);font-weight:700;text-decoration:underline;text-underline-offset:3px} .sg-row .sg-date.today{color:var(--ink);font-weight:700}
 
   .overlay{position:fixed;inset:0;background:rgba(17,17,17,.45);display:none;align-items:flex-start;justify-content:center;padding:40px 20px;z-index:50;overflow-y:auto}
   .overlay.open{display:flex}
