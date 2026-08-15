@@ -65,7 +65,7 @@ confirmar correo, desactivar "Confirm email". Es el único usuario del CRM.
 ## Ideas de mejora pendientes (backlog)
 - Arrastrar tarjetas entre columnas (drag & drop) para cambiar de etapa.
 - Vista de "seguimientos de hoy / vencidos".
-- Conectar el formulario de la web del usuario (https://sebastian-gomez-sigma.vercel.app)
+- Conectar el formulario de la web del usuario (https://vetalabs.cl)
   para que los leads entren solos al CRM.
 - Mover credenciales a variables de entorno.
 

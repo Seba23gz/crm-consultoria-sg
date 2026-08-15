@@ -12,7 +12,7 @@ Este endpoint recibe leads desde tu sitio web y los guarda en Supabase como cont
 ## Ejemplo de uso
 
 ```bash
-curl -X POST https://TU-APP.vercel.app/api/lead-form \
+curl -X POST https://vetalabs.cl/api/lead-form \
   -H 'Content-Type: application/json' \
   -d '{
     "nombre": "Juan Pérez",
