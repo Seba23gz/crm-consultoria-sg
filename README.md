@@ -2,6 +2,12 @@
 
 Sitio de la consultora y su CRM interno, en un mismo proyecto de Vercel.
 
+> **Dominio en tránsito.** `vetalabs.cl` está comprado en NIC Chile pero todavía
+> no delegado. Cuando resuelva, hay que cambiar a `https://vetalabs.cl/` las
+> cuatro URLs del `<head>` de `index.html`: `canonical`, `og:url`, `og:image` y
+> `twitter:image`. Hoy apuntan a `vetalabs.vercel.app` para que el preview de
+> los enlaces siga funcionando.
+
 | Ruta | Qué es | Acceso |
 |---|---|---|
 | `/` | Sitio público de Veta Labs: servicios, proceso, resultados, proyectos y contacto | público |
