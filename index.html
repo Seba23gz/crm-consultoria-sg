@@ -8,7 +8,7 @@
   <meta name="author" content="Veta Labs">
   <meta name="theme-color" content="#111111">
   <link rel="canonical" href="https://vetalabs.vercel.app/">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cmask id='h'%3E%3Crect width='100' height='100' fill='%23fff'/%3E%3Ccircle cx='50' cy='70.5' r='9.4' fill='%23000'/%3E%3C/mask%3E%3Crect width='100' height='100' rx='0' fill='%23111111'/%3E%3Cg mask='url%28%23h%29' fill='%23f4f4f5' stroke='%23f4f4f5' stroke-width='2.8' stroke-linejoin='round'%3E%3Cpath d='M15.5 15L31 15L51.5 56L43 64Z'/%3E%3Cpath d='M84.5 15L69 15L48.5 56L57 64Z'/%3E%3Ccircle cx='50' cy='70.5' r='12.4' fill='none' stroke-width='6'/%3E%3C/g%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='.15' y1='0' x2='.8' y2='1'%3E%3Cstop offset='0' stop-color='%23ffffff'/%3E%3Cstop offset='.22' stop-color='%23e8e8ec'/%3E%3Cstop offset='.48' stop-color='%23b9b9c0'/%3E%3Cstop offset='.72' stop-color='%239a9aa2'/%3E%3Cstop offset='1' stop-color='%23adadb5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='%23111111'/%3E%3Cpath fill='url%28%23g%29' stroke='url%28%23g%29' stroke-width='2.2' stroke-linejoin='round' fill-rule='evenodd' d='M15 14.5L33 14.5L50 53L67 14.5L85 14.5L63.9 64.9A14.8 14.8 0 1 1 36.1 64.9ZM61 70A11 11 0 1 0 39 70A11 11 0 1 0 61 70Z'/%3E%3C/svg%3E">
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:locale" content="es_CL">
@@ -82,13 +82,29 @@
 </script>
 </head>
 <body>
+
+<!-- Degradados del isotipo. El logo es metálico: cromo claro sobre fondos
+     oscuros, cromo oscuro sobre fondos claros, para que el brillo se lea en
+     los dos casos sin perder contraste. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="veta-plata" x1=".15" y1="0" x2=".8" y2="1">
+    <stop offset="0" stop-color="#ffffff"/><stop offset=".22" stop-color="#e8e8ec"/>
+    <stop offset=".48" stop-color="#b9b9c0"/><stop offset=".72" stop-color="#9a9aa2"/>
+    <stop offset="1" stop-color="#adadb5"/>
+  </linearGradient>
+  <linearGradient id="veta-grafito" x1=".15" y1="0" x2=".8" y2="1">
+    <stop offset="0" stop-color="#6b6b74"/><stop offset=".26" stop-color="#3f3f46"/>
+    <stop offset=".55" stop-color="#111111"/><stop offset=".8" stop-color="#2b2b31"/>
+    <stop offset="1" stop-color="#43434a"/>
+  </linearGradient>
+</defs></svg>
 <canvas id="bg-dots" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none"></canvas>
 <div style="position:relative;z-index:1;width:100%;overflow-x:hidden">
 
   <!-- ===== NAV ===== -->
   <div style="position:sticky;top:0;z-index:50;background:rgba(244,244,245,.82);backdrop-filter:blur(12px);border-bottom:1px solid #ebebed">
     <div style="max-width:1120px;margin:0 auto;padding:16px clamp(20px,4vw,44px);display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
-      <a href="#top" style="font:700 18px 'Space Grotesk',sans-serif;letter-spacing:-.02em;display:flex;align-items:center;gap:10px"><svg width="24" height="24" viewBox="0 0 100 100" aria-hidden="true" style="flex:none"><mask id="vt-nav"><rect width="100" height="100" fill="#fff"/><circle cx="50" cy="70.5" r="9.4" fill="#000"/></mask><g mask="url(#vt-nav)" fill="var(--brand)" stroke="var(--brand)" stroke-width="2.8" stroke-linejoin="round"><path d="M15.5 15L31 15L51.5 56L43 64Z"/><path d="M84.5 15L69 15L48.5 56L57 64Z"/><circle cx="50" cy="70.5" r="12.4" fill="none" stroke-width="6"/></g></svg>Veta Labs</a>
+      <a href="#top" style="font:700 18px 'Space Grotesk',sans-serif;letter-spacing:-.02em;display:flex;align-items:center;gap:10px"><svg width="24" height="24" viewBox="0 0 100 100" aria-hidden="true" style="flex:none"><path fill="url(#veta-grafito)" stroke="url(#veta-grafito)" stroke-width="2.2" stroke-linejoin="round" fill-rule="evenodd" d="M15 14.5L33 14.5L50 53L67 14.5L85 14.5L63.9 64.9A14.8 14.8 0 1 1 36.1 64.9ZM61 70A11 11 0 1 0 39 70A11 11 0 1 0 61 70Z"/></svg>Veta Labs</a>
       <div style="display:flex;gap:26px;align-items:center;font:500 14.5px 'Inter',sans-serif;color:#52525b;flex-wrap:wrap">
         <a href="#para-quien" data-navlink="para-quien" style="transition:color .2s" style-hover="color:#111111">Para quién</a>
         <a href="#servicios" data-navlink="servicios" style="transition:color .2s" style-hover="color:#111111">Qué incluye</a>
@@ -304,7 +320,7 @@
 
     <div style="border-top:1px solid #3f3f46">
       <div style="max-width:1120px;margin:0 auto;padding:26px clamp(20px,4vw,44px);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;font:500 13.5px 'Inter',sans-serif;color:#52525b">
-        <span style="display:flex;align-items:center;gap:9px;font:700 15px 'Space Grotesk',sans-serif;letter-spacing:-.02em;color:#f4f4f5"><svg width="20" height="20" viewBox="0 0 100 100" aria-hidden="true" style="flex:none"><mask id="vt-pie"><rect width="100" height="100" fill="#fff"/><circle cx="50" cy="70.5" r="9.4" fill="#000"/></mask><g mask="url(#vt-pie)" fill="#f4f4f5" stroke="#f4f4f5" stroke-width="2.8" stroke-linejoin="round"><path d="M15.5 15L31 15L51.5 56L43 64Z"/><path d="M84.5 15L69 15L48.5 56L57 64Z"/><circle cx="50" cy="70.5" r="12.4" fill="none" stroke-width="6"/></g></svg>Veta Labs</span>
+        <span style="display:flex;align-items:center;gap:9px;font:700 15px 'Space Grotesk',sans-serif;letter-spacing:-.02em;color:#f4f4f5"><svg width="20" height="20" viewBox="0 0 100 100" aria-hidden="true" style="flex:none"><path fill="url(#veta-plata)" stroke="url(#veta-plata)" stroke-width="2.2" stroke-linejoin="round" fill-rule="evenodd" d="M15 14.5L33 14.5L50 53L67 14.5L85 14.5L63.9 64.9A14.8 14.8 0 1 1 36.1 64.9ZM61 70A11 11 0 1 0 39 70A11 11 0 1 0 61 70Z"/></svg>Veta Labs</span>
         <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
           <a href="https://www.linkedin.com/in/sebastián-gonzalo-gómez-pastén/" target="_blank" rel="noopener" style="transition:color .2s" style-hover="color:#f4f4f5">LinkedIn</a>
           <span>Marca · Tienda · Automatización · Datos · © 2026</span>
