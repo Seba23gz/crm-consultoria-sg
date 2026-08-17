@@ -115,6 +115,9 @@
   .badge{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.03em;padding:3px 9px;border-radius:0;border:1px solid var(--line);color:var(--ink-soft);white-space:nowrap}
   .badge.ganado{background:var(--ink);color:var(--paper);border-color:var(--ink)}
   .badge.perdido{color:var(--lost)}
+  /* De dónde entró el lead. Sin esto, uno de Meta se ve igual a uno cargado a mano. */
+  .origen{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.03em;
+    padding:3px 8px;border:1px dashed var(--line);color:var(--ink-faint);white-space:nowrap}
   .follow{font-size:11px;color:var(--ink-faint)} .follow.overdue{color:var(--warn);font-weight:700;text-decoration:underline;text-underline-offset:3px}
 
   .table-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow-x:auto}
@@ -354,6 +357,12 @@
     </div>
     <div class="field"><label>Notas</label><textarea id="l_notas" rows="2"></textarea></div>
 
+    <!-- Solo para leads que entraron por Meta: lo que respondió la persona, tal cual. -->
+    <div class="sub-list" id="l_metaBox" style="display:none">
+      <h4>Formulario de Meta</h4>
+      <div id="l_metaInfo"></div>
+    </div>
+
     <div class="sub-list" id="l_actsBox" style="display:none">
       <h4>Registrar actividad</h4>
       <div class="row2">
@@ -588,6 +597,10 @@ const empById = id => empresas.find(x=>x.id===id);
 // Se muestra el nombre comercial cuando existe: es como se conoce a la empresa.
 // La razón social queda como respaldo y sigue siendo el dato legal en `nombre`.
 const empName = id => { const e=empById(id); return e?(e.nombre_comercial||e.nombre):'—'; };
+// Los leads que entran solos traen `origen`; los cargados a mano no.
+const ORIGENES = {meta_lead_ads:'Meta Ads', web:'Web'};
+const origenLabel = o => ORIGENES[o] || o;
+const tagOrigen = l => l.origen ? `<span class="origen">${esc(origenLabel(l.origen))}</span>` : '';
 const cById = id => contactos.find(x=>x.id===id);
 const cName = id => { const c=cById(id); return c?c.nombre:'(sin contacto)'; };
 const contactosDeEmpresa = id => contactos.filter(c=>c.empresa_id===id);
@@ -778,7 +791,10 @@ function card(l){
     <div class="co">${esc(empName(l.empresa_id))}</div>
     ${l.valor_estimado?`<div class="val">${money(l.valor_estimado)}</div>`:''}
     <div class="foot">
-      <span class="pill ${l.prioridad||'media'}">${l.prioridad||'media'}</span>
+      <span style="display:flex;gap:6px;align-items:center">
+        <span class="pill ${l.prioridad||'media'}">${l.prioridad||'media'}</span>
+        ${tagOrigen(l)}
+      </span>
       ${l.proximo_seguimiento?`<span class="follow ${overdue?'overdue':''}">${overdue?'⚠ ':''}${l.proximo_seguimiento}</span>`:''}
     </div>`;
   d.onclick = () => openLead(l.id);
@@ -806,7 +822,7 @@ function renderLeads(){
     return `<tr data-id="${l.id}">
       <td><div class="t-name">${esc(cName(l.contacto_id))}</div></td>
       <td>${esc(empName(l.empresa_id))}</td>
-      <td>${esc(l.titulo||'—')}</td>
+      <td>${esc(l.titulo||'—')} ${tagOrigen(l)}</td>
       <td><span class="badge ${l.etapa}">${etLabel(l.etapa)}</span></td>
       <td><span class="pill ${l.prioridad||'media'}">${l.prioridad||'media'}</span></td>
       <td>${money(l.valor_estimado)}</td>
@@ -909,7 +925,43 @@ function openLead(id, presetContacto){
   $('l_actsBox').style.display = l?'block':'none';
   $('btnDeleteLead').style.display = l?'inline-flex':'none';
   if(l) loadActs(id); else $('actList').innerHTML='';
+  loadMetaLead(l);
   $('modalLead').classList.add('open');
+}
+
+// Trae el detalle crudo que guardó el webhook: las respuestas del formulario con
+// sus preguntas originales, más los ids de la pauta. Solo aplica a leads de Meta.
+async function loadMetaLead(l){
+  const box = $('l_metaBox');
+  if(!l || l.origen!=='meta_lead_ads' || !l.origen_id){ box.style.display='none'; return; }
+  box.style.display='block';
+  $('l_metaInfo').innerHTML = '<div class="empty">Cargando…</div>';
+
+  const {data, error} = await sb.from('meta_leads')
+    .select('meta_lead_id,status,attempt_count,last_error,form_id,page_id,ad_id,creado_en_meta,respuestas')
+    .eq('meta_lead_id', l.origen_id).maybeSingle();
+
+  if(error || !data){ $('l_metaInfo').innerHTML = '<div class="empty">Sin detalle guardado.</div>'; return; }
+
+  // Las respuestas van con el nombre de campo tal como lo escribió Meta.
+  const respuestas = Object.entries(data.respuestas||{})
+    .map(([pregunta, valores]) => `<div class="li">
+      <span class="at" style="text-transform:none">${esc(pregunta)}</span>
+      <span class="af">${esc([].concat(valores||[]).join(', ')) || '—'}</span></div>`).join('');
+
+  // Si algo falló al procesarlo, que se vea acá y no solo en los logs.
+  const problema = data.status!=='completed'
+    ? `<div class="li"><span class="at" style="color:var(--lost)">Estado: ${esc(data.status)}</span>
+       <span class="af">${esc(data.last_error||'')||`intento ${data.attempt_count}`}</span></div>` : '';
+
+  const meta = [
+    data.creado_en_meta ? `Recibido en Meta: ${esc(String(data.creado_en_meta).slice(0,16).replace('T',' '))}` : '',
+    data.form_id ? `Formulario ${esc(data.form_id)}` : '',
+    data.ad_id ? `Anuncio ${esc(data.ad_id)}` : '',
+  ].filter(Boolean).join(' · ');
+
+  $('l_metaInfo').innerHTML = problema + (respuestas || '<div class="empty">El formulario no traía respuestas.</div>')
+    + (meta ? `<div style="font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);padding-top:10px">${meta}</div>` : '');
 }
 $('btnNewLeadP').onclick = () => newLead();
 $('btnNewLeadL').onclick = () => newLead();
