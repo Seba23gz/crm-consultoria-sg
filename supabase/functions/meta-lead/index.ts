@@ -48,7 +48,7 @@ import {
 // La logica vive en `lib.ts` y esta cubierta por `lib_test.ts`. Aca solo va el
 // wiring con el mundo real: entorno, red y base de datos.
 
-const NOTIFY_TO = "sebastiangomez2003@gmail.com";
+const NOTIFY_TO = "contacto@vetalabs.cl";
 
 // Presupuesto de tiempo. Meta corta la conexion si el endpoint tarda demasiado y
 // las entregas lentas repetidas pueden hacer que desactive la suscripcion, asi
