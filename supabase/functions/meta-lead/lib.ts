@@ -58,34 +58,36 @@ export type ResultadoReclamo =
 export interface Almacen {
   /** Reclamo atomico. Es lo unico que impide que dos entregas dupliquen. */
   reclamar(evento: EventoLeadgen): Promise<ResultadoReclamo>;
-  buscarEmpresaPorNombre(nombre: string): Promise<number | null>;
-  crearEmpresa(datos: { nombre: string; ciudad: string | null }): Promise<number | null>;
-  buscarContactoPorEmail(email: string): Promise<number | null>;
-  crearContacto(datos: {
-    nombre: string;
-    cargo: string | null;
-    email: string | null;
-    telefono: string | null;
-    empresaId: number | null;
-  }): Promise<number>;
-  crearLead(datos: {
-    empresaId: number | null;
-    contactoId: number;
-    titulo: string;
-    notas: string;
-    leadgenId: string;
-  }): Promise<number | null>;
-  marcarCompletado(leadgenId: string, datos: DatosProcesado): Promise<void>;
+  /**
+   * Crea o reutiliza empresa + contacto + lead y cierra la fila como `completed`,
+   * TODO dentro de una sola transaccion.
+   *
+   * Es una sola operacion a proposito. Si fueran cuatro llamadas sueltas, una
+   * caida a mitad de camino dejaria escrituras parciales confirmadas, y el
+   * reintento tendria que adivinar que existe y que no. El CRM no tiene con que
+   * adivinar: `empresas.nombre` no es unico (ya hay nombres repetidos) y 41 de 57
+   * contactos no tienen correo, asi que deduplicar por email o por nombre no
+   * garantiza nada. La transaccion elimina el problema: o queda todo, o no queda
+   * nada.
+   */
+  persistir(leadgenId: string, datos: DatosPersistencia): Promise<ResultadoPersistencia>;
   /** Deja la fila en `failed`, que es reclamable de nuevo. */
   marcarFallido(leadgenId: string, errorSaneado: string): Promise<void>;
 }
 
-export interface DatosProcesado {
+export interface DatosPersistencia {
+  lead: LeadNormalizado;
+  graph: LeadDeGraph;
+  titulo: string;
+  notas: string;
+}
+
+export interface ResultadoPersistencia {
   leadId: number | null;
   contactoId: number | null;
   empresaId: number | null;
-  lead: LeadNormalizado;
-  graph: LeadDeGraph;
+  /** true si la fila ya estaba `completed` y no se escribio nada. */
+  yaEstaba: boolean;
 }
 
 export interface Dependencias {
@@ -269,6 +271,39 @@ export function extraerEventosLeadgen(cuerpo: unknown): EventoLeadgen[] {
   }
 
   return eventos;
+}
+
+/**
+ * Tope del cuerpo del POST.
+ *
+ * Una entrega real de Meta son unos pocos KB. 256 KB deja margen de sobra para un
+ * lote grande y evita que alguien que consiga firmar (o que la firma se valide
+ * despues, como aqui) nos haga leer y hashear algo enorme.
+ */
+export const LIMITE_CUERPO_BYTES = 256 * 1024;
+
+/**
+ * Descarta los eventos que no son de la pagina configurada.
+ *
+ * Solo aplica si `META_PAGE_ID` esta puesto. Una misma app puede tener varias
+ * paginas suscritas, y solo nos interesan los leads de Veta Labs.
+ *
+ * Se ignoran, no se rechazan: devolverle un error a Meta por un evento que
+ * legitimamente no nos incumbe solo provoca reintentos inutiles.
+ */
+export function filtrarPorPagina(
+  eventos: EventoLeadgen[],
+  pageId: string | undefined,
+): { aceptados: EventoLeadgen[]; descartados: EventoLeadgen[] } {
+  if (!pageId) return { aceptados: eventos, descartados: [] };
+  const aceptados: EventoLeadgen[] = [];
+  const descartados: EventoLeadgen[] = [];
+  for (const e of eventos) {
+    // Un evento sin page_id no se puede atribuir: se descarta por precaucion.
+    if (e.pageId === pageId) aceptados.push(e);
+    else descartados.push(e);
+  }
+  return { aceptados, descartados };
 }
 
 // ---------------------------------------------------------------------------
@@ -573,46 +608,23 @@ export async function procesarEvento(evento: EventoLeadgen, deps: Dependencias):
     const graph = await deps.traerDeGraph(evento.leadgenId);
     const lead = normalizarCampos(graph.fieldData);
 
-    // 1) Empresa: se reutiliza si ya existe con ese nombre.
-    let empresaId: number | null = null;
-    if (lead.empresa) {
-      empresaId = await deps.almacen.buscarEmpresaPorNombre(lead.empresa);
-      if (empresaId === null) {
-        empresaId = await deps.almacen.crearEmpresa({
-          nombre: lead.empresa,
-          ciudad: lead.ciudad || null,
-        });
-      }
-    }
-
-    // 2) Contacto: el correo es la llave natural de una persona en este CRM.
-    let contactoId: number | null = null;
-    if (lead.email) contactoId = await deps.almacen.buscarContactoPorEmail(lead.email);
-    if (contactoId === null) {
-      contactoId = await deps.almacen.crearContacto({
-        nombre: lead.nombre,
-        cargo: lead.cargo || null,
-        email: lead.email || null,
-        telefono: lead.telefono || null,
-        empresaId,
-      });
-    }
-
-    // 3) Lead en el pipeline, en la etapa inicial.
-    const leadId = await deps.almacen.crearLead({
-      empresaId,
-      contactoId,
+    // Una sola operacion atomica: empresa + contacto + lead + cierre de la fila.
+    // No hay estados intermedios confirmados que un reintento tenga que limpiar.
+    const r = await deps.almacen.persistir(evento.leadgenId, {
+      lead,
+      graph,
       titulo: lead.empresa ? `Meta Ads: ${lead.empresa}` : "Lead desde Meta Ads",
       notas: armarNotas(lead, graph),
-      leadgenId: evento.leadgenId,
     });
 
-    // 4) Recien aca la fila pasa a `completed`.
-    await deps.almacen.marcarCompletado(evento.leadgenId, { leadId, contactoId, empresaId, lead, graph });
+    if (r.yaEstaba) {
+      log.info("la fila ya estaba completada al persistir", { leadgenId: evento.leadgenId });
+      return "already_completed";
+    }
 
     log.info("lead guardado", {
       leadgenId: evento.leadgenId,
-      leadId,
+      leadId: r.leadId,
       email: ofuscarEmail(lead.email),
       campos: Object.keys(lead.respuestas).length,
     });

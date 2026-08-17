@@ -149,6 +149,36 @@ Como segunda red, `leads` tiene su propio índice único `(origen, origen_id)`: 
 intento anterior alcanzó a escribir el lead antes de caerse, el reintento lo
 reutiliza en vez de duplicarlo.
 
+### Atomicidad: por qué la escritura es una sola función
+
+El reclamo resuelve la concurrencia, pero no las **escrituras parciales**. Crear
+empresa, contacto y lead con cuatro llamadas sueltas de PostgREST son cuatro
+transacciones distintas: si el proceso muere entre la segunda y la tercera, la
+empresa y el contacto quedan confirmados y el reintento tiene que adivinar cuáles
+existen ya. Y este esquema no da para adivinar:
+
+- `empresas.nombre` **no es único** — hoy ya hay 4 nombres repetidos.
+- **41 de 57 contactos no tienen correo**, así que deduplicar por email no cubre
+  el caso mayoritario.
+
+Por eso toda la escritura vive en `procesar_meta_lead`, una sola función de
+Postgres: empresa + contacto + lead + cierre de la fila, en **una transacción**.
+O queda todo, o no queda nada y el reintento arranca limpio. Y como refuerzo, los
+ids ya creados se guardan en la propia fila (`lead_id`, `contacto_id`,
+`empresa_id`) y se reutilizan **por id**, no por heurística.
+
+Verificado contra Postgres real, con un trigger que revienta al insertar el lead
+—es decir, después de que la función ya creó empresa y contacto:
+
+| Paso | Resultado |
+|---|---|
+| Fallo inyectado al crear el lead | lanzó la excepción |
+| Tras el fallo | `empresa=0 contacto=0 lead=0` — nada a medio escribir |
+| Reintento sin la falla | `completed`, `attempt_count=2` |
+| Conteo final | `empresa=1 contacto=1 lead=1 meta_lead=1` |
+| Relaciones | correctas y coincidentes |
+| Tercera llamada sobre `completed` | `ya_estaba=true`, cero escrituras |
+
 Campos de recuperación en la tabla: `status`, `attempt_count`, `last_attempt_at`,
 `last_error` (saneado, nunca con tokens), `processed_at`, y `lead_id` /
 `contacto_id` / `empresa_id` apuntando a lo que se creó.
@@ -417,12 +447,83 @@ De menos a más definitivo:
 6. **Revertir el esquema**, si además quieres borrar el detalle guardado:
    `20260816173000_meta_leads_down.sql`.
 
-## Privacidad
+## Seguridad y privacidad
 
-- Los datos personales de los leads viven solo en Postgres, detrás de RLS. `meta_leads`
-  tiene la misma política que el resto de las tablas: solo el usuario dueño.
-- La Edge Function entra con `service_role`, que salta RLS. Esa clave nunca sale de los
-  secretos de Supabase y no está en el repo.
-- El token de página viaja en la cabecera `Authorization`, **no** en la query string, para
-  que no quede escrito en logs de acceso.
-- El frontend (`index.html`, `crm/index.html`) nunca ve ninguno de estos secretos.
+### Validación del origen
+
+El orden importa y es este:
+
+1. **Tope de tamaño** antes de leer nada: `Content-Length` y, después, el largo
+   real del texto. Sobre 256 KB se responde `413`.
+2. **Firma HMAC sobre los bytes crudos**, antes de cualquier `JSON.parse`.
+   Reserializar el JSON cambia bytes y rompería el HMAC, así que se firma el texto
+   exacto que llegó. Hay una prueba que falla si alguien invierte este orden.
+3. Recién con la firma validada se interpreta el contenido.
+4. **Filtro por página**: si `META_PAGE_ID` está puesto, los eventos de otra
+   página se ignoran (no se rechazan: devolver error por algo que legítimamente no
+   nos incumbe solo provoca reintentos inútiles). Un evento sin `page_id` no se
+   puede atribuir y también se descarta.
+
+### Las funciones SQL
+
+Ninguna usa `SECURITY DEFINER`, y es deliberado: no hace falta. Quien las llama es
+la Edge Function con `service_role`, que ya salta RLS. Un `SECURITY DEFINER` las
+haría correr con los privilegios del dueño, así que cualquiera que consiguiera
+ejecutarlas escribiría en el CRM. Siendo `SECURITY INVOKER`, si algún día se
+filtrara el permiso de ejecución, todavía se toparía con RLS.
+
+Aun así ambas fijan `search_path` explícitamente: sin eso, quien llama podría
+anteponer un esquema propio y hacer que `meta_leads` o `contactos` resuelvan a
+tablas suyas. Y todas las referencias van calificadas (`public.contactos`).
+
+**No hay SQL dinámico.** Ni `EXECUTE`, ni `format()` armando sentencias, ni
+concatenación: los datos del webhook entran solo como parámetros tipados.
+
+Postgres le da `EXECUTE` a `PUBLIC` por defecto en toda función nueva, y en
+Supabase `anon` y `authenticated` son alcanzables desde el navegador con la clave
+anon, que es pública. Por eso se revoca primero y se concede después:
+
+```sql
+revoke all on function public.reclamar_meta_lead(text,text,text,text,timestamptz,interval)
+  from public, anon, authenticated;
+grant execute on function public.reclamar_meta_lead(text,text,text,text,timestamptz,interval)
+  to service_role;
+
+revoke all on function public.procesar_meta_lead(
+  text,text,text,text,text,text,text,text,text,jsonb,jsonb,text,text,timestamptz
+) from public, anon, authenticated;
+grant execute on function public.procesar_meta_lead(
+  text,text,text,text,text,text,text,text,text,jsonb,jsonb,text,text,timestamptz
+) to service_role;
+
+revoke all on table public.meta_leads from anon;
+```
+
+Estado verificado contra Postgres:
+
+| | `reclamar_meta_lead` | `procesar_meta_lead` |
+|---|---|---|
+| Modo | `SECURITY INVOKER` | `SECURITY INVOKER` |
+| `search_path` | `public, pg_temp` | `public, pg_temp` |
+| `anon` ejecuta | no | no |
+| `authenticated` ejecuta | no | no |
+| `service_role` ejecuta | sí | sí |
+
+Y sobre la tabla: `anon` no puede leerla, `authenticated` sí pero **con RLS
+activo**, que limita las filas al usuario dueño — la misma política que el resto
+del CRM. El frontend autenticado ve sus leads; la clave anon sola no ve nada.
+
+### Datos personales
+
+- Viven solo en Postgres, detrás de RLS. Nunca salen al frontend público.
+- El token de página viaja en la cabecera `Authorization`, **no** en la query
+  string, para que no quede escrito en logs de acceso.
+- `payload` se arma con una **lista blanca** de campos (`id`, `created_time`,
+  `field_data`, `form_id`, `ad_id`), no copiando la respuesta de Graph: no puede
+  arrastrar cabeceras, firma ni tokens aunque llegaran.
+- `last_error` pasa por `sanitizarError`, que borra los valores de los secretos
+  conocidos y además lo que tenga forma de credencial (`access_token=`, `Bearer`,
+  `EAA…`), por si Meta devuelve el token dentro de su propio mensaje de error.
+- Los logs no llevan tokens ni datos personales completos: los correos salen
+  ofuscados (`p***@example.com`) y del payload solo se anotan ids y conteos.
+- La clave `service_role` nunca sale de los secretos de Supabase ni está en el repo.

@@ -4,18 +4,21 @@ import {
   type Almacen,
   CAMPOS_GRAPH,
   codigoHttp,
-  type DatosProcesado,
+  type DatosPersistencia,
   type Desenlace,
   ErrorGraph,
   esReintentable,
   type EventoLeadgen,
   extraerEventosLeadgen,
+  filtrarPorPagina,
   type LeadDeGraph,
   type LeadNormalizado,
+  LIMITE_CUERPO_BYTES,
   mensajeDe,
   normalizarRespuestaGraph,
   procesarEvento,
   type Registro,
+  type ResultadoPersistencia,
   type ResultadoReclamo,
   urlGraph,
   verificarFirma,
@@ -28,12 +31,16 @@ import {
 // Meta NO manda los datos del lead en el webhook: manda un leadgen_id y hay que
 // ir a buscarlos a la Graph API con el token de la pagina. El flujo es:
 //   1. GET  -> Meta verifica la URL con hub.challenge (una sola vez, al darla de alta)
-//   2. POST -> llega {leadgen_id}, se consulta Graph API y se crea empresa + contacto + lead
+//   2. POST -> llega {leadgen_id}; se reclama, se consulta Graph y se persiste
 //
 // El procesamiento es SINCRONO: el 200 sale recien cuando el lead esta guardado.
 // Si algo falla, se responde 503 (temporal) o 500 (permanente) para que Meta
 // reintente en vez de dar la entrega por buena. El costo es que la respuesta
 // tarda mas; por eso hay un presupuesto de tiempo estricto, abajo.
+//
+// Toda la escritura pasa por dos funciones de Postgres, no por llamadas sueltas:
+//   reclamar_meta_lead()  -> quien procesa (exclusion mutua)
+//   procesar_meta_lead()  -> empresa + contacto + lead + cierre, en UNA transaccion
 //
 // verify_jwt off a proposito: Meta no manda JWT. La proteccion es la firma
 // X-Hub-Signature-256 (HMAC del cuerpo con el app secret), que se valida abajo.
@@ -182,18 +189,19 @@ function hacerTraerDeGraph(reloj: ReturnType<typeof presupuesto>) {
 }
 
 // ---------------------------------------------------------------------------
-// Persistencia (implementacion del puerto `Almacen` con supabase-js)
+// Persistencia
 // ---------------------------------------------------------------------------
-
-/** 23505 = choque con un indice unico. */
-const CONFLICTO_UNICO = "23505";
+//
+// Solo tres operaciones, y las dos que escriben son funciones de Postgres. No hay
+// inserts sueltos desde aca a proposito: cada llamada de PostgREST es su propia
+// transaccion, y encadenar cuatro dejaria escrituras parciales confirmadas si el
+// proceso muere a mitad de camino.
 
 function almacenSupabase(sb: SupabaseClient): Almacen {
   return {
     /**
-     * Todo el reclamo ocurre dentro de `reclamar_meta_lead`, una funcion de
-     * Postgres. Tiene que ser una sola sentencia atomica: si esto fuera un SELECT
-     * seguido de un INSERT desde aca, dos entregas simultaneas pasarian las dos.
+     * Exclusion mutua. Tiene que ser una sola sentencia atomica: un SELECT
+     * seguido de un INSERT desde aca dejaria pasar dos entregas simultaneas.
      */
     async reclamar(evento: EventoLeadgen): Promise<ResultadoReclamo> {
       const { data, error } = await sb.rpc("reclamar_meta_lead", {
@@ -216,106 +224,41 @@ function almacenSupabase(sb: SupabaseClient): Almacen {
       throw new Error(`reclamar: respuesta inesperada (${resultado ?? "vacia"})`);
     },
 
-    async buscarEmpresaPorNombre(nombre: string) {
-      const { data, error } = await sb.from("empresas").select("id").ilike("nombre", nombre).limit(1)
-        .maybeSingle();
-      if (error) throw new Error(`buscar empresa: ${error.message}`);
-      return data?.id ?? null;
-    },
+    /**
+     * Empresa + contacto + lead + cierre de la fila, todo en una transaccion de
+     * Postgres. Si algo falla adentro, no queda nada escrito y el reintento
+     * arranca limpio.
+     */
+    async persistir(leadgenId: string, d: DatosPersistencia): Promise<ResultadoPersistencia> {
+      const { data, error } = await sb.rpc("procesar_meta_lead", {
+        p_meta_lead_id: leadgenId,
+        p_nombre: d.lead.nombre,
+        p_email: d.lead.email,
+        p_telefono: d.lead.telefono,
+        p_empresa: d.lead.empresa,
+        p_cargo: d.lead.cargo,
+        p_ciudad: d.lead.ciudad,
+        p_titulo: d.titulo,
+        p_notas: d.notas,
+        p_respuestas: d.lead.respuestas,
+        // `crudo` es una copia con solo los campos que pedimos a Graph: nunca
+        // lleva cabeceras, firma ni tokens.
+        p_payload: d.graph.crudo,
+        p_form_id: d.graph.formId,
+        p_ad_id: d.graph.adId,
+        p_created_time: d.graph.createdTime,
+      });
+      if (error) throw new Error(`persistir: ${error.message}`);
 
-    async crearEmpresa({ nombre, ciudad }) {
-      const { data, error } = await sb
-        .from("empresas")
-        .insert({ nombre, ciudad, fuente: "meta_lead_ads" })
-        .select("id")
-        .single();
-      if (error) {
-        // No es fatal: el lead puede quedar sin empresa asociada.
-        log.error("no se pudo crear la empresa", { detalle: error.message });
-        return null;
-      }
-      return data?.id ?? null;
-    },
+      const fila = Array.isArray(data) ? data[0] : data;
+      if (!fila) throw new Error("persistir: la funcion no devolvio nada");
 
-    async buscarContactoPorEmail(email: string) {
-      const { data, error } = await sb.from("contactos").select("id").ilike("email", email).limit(1)
-        .maybeSingle();
-      if (error) throw new Error(`buscar contacto: ${error.message}`);
-      return data?.id ?? null;
-    },
-
-    async crearContacto({ nombre, cargo, email, telefono, empresaId }) {
-      const { data, error } = await sb
-        .from("contactos")
-        .insert({ nombre, cargo, email, telefono, empresa_id: empresaId })
-        .select("id")
-        .single();
-      if (error) throw new Error(`contacto: ${error.message}`);
-      return data.id as number;
-    },
-
-    async crearLead({ empresaId, contactoId, titulo, notas, leadgenId }) {
-      const hoy = new Date().toISOString().slice(0, 10);
-      const { data, error } = await sb
-        .from("leads")
-        .insert({
-          empresa_id: empresaId,
-          contacto_id: contactoId,
-          titulo,
-          etapa: "nuevo",
-          prioridad: "media",
-          notas,
-          ultimo_contacto: hoy,
-          origen: "meta_lead_ads",
-          origen_id: leadgenId,
-        })
-        .select("id")
-        .single();
-
-      // El indice unico (origen, origen_id) ya tenia este lead: no es un error,
-      // es un intento anterior que alcanzo a escribirlo antes de caerse.
-      if (error?.code === CONFLICTO_UNICO) {
-        const { data: existente } = await sb
-          .from("leads")
-          .select("id")
-          .eq("origen", "meta_lead_ads")
-          .eq("origen_id", leadgenId)
-          .maybeSingle();
-        return existente?.id ?? null;
-      }
-      if (error) throw new Error(`lead: ${error.message}`);
-      return data?.id ?? null;
-    },
-
-    async marcarCompletado(leadgenId: string, d: DatosProcesado) {
-      const ahora = new Date().toISOString();
-      const { error } = await sb
-        .from("meta_leads")
-        .update({
-          lead_id: d.leadId,
-          contacto_id: d.contactoId,
-          empresa_id: d.empresaId,
-          nombre: d.lead.nombre,
-          email: d.lead.email || null,
-          telefono: d.lead.telefono || null,
-          empresa: d.lead.empresa || null,
-          cargo: d.lead.cargo || null,
-          ciudad: d.lead.ciudad || null,
-          // Los ids de Graph completan lo que el webhook no traia.
-          form_id: d.graph.formId ?? undefined,
-          ad_id: d.graph.adId ?? undefined,
-          respuestas: d.lead.respuestas,
-          payload: d.graph.crudo,
-          creado_en_meta: d.graph.createdTime ?? undefined,
-          status: "completed",
-          last_error: null,
-          processed_at: ahora,
-          updated_at: ahora,
-        })
-        .eq("meta_lead_id", leadgenId);
-      // Si esto falla, el lead esta en el CRM pero la fila no dice `completed`.
-      // Se propaga: mejor un 503 y una reentrega idempotente que una fila mintiendo.
-      if (error) throw new Error(`marcarCompletado: ${error.message}`);
+      return {
+        leadId: fila.lead_id ?? null,
+        contactoId: fila.contacto_id ?? null,
+        empresaId: fila.empresa_id ?? null,
+        yaEstaba: fila.ya_estaba === true,
+      };
     },
 
     async marcarFallido(leadgenId: string, errorSaneado: string) {
@@ -324,6 +267,8 @@ function almacenSupabase(sb: SupabaseClient): Almacen {
         .from("meta_leads")
         .update({ status: "failed", last_error: errorSaneado, updated_at: ahora })
         .eq("meta_lead_id", leadgenId);
+      // Si esto falla, la fila queda en `processing` y la recupera el umbral de
+      // abandono. No se propaga: ya estamos en el camino de error.
       if (error) log.error("no se pudo marcar el fallo", { detalle: error.message });
     },
   };
@@ -402,14 +347,29 @@ Deno.serve(async (req: Request) => {
 
   if (req.method !== "POST") return json({ error: "Metodo no permitido" }, 405);
 
-  // El cuerpo se lee como texto y se firma sobre esos bytes exactos.
+  // 2) Tope de tamano antes de leer nada: una entrega real son unos pocos KB.
+  const declarado = Number(req.headers.get("content-length") ?? "0");
+  if (Number.isFinite(declarado) && declarado > LIMITE_CUERPO_BYTES) {
+    log.error("cuerpo rechazado por tamano", { declarado });
+    return json({ error: "Cuerpo demasiado grande" }, 413);
+  }
+
+  // El cuerpo se lee como TEXTO y se firma sobre esos bytes exactos, antes de
+  // cualquier JSON.parse: reserializar cambia bytes y romperia el HMAC.
   const crudo = await req.text();
+  if (crudo.length > LIMITE_CUERPO_BYTES) {
+    log.error("cuerpo rechazado por tamano", { real: crudo.length });
+    return json({ error: "Cuerpo demasiado grande" }, 413);
+  }
+
+  // 3) Firma. Nada de lo que sigue corre si esto no pasa.
   const firma = await verificarFirma(crudo, req.headers.get("x-hub-signature-256"), env("META_APP_SECRET"));
   if (!firma.ok) {
     log.error("firma rechazada", { motivo: firma.motivo });
     return json({ error: "Firma invalida" }, 401);
   }
 
+  // 4) Recien con la firma validada se interpreta el contenido.
   let cuerpo: unknown;
   try {
     cuerpo = JSON.parse(crudo);
@@ -419,8 +379,13 @@ Deno.serve(async (req: Request) => {
 
   // Lo que no sea `leadgen` se descarta sin ruido: la suscripcion a la pagina
   // trae cambios de otros campos que no nos incumben.
-  const eventos = extraerEventosLeadgen(cuerpo);
-  if (eventos.length === 0) return json({ ok: true, recibidos: 0, procesados: 0 });
+  const todos = extraerEventosLeadgen(cuerpo);
+  // Y si hay varias paginas en la misma app, solo la nuestra.
+  const { aceptados: eventos, descartados } = filtrarPorPagina(todos, env("META_PAGE_ID"));
+  if (descartados.length > 0) {
+    log.info("eventos de otra pagina ignorados", { cantidad: descartados.length });
+  }
+  if (eventos.length === 0) return json({ ok: true, recibidos: 0, completados: 0 });
 
   const reloj = presupuesto(PRESUPUESTO_TOTAL_MS);
   const sb = createClient(

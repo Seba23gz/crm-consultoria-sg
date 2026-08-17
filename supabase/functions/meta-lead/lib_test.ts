@@ -15,18 +15,21 @@ import {
   type Almacen,
   CAMPOS_GRAPH,
   codigoHttp,
-  type DatosProcesado,
+  type DatosPersistencia,
   type Desenlace,
   ErrorGraph,
   esReintentable,
   type EventoLeadgen,
   extraerEventosLeadgen,
+  filtrarPorPagina,
   igualSeguro,
   type LeadDeGraph,
+  LIMITE_CUERPO_BYTES,
   normalizarCampos,
   normalizarRespuestaGraph,
   ofuscarEmail,
   procesarEvento,
+  type ResultadoPersistencia,
   type ResultadoReclamo,
   sanitizarError,
   urlGraph,
@@ -422,6 +425,9 @@ Deno.test("el codigo HTTP sale del peor desenlace de la entrega", () => {
 /** Umbral de abandono, igual al `p_stale_after` de la funcion SQL. */
 const STALE_MS = 5 * 60 * 1000;
 
+/** Puntos donde se puede inyectar una falla dentro de la "transaccion". */
+type PuntoDeFalla = "empresa" | "contacto" | "lead" | "cierre";
+
 interface Fila {
   status: "pending" | "processing" | "completed" | "failed";
   attempt_count: number;
@@ -430,27 +436,39 @@ interface Fila {
   processed_at: number | null;
   lead_id: number | null;
   contacto_id: number | null;
+  empresa_id: number | null;
 }
 
 interface Registro {
-  empresas: { nombre: string; ciudad: string | null }[];
-  contactos: { nombre: string; email: string | null }[];
-  leads: { leadgenId: string; titulo: string; notas: string }[];
-  completados: DatosProcesado[];
+  empresas: { id: number; nombre: string; ciudad: string | null }[];
+  contactos: { id: number; nombre: string; email: string | null; empresa_id: number | null }[];
+  leads: { id: number; leadgenId: string; titulo: string; notas: string; contacto_id: number; empresa_id: number | null }[];
 }
 
 /** Cede el turno del event loop, para que dos flujos puedan intercalarse. */
 const tick = () => new Promise((r) => setTimeout(r, 0));
 
 /**
- * Almacen en memoria que replica `reclamar_meta_lead`. El reloj es manual para
- * poder simular un `processing` abandonado sin esperar cinco minutos.
+ * Almacen en memoria que replica las dos funciones SQL:
+ *
+ *   reclamar_meta_lead()  -> maquina de estados y exclusion mutua
+ *   procesar_meta_lead()  -> empresa + contacto + lead + cierre, transaccional
+ *
+ * `persistir` trabaja sobre copias y solo las publica al final. Eso es lo que
+ * modela la transaccion de Postgres: si se inyecta una falla en cualquier punto
+ * intermedio, no queda NADA escrito, igual que un ROLLBACK.
+ *
+ * El reloj es manual para poder simular un `processing` abandonado sin esperar
+ * cinco minutos.
  */
 function almacenFalso() {
   const filas = new Map<string, Fila>();
-  const r: Registro = { empresas: [], contactos: [], leads: [], completados: [] };
+  const r: Registro = { empresas: [], contactos: [], leads: [] };
   let ahora = 1_786_000_000_000;
-  let seq = 1;
+  let seqEmpresa = 1000;
+  let seqContacto = 2000;
+  let seqLead = 1;
+  let fallarEn: PuntoDeFalla | null = null;
 
   const almacen: Almacen = {
     async reclamar(evento: EventoLeadgen): Promise<ResultadoReclamo> {
@@ -467,6 +485,7 @@ function almacenFalso() {
           processed_at: null,
           lead_id: null,
           contacto_id: null,
+          empresa_id: null,
         });
         return { tipo: "claimed", intento: 1 };
       }
@@ -485,43 +504,79 @@ function almacenFalso() {
       return { tipo: "in_progress" };
     },
 
-    async buscarEmpresaPorNombre(nombre) {
-      await tick();
-      const i = r.empresas.findIndex((e) => e.nombre.toLowerCase() === nombre.toLowerCase());
-      return i === -1 ? null : i + 1000;
-    },
-    async crearEmpresa(datos) {
-      await tick();
-      r.empresas.push(datos);
-      return r.empresas.length + 999;
-    },
-    async buscarContactoPorEmail(email) {
-      await tick();
-      const i = r.contactos.findIndex((c) => c.email?.toLowerCase() === email.toLowerCase());
-      return i === -1 ? null : i + 2000;
-    },
-    async crearContacto(datos) {
-      await tick();
-      r.contactos.push({ nombre: datos.nombre, email: datos.email });
-      return r.contactos.length + 1999;
-    },
-    async crearLead(datos) {
-      await tick();
-      r.leads.push({ leadgenId: datos.leadgenId, titulo: datos.titulo, notas: datos.notas });
-      return seq++;
-    },
-    async marcarCompletado(id, datos) {
+    async persistir(id: string, d: DatosPersistencia): Promise<ResultadoPersistencia> {
       await tick();
       const f = filas.get(id);
-      if (f) {
-        f.status = "completed";
-        f.processed_at = ahora;
-        f.last_error = null;
-        f.lead_id = datos.leadId;
-        f.contacto_id = datos.contactoId;
+      if (!f) throw new Error(`meta_lead ${id} no existe; hay que reclamarlo antes`);
+
+      // Idempotencia dura: si ya se completo no se escribe nada.
+      if (f.status === "completed") {
+        return { leadId: f.lead_id, contactoId: f.contacto_id, empresaId: f.empresa_id, yaEstaba: true };
       }
-      r.completados.push(datos);
+
+      // --- inicio de la "transaccion": se trabaja sobre copias ---
+      const empresas = [...r.empresas];
+      const contactos = [...r.contactos];
+      const leads = [...r.leads];
+
+      // 1) Empresa: checkpoint por id, luego por nombre, luego crear.
+      let empresaId = f.empresa_id;
+      if (empresaId === null && d.lead.empresa) {
+        const hallada = empresas.find((e) => e.nombre.toLowerCase() === d.lead.empresa.toLowerCase());
+        if (hallada) empresaId = hallada.id;
+        else {
+          empresaId = ++seqEmpresa;
+          empresas.push({ id: empresaId, nombre: d.lead.empresa, ciudad: d.lead.ciudad || null });
+        }
+      }
+      if (fallarEn === "empresa") throw new Error("falla simulada: despues de crear la empresa");
+
+      // 2) Contacto: checkpoint por id, luego por correo, luego crear.
+      let contactoId = f.contacto_id;
+      if (contactoId === null && d.lead.email) {
+        const c = contactos.find((x) => x.email?.toLowerCase() === d.lead.email.toLowerCase());
+        if (c) contactoId = c.id;
+      }
+      if (contactoId === null) {
+        contactoId = ++seqContacto;
+        contactos.push({ id: contactoId, nombre: d.lead.nombre, email: d.lead.email || null, empresa_id: empresaId });
+      }
+      if (fallarEn === "contacto") throw new Error("falla simulada: despues de crear el contacto");
+
+      // 3) Lead: el unico (origen, origen_id) lo hace idempotente.
+      let leadId = f.lead_id;
+      if (leadId === null) {
+        const ya = leads.find((l) => l.leadgenId === id);
+        if (ya) leadId = ya.id;
+        else {
+          leadId = seqLead++;
+          leads.push({
+            id: leadId,
+            leadgenId: id,
+            titulo: d.titulo,
+            notas: d.notas,
+            contacto_id: contactoId,
+            empresa_id: empresaId,
+          });
+        }
+      }
+      if (fallarEn === "lead") throw new Error("falla simulada: despues de crear el lead");
+      if (fallarEn === "cierre") throw new Error("falla simulada: cierre, antes de marcar completed");
+
+      // --- commit: recien aca se publica todo ---
+      r.empresas = empresas;
+      r.contactos = contactos;
+      r.leads = leads;
+      f.status = "completed";
+      f.processed_at = ahora;
+      f.last_error = null;
+      f.lead_id = leadId;
+      f.contacto_id = contactoId;
+      f.empresa_id = empresaId;
+
+      return { leadId, contactoId, empresaId, yaEstaba: false };
     },
+
     async marcarFallido(id, detalle) {
       await tick();
       const f = filas.get(id);
@@ -537,6 +592,9 @@ function almacenFalso() {
     r,
     filas,
     fila: (id: string) => filas.get(id),
+    fallarEn: (p: PuntoDeFalla | null) => {
+      fallarEn = p;
+    },
     avanzarReloj: (ms: number) => {
       ahora += ms;
     },
@@ -554,6 +612,77 @@ const EVENTO: EventoLeadgen = {
 async function graphDeFixture(): Promise<LeadDeGraph> {
   return normalizarRespuestaGraph(await leerFixture("graph_lead.json"), EVENTO.leadgenId);
 }
+// ---------------------------------------------------------------------------
+// Origen: filtro por pagina y tope de tamano
+// ---------------------------------------------------------------------------
+
+Deno.test("sin META_PAGE_ID pasan todos los eventos", () => {
+  const eventos = [
+    { ...EVENTO, pageId: "100000000000001" },
+    { ...EVENTO, leadgenId: "2", pageId: "999" },
+  ];
+  const { aceptados, descartados } = filtrarPorPagina(eventos, undefined);
+  assertEquals(aceptados.length, 2);
+  assertEquals(descartados.length, 0);
+});
+
+Deno.test("con META_PAGE_ID se descartan los eventos de otra pagina", () => {
+  const eventos = [
+    { ...EVENTO, pageId: "100000000000001" },
+    { ...EVENTO, leadgenId: "2", pageId: "888888888888888" },
+    { ...EVENTO, leadgenId: "3", pageId: null },
+  ];
+  const { aceptados, descartados } = filtrarPorPagina(eventos, "100000000000001");
+  assertEquals(aceptados.map((e) => e.leadgenId), ["900000000000001"]);
+  // El de otra pagina y el que no se puede atribuir quedan fuera.
+  assertEquals(descartados.map((e) => e.leadgenId), ["2", "3"]);
+});
+
+Deno.test("el tope de cuerpo es razonable para una entrega real", () => {
+  // Una entrega de Meta son unos pocos KB; el tope deja margen sin ser absurdo.
+  assertEquals(LIMITE_CUERPO_BYTES, 256 * 1024);
+  assert(LIMITE_CUERPO_BYTES > 64 * 1024);
+  assert(LIMITE_CUERPO_BYTES < 5 * 1024 * 1024);
+});
+
+Deno.test("la firma se valida sobre los bytes crudos, no sobre el JSON reserializado", async () => {
+  // Meta firma el cuerpo tal como lo manda. Este cuerpo tiene espaciado propio:
+  // pasarlo por JSON.parse/stringify cambia los bytes y romperia el HMAC. Por eso
+  // el handler firma el texto crudo ANTES de parsearlo.
+  const crudo = '{"object":"page",  "entry":[ {"id":"1"} ]}';
+  const firma = await firmar(crudo);
+
+  assert((await verificarFirma(crudo, firma, APP_SECRET)).ok, "el crudo debe validar");
+
+  const reserializado = JSON.stringify(JSON.parse(crudo));
+  assert(reserializado !== crudo, "el fixture debe cambiar al reserializar");
+  assert(
+    !(await verificarFirma(reserializado, firma, APP_SECRET)).ok,
+    "validar sobre el reserializado seria un bug",
+  );
+});
+
+Deno.test("el payload que se guarda no lleva cabeceras, firma ni tokens", async () => {
+  // `crudo` se arma con una lista blanca de campos, no copiando la respuesta.
+  const graph = normalizarRespuestaGraph(
+    {
+      ...(await leerFixture("graph_lead.json") as Record<string, unknown>),
+      // Basura que Graph nunca manda, pero que si llegara no debe quedar guardada.
+      access_token: "EAAG1234567890abcdefghijklmnop",
+      authorization: "Bearer secreto",
+      "x-hub-signature-256": "sha256=deadbeef",
+    },
+    EVENTO.leadgenId,
+  );
+
+  const claves = Object.keys(graph.crudo);
+  assertEquals(claves.sort(), ["ad_id", "created_time", "field_data", "form_id", "id"]);
+
+  const serializado = JSON.stringify(graph.crudo);
+  for (const prohibido of ["access_token", "authorization", "signature", "Bearer", "EAAG"]) {
+    assert(!serializado.includes(prohibido), `el payload no debe contener ${prohibido}`);
+  }
+});
 
 // ---------------------------------------------------------------------------
 // Flujo completo
@@ -579,15 +708,163 @@ Deno.test("lead valido crea empresa, contacto y lead, y queda completed", async 
   assertEquals(f.attempt_count, 1);
   assertEquals(f.last_error, null);
   assert(f.processed_at !== null, "processed_at debe quedar puesto");
-  assert(f.lead_id !== null, "la fila debe apuntar al lead creado");
-  assert(f.contacto_id !== null, "la fila debe apuntar al contacto creado");
 
-  // Las preguntas personalizadas viajan a las notas del lead.
+  // Relaciones: la fila apunta a lo creado, y lo creado se apunta entre si.
+  assertEquals(f.lead_id, r.leads[0].id);
+  assertEquals(f.contacto_id, r.contactos[0].id);
+  assertEquals(f.empresa_id, r.empresas[0].id);
+  assertEquals(r.leads[0].contacto_id, r.contactos[0].id);
+  assertEquals(r.leads[0].empresa_id, r.empresas[0].id);
+  assertEquals(r.contactos[0].empresa_id, r.empresas[0].id);
+
   assertStringIncludes(r.leads[0].notas, "Seguimiento de arriendos");
   assertStringIncludes(r.leads[0].notas, "Origen: Meta Lead Ads");
-  // Y las respuestas completas quedan para persistir en jsonb.
-  assertEquals(Object.keys(r.completados[0].lead.respuestas).length, 8);
 });
+
+// ---------------------------------------------------------------------------
+// Atomicidad: fallas parciales
+// ---------------------------------------------------------------------------
+
+/**
+ * El nucleo de la auditoria. Se inyecta una falla en cada punto de la escritura y
+ * se comprueba que el reintento deja EXACTAMENTE una de cada cosa.
+ *
+ * Si la persistencia fueran cuatro llamadas sueltas, la falla "despues de crear
+ * el contacto" dejaria un contacto huerfano confirmado, y el reintento crearia
+ * otro: el fixture no tiene con que deduplicar de forma fiable (empresas.nombre
+ * no es unico y hay leads sin correo). Con todo en una transaccion, el intento
+ * fallido no deja rastro.
+ */
+for (const punto of ["empresa", "contacto", "lead", "cierre"] as const) {
+  Deno.test(`falla despues de "${punto}": el reintento deja exactamente una de cada cosa`, async () => {
+    const { almacen, r, filas, fila, fallarEn } = almacenFalso();
+    const graph = await graphDeFixture();
+    const deps = { almacen, traerDeGraph: () => Promise.resolve(graph) };
+
+    // Primer intento: se cae en el punto indicado.
+    fallarEn(punto);
+    assertEquals(await procesarEvento(EVENTO, deps), "retry");
+
+    // Rollback: no quedo NADA a medio escribir.
+    assertEquals(r.empresas.length, 0, "no debe quedar empresa huerfana");
+    assertEquals(r.contactos.length, 0, "no debe quedar contacto huerfano");
+    assertEquals(r.leads.length, 0, "no debe quedar lead huerfano");
+
+    const tras = fila(EVENTO.leadgenId)!;
+    assertEquals(tras.status, "failed");
+    assertStringIncludes(tras.last_error!, punto);
+
+    // Segundo intento, ya sin la falla.
+    fallarEn(null);
+    assertEquals(await procesarEvento(EVENTO, deps), "completed");
+
+    // Exactamente una de cada cosa.
+    assertEquals(r.empresas.length, 1, "una empresa");
+    assertEquals(r.contactos.length, 1, "un contacto");
+    assertEquals(r.leads.length, 1, "un lead");
+    assertEquals(filas.size, 1, "un meta_lead");
+
+    // Y las relaciones bien enlazadas.
+    const f = fila(EVENTO.leadgenId)!;
+    assertEquals(f.status, "completed");
+    assertEquals(f.attempt_count, 2);
+    assertEquals(f.last_error, null);
+    assertEquals(f.empresa_id, r.empresas[0].id);
+    assertEquals(f.contacto_id, r.contactos[0].id);
+    assertEquals(f.lead_id, r.leads[0].id);
+    assertEquals(r.leads[0].contacto_id, r.contactos[0].id);
+    assertEquals(r.leads[0].empresa_id, r.empresas[0].id);
+    assertEquals(r.contactos[0].empresa_id, r.empresas[0].id);
+  });
+}
+
+Deno.test("un lead sin correo tampoco se duplica tras una falla parcial", async () => {
+  // El caso peligroso: sin correo no hay con que deduplicar el contacto. Hoy 41
+  // de 57 contactos del CRM no tienen correo, asi que no es hipotetico.
+  const { almacen, r, filas, fallarEn } = almacenFalso();
+  const graph = normalizarRespuestaGraph(
+    {
+      id: EVENTO.leadgenId,
+      field_data: [
+        { name: "full_name", values: ["Sin Correo"] },
+        { name: "phone_number", values: ["+56900000000"] },
+      ],
+    },
+    EVENTO.leadgenId,
+  );
+  const deps = { almacen, traerDeGraph: () => Promise.resolve(graph) };
+
+  fallarEn("lead");
+  assertEquals(await procesarEvento(EVENTO, deps), "retry");
+  assertEquals(r.contactos.length, 0);
+
+  fallarEn(null);
+  assertEquals(await procesarEvento(EVENTO, deps), "completed");
+
+  assertEquals(r.contactos.length, 1, "sin correo igual debe haber un solo contacto");
+  assertEquals(r.leads.length, 1);
+  assertEquals(filas.size, 1);
+});
+
+Deno.test("tres fallas seguidas y un exito: sigue habiendo una sola de cada cosa", async () => {
+  const { almacen, r, filas, fila, fallarEn } = almacenFalso();
+  const graph = await graphDeFixture();
+  const deps = { almacen, traerDeGraph: () => Promise.resolve(graph) };
+
+  for (const punto of ["empresa", "contacto", "lead"] as const) {
+    fallarEn(punto);
+    assertEquals(await procesarEvento(EVENTO, deps), "retry");
+  }
+  fallarEn(null);
+  assertEquals(await procesarEvento(EVENTO, deps), "completed");
+
+  assertEquals(r.empresas.length, 1);
+  assertEquals(r.contactos.length, 1);
+  assertEquals(r.leads.length, 1);
+  assertEquals(filas.size, 1);
+  assertEquals(fila(EVENTO.leadgenId)!.attempt_count, 4);
+});
+
+Deno.test("persistir sobre una fila ya completed no escribe nada", async () => {
+  const { almacen, r } = almacenFalso();
+  const graph = await graphDeFixture();
+  const deps = { almacen, traerDeGraph: () => Promise.resolve(graph) };
+
+  await procesarEvento(EVENTO, deps);
+  const antes = { e: r.empresas.length, c: r.contactos.length, l: r.leads.length };
+
+  // Llamada directa, saltandose el reclamo: la propia funcion es idempotente.
+  const res = await almacen.persistir(EVENTO.leadgenId, {
+    lead: normalizarCampos(graph.fieldData),
+    graph,
+    titulo: "otro titulo",
+    notas: "otras notas",
+  });
+
+  assert(res.yaEstaba, "debe reportar que ya estaba");
+  assertEquals(r.empresas.length, antes.e);
+  assertEquals(r.contactos.length, antes.c);
+  assertEquals(r.leads.length, antes.l);
+});
+
+Deno.test("persistir sin reclamo previo falla en vez de escribir", async () => {
+  const { almacen, r } = almacenFalso();
+  const graph = await graphDeFixture();
+
+  await assertRejects(() =>
+    almacen.persistir("no-reclamado", {
+      lead: normalizarCampos(graph.fieldData),
+      graph,
+      titulo: "t",
+      notas: "n",
+    })
+  );
+  assertEquals(r.contactos.length, 0);
+});
+
+// ---------------------------------------------------------------------------
+// Idempotencia, concurrencia y recuperacion
+// ---------------------------------------------------------------------------
 
 Deno.test("un completed no se vuelve a procesar y responde 200", async () => {
   const { almacen, r, fila } = almacenFalso();
@@ -611,7 +888,6 @@ Deno.test("un completed no se vuelve a procesar y responde 200", async () => {
   assertEquals(r.empresas.length, 1);
   assertEquals(llamadasGraph, 1);
   assertEquals(codigoHttp(["already_completed"]), 200);
-  // El reintento no toca attempt_count: no se reclamo.
   assertEquals(fila(EVENTO.leadgenId)!.attempt_count, 1);
 });
 
@@ -640,28 +916,24 @@ Deno.test("un registro failed se puede reintentar y completar", async () => {
   const { almacen, r, fila } = almacenFalso();
   const graph = await graphDeFixture();
 
-  // Primer intento: Graph se cae.
   let caer = true;
   const deps = {
     almacen,
     traerDeGraph: () =>
-      caer
-        ? Promise.reject(new ErrorGraph("Graph API 503", 503, null, true))
-        : Promise.resolve(graph),
+      caer ? Promise.reject(new ErrorGraph("Graph API 503", 503, null, true)) : Promise.resolve(graph),
   };
 
   assertEquals(await procesarEvento(EVENTO, deps), "retry");
   assertEquals(fila(EVENTO.leadgenId)!.status, "failed");
 
-  // Meta reintenta la entrega y esta vez Graph responde.
   caer = false;
   assertEquals(await procesarEvento(EVENTO, deps), "completed");
 
   const f = fila(EVENTO.leadgenId)!;
   assertEquals(f.status, "completed");
-  assertEquals(f.attempt_count, 2); // se reclamo dos veces
+  assertEquals(f.attempt_count, 2);
   assertEquals(f.last_error, null);
-  assertEquals(r.leads.length, 1); // y no duplico
+  assertEquals(r.leads.length, 1);
   assertEquals(r.contactos.length, 1);
 });
 
@@ -670,8 +942,7 @@ Deno.test("un processing abandonado se recupera pasado el umbral", async () => {
   const graph = await graphDeFixture();
 
   // Se reclama y el proceso "muere" sin marcar nada: la fila queda en processing.
-  const reclamo = await almacen.reclamar(EVENTO);
-  assertEquals(reclamo.tipo, "claimed");
+  assertEquals((await almacen.reclamar(EVENTO)).tipo, "claimed");
   assertEquals(fila(EVENTO.leadgenId)!.status, "processing");
 
   // Mientras esta fresco, otra entrega no lo toca: no duplica.
@@ -706,16 +977,10 @@ Deno.test("dos entregas concurrentes nunca crean dos contactos", async () => {
     },
   };
 
-  // Las dos arrancan antes de que ninguna termine.
-  const [a, b] = await Promise.all([
-    procesarEvento(EVENTO, deps),
-    procesarEvento(EVENTO, deps),
-  ]);
+  const [a, b] = await Promise.all([procesarEvento(EVENTO, deps), procesarEvento(EVENTO, deps)]);
 
   // Una gana el reclamo y completa; la otra se retira pidiendo reintento.
-  const desenlaces = [a, b].sort();
-  assertEquals(desenlaces, ["completed", "retry"]);
-
+  assertEquals([a, b].sort(), ["completed", "retry"]);
   assertEquals(r.contactos.length, 1, "no puede haber dos contactos");
   assertEquals(r.leads.length, 1, "no puede haber dos leads");
   assertEquals(r.empresas.length, 1);
@@ -728,7 +993,7 @@ Deno.test("dos entregas concurrentes nunca crean dos contactos", async () => {
 });
 
 Deno.test("cinco entregas concurrentes tampoco duplican", async () => {
-  const { almacen, r } = almacenFalso();
+  const { almacen, r, filas } = almacenFalso();
   const graph = await graphDeFixture();
   const deps = {
     almacen,
@@ -744,6 +1009,7 @@ Deno.test("cinco entregas concurrentes tampoco duplican", async () => {
   assertEquals(res.filter((d) => d === "retry").length, 4);
   assertEquals(r.contactos.length, 1);
   assertEquals(r.leads.length, 1);
+  assertEquals(filas.size, 1);
 });
 
 Deno.test("un 429 y un 5xx terminan en respuesta reintentable", async () => {
@@ -752,14 +1018,11 @@ Deno.test("un 429 y un 5xx terminan en respuesta reintentable", async () => {
     const res = await procesarEvento(EVENTO, {
       almacen,
       traerDeGraph: () =>
-        Promise.reject(
-          new ErrorGraph(`Graph API ${status}`, status, codigo, esReintentable(status, codigo)),
-        ),
+        Promise.reject(new ErrorGraph(`Graph API ${status}`, status, codigo, esReintentable(status, codigo))),
     });
 
     assertEquals(res, "retry", `status ${status} deberia ser reintentable`);
     assertEquals(codigoHttp([res]), 503);
-    // Y queda reclamable para el reintento de Meta.
     assertEquals(fila(EVENTO.leadgenId)!.status, "failed");
     assertEquals(r.contactos.length, 0);
   }
@@ -774,17 +1037,11 @@ Deno.test("token invalido: desenlace permanente y sin secretos en last_error", a
     // Mensaje realista: Meta a veces devuelve el token dentro del propio error.
     traerDeGraph: () =>
       Promise.reject(
-        new ErrorGraph(
-          `Graph API 400 (codigo 190): Error validating access token=${token}`,
-          400,
-          190,
-          false,
-        ),
+        new ErrorGraph(`Graph API 400 (codigo 190): Error validating access token=${token}`, 400, 190, false),
       ),
     secretos: [token],
   });
 
-  // No es reintentable: reintentar con el mismo token invalido no arregla nada.
   assertEquals(res, "permanent");
   assertEquals(codigoHttp([res]), 500);
 
@@ -856,31 +1113,6 @@ Deno.test("un fallo del correo no invalida el lead ya guardado", async () => {
   assertEquals(res, "completed");
   assertEquals(r.leads.length, 1);
   assertEquals(fila(EVENTO.leadgenId)!.status, "completed");
-});
-
-Deno.test("si falla la escritura del contacto se marca failed y se reintenta", async () => {
-  const { almacen, r, fila } = almacenFalso();
-  const graph = await graphDeFixture();
-  almacen.crearContacto = () => Promise.reject(new Error("contacto: conexion perdida"));
-
-  const res = await procesarEvento(EVENTO, { almacen, traerDeGraph: () => Promise.resolve(graph) });
-
-  assertEquals(res, "retry");
-  assertEquals(codigoHttp([res]), 503);
-  assertEquals(fila(EVENTO.leadgenId)!.status, "failed");
-  assertEquals(r.leads.length, 0);
-});
-
-Deno.test("si falla marcarCompletado se pide reintento (la reentrega es idempotente)", async () => {
-  const { almacen, r } = almacenFalso();
-  const graph = await graphDeFixture();
-  almacen.marcarCompletado = () => Promise.reject(new Error("update: conexion perdida"));
-
-  const res = await procesarEvento(EVENTO, { almacen, traerDeGraph: () => Promise.resolve(graph) });
-
-  // El lead se creo pero la fila no llego a `completed`: mejor 503 que mentir.
-  assertEquals(res, "retry");
-  assertEquals(r.leads.length, 1);
 });
 
 Deno.test("ErrorGraph conserva status, codigo y si es reintentable", async () => {
