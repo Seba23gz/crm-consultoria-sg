@@ -2,11 +2,20 @@
 
 Sitio de la consultora y su CRM interno, en un mismo proyecto de Vercel.
 
-> **Dominio en tránsito.** `vetalabs.cl` está comprado en NIC Chile pero todavía
-> no delegado. Cuando resuelva, hay que cambiar a `https://vetalabs.cl/` las
-> cuatro URLs del `<head>` de `index.html`: `canonical`, `og:url`, `og:image` y
-> `twitter:image`. Hoy apuntan a `vetalabs.vercel.app` para que el preview de
-> los enlaces siga funcionando.
+## Dominio
+
+El dominio de producción es **`https://vetalabs.cl`** (NIC Chile, delegado a
+Vercel). Es el único host canónico: las cuatro URLs del `<head>` de `index.html`
+—`canonical`, `og:url`, `og:image` y `twitter:image`— apuntan ahí, y `vercel.json`
+manda un 301 a la raíz desde `www.vetalabs.cl` y desde las URLs antiguas
+`vetalabs.vercel.app` y `crm-consultoria-sg.vercel.app`. Las URLs de preview
+(`vetalabs-git-<rama>-….vercel.app`) no se redirigen, para poder revisar ramas.
+
+Si se agrega otro dominio o alias, sumarle su regla en `vercel.json` para que no
+quede una copia del sitio indexada aparte.
+
+`robots.txt` y `sitemap.xml` (en la raíz) declaran ese mismo dominio: indexan `/`
+y dejan fuera `/crm` y `/api/`. El CRM además lleva `noindex` en su `<head>`.
 
 | Ruta | Qué es | Acceso |
 |---|---|---|
