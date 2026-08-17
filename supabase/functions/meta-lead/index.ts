@@ -3,8 +3,9 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import {
   type Almacen,
   CAMPOS_GRAPH,
-  CAMPOS_GRAPH_MINIMOS,
+  codigoHttp,
   type DatosProcesado,
+  type Desenlace,
   ErrorGraph,
   esReintentable,
   type EventoLeadgen,
@@ -15,6 +16,7 @@ import {
   normalizarRespuestaGraph,
   procesarEvento,
   type Registro,
+  type ResultadoReclamo,
   urlGraph,
   verificarFirma,
   verificarSuscripcion,
@@ -28,6 +30,11 @@ import {
 //   1. GET  -> Meta verifica la URL con hub.challenge (una sola vez, al darla de alta)
 //   2. POST -> llega {leadgen_id}, se consulta Graph API y se crea empresa + contacto + lead
 //
+// El procesamiento es SINCRONO: el 200 sale recien cuando el lead esta guardado.
+// Si algo falla, se responde 503 (temporal) o 500 (permanente) para que Meta
+// reintente en vez de dar la entrega por buena. El costo es que la respuesta
+// tarda mas; por eso hay un presupuesto de tiempo estricto, abajo.
+//
 // verify_jwt off a proposito: Meta no manda JWT. La proteccion es la firma
 // X-Hub-Signature-256 (HMAC del cuerpo con el app secret), que se valida abajo.
 //
@@ -36,19 +43,25 @@ import {
 
 const NOTIFY_TO = "sebastiangomez2003@gmail.com";
 
-// `EdgeRuntime.waitUntil` mantiene vivo el trabajo en segundo plano despues de
-// responder. Sin esto el runtime puede cortar la funcion apenas sale el 200.
-declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void } | undefined;
+// Presupuesto de tiempo. Meta corta la conexion si el endpoint tarda demasiado y
+// las entregas lentas repetidas pueden hacer que desactive la suscripcion, asi
+// que preferimos rendirnos y devolver 503 (que reintenta) antes que colgarnos.
+const PRESUPUESTO_TOTAL_MS = 10_000;
+/** Debajo de esto no vale la pena empezar otro evento. */
+const MINIMO_POR_EVENTO_MS = 2_500;
+const TIMEOUT_GRAPH_MS = 4_000;
+const INTENTOS_GRAPH = 2;
+const ESPERA_ENTRE_INTENTOS_MS = 300;
 
 const log: Registro = {
   info: (mensaje, datos) => console.log(`[meta-lead] ${mensaje}`, datos ?? ""),
   error: (mensaje, datos) => console.error(`[meta-lead] ${mensaje}`, datos ?? ""),
 };
 
-function json(obj: unknown, status = 200) {
+function json(obj: unknown, status = 200, headers: Record<string, string> = {}) {
   return new Response(JSON.stringify(obj), {
     status,
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...headers },
   });
 }
 
@@ -73,12 +86,29 @@ function tokenDeVerificacion(): string | undefined {
   return env("META_WEBHOOK_VERIFY_TOKEN") ?? env("META_VERIFY_TOKEN");
 }
 
+/** Valores que nunca deben aparecer en `last_error` ni en los logs. */
+function secretosConocidos(): string[] {
+  return [
+    env("META_PAGE_ACCESS_TOKEN"),
+    env("META_APP_SECRET"),
+    tokenDeVerificacion(),
+    env("RESEND_API_KEY"),
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? undefined,
+  ].filter((v): v is string => typeof v === "string" && v.length > 0);
+}
+
+/** Lleva la cuenta del tiempo que queda antes de rendirse. */
+function presupuesto(totalMs: number) {
+  const inicio = Date.now();
+  return {
+    restante: () => totalMs - (Date.now() - inicio),
+    agotado: (minimo = 0) => totalMs - (Date.now() - inicio) <= minimo,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Graph API
 // ---------------------------------------------------------------------------
-
-const REINTENTOS = 3;
-const ESPERA_BASE_MS = 800;
 
 function dormir(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
@@ -88,7 +118,6 @@ function dormir(ms: number) {
 async function errorDeRespuesta(res: Response): Promise<ErrorGraph> {
   const cuerpo = await res.json().catch(() => ({})) as { error?: { message?: string; code?: number } };
   const codigo = typeof cuerpo?.error?.code === "number" ? cuerpo.error.code : null;
-  // El mensaje de Meta no incluye el token, pero se recorta igual por prudencia.
   const detalle = (cuerpo?.error?.message ?? "sin detalle").slice(0, 300);
   return new ErrorGraph(
     `Graph API ${res.status} (codigo ${codigo ?? "?"}): ${detalle}`,
@@ -104,62 +133,52 @@ async function errorDeRespuesta(res: Response): Promise<ErrorGraph> {
  * El token va en la cabecera Authorization y no en la query string: asi no queda
  * escrito en logs de acceso ni en trazas de red.
  *
- * Reintenta ante 429, 5xx y fallos de red, con espera creciente. Un token vencido
- * o un permiso faltante no se reintenta: no se arregla solo.
+ * Reintenta una sola vez y con espera corta: esto corre dentro del webhook, y las
+ * esperas largas son peores que devolver 503 y dejar que Meta reintente.
  */
-async function traerDeGraph(leadgenId: string): Promise<LeadDeGraph> {
-  const token = env("META_PAGE_ACCESS_TOKEN");
-  if (!token) throw new Error("META_PAGE_ACCESS_TOKEN no configurado");
-  const version = versionGraph(Deno.env.get("META_GRAPH_API_VERSION"));
+function hacerTraerDeGraph(reloj: ReturnType<typeof presupuesto>) {
+  return async function traerDeGraph(leadgenId: string): Promise<LeadDeGraph> {
+    const token = env("META_PAGE_ACCESS_TOKEN");
+    // Falta de configuracion: reintentar no arregla nada.
+    if (!token) throw new ErrorGraph("META_PAGE_ACCESS_TOKEN no configurado", 0, null, false);
+    const version = versionGraph(Deno.env.get("META_GRAPH_API_VERSION"));
 
-  // Primero el set completo. Si esta version de la API no conoce algun campo,
-  // devuelve 400 y se reintenta con el minimo garantizado.
-  const intentos: readonly (readonly string[])[] = [CAMPOS_GRAPH, CAMPOS_GRAPH_MINIMOS];
+    let ultimo: ErrorGraph | null = null;
 
-  let ultimo: unknown = null;
-  for (const campos of intentos) {
-    for (let intento = 1; intento <= REINTENTOS; intento++) {
+    for (let intento = 1; intento <= INTENTOS_GRAPH; intento++) {
+      // Nunca arrancar una llamada que no alcanza a terminar.
+      const disponible = Math.min(TIMEOUT_GRAPH_MS, reloj.restante());
+      if (disponible <= 0) {
+        throw new ErrorGraph("se agoto el presupuesto de tiempo del webhook", 0, null, true);
+      }
+
       try {
-        const res = await fetch(urlGraph(version, leadgenId, campos), {
+        const res = await fetch(urlGraph(version, leadgenId, CAMPOS_GRAPH), {
           headers: { Authorization: `Bearer ${token}` },
+          signal: AbortSignal.timeout(disponible),
         });
 
-        if (res.ok) {
-          const cuerpo = await res.json();
-          return normalizarRespuestaGraph(cuerpo, leadgenId);
-        }
+        if (res.ok) return normalizarRespuestaGraph(await res.json(), leadgenId);
 
-        const err = await errorDeRespuesta(res);
-        ultimo = err;
-
-        // Campo desconocido para esta version: probar con el set reducido.
-        if (res.status === 400 && campos !== CAMPOS_GRAPH_MINIMOS) {
-          log.error("Graph rechazo el set completo de campos, se reintenta con el minimo", {
-            leadgenId,
-            status: res.status,
-          });
-          break;
-        }
-
-        if (!err.reintentable || intento === REINTENTOS) throw err;
-
-        const espera = ESPERA_BASE_MS * 2 ** (intento - 1);
-        log.error("Graph fallo, se reintenta", { leadgenId, status: res.status, intento, espera });
-        await dormir(espera);
+        ultimo = await errorDeRespuesta(res);
+        if (!ultimo.reintentable) throw ultimo;
       } catch (e) {
-        if (e instanceof ErrorGraph && !e.reintentable) throw e;
-        ultimo = e;
-        if (intento === REINTENTOS) {
-          if (e instanceof ErrorGraph) throw e;
-          // Fallo de red: no hubo respuesta.
-          throw new ErrorGraph(`Graph API inalcanzable: ${mensajeDe(e)}`, 0, null, true);
+        if (e instanceof ErrorGraph) {
+          if (!e.reintentable) throw e;
+          ultimo = e;
+        } else {
+          // Timeout o fallo de red: no hubo respuesta. status 0 = reintentable.
+          ultimo = new ErrorGraph(`Graph API inalcanzable: ${mensajeDe(e)}`, 0, null, true);
         }
-        await dormir(ESPERA_BASE_MS * 2 ** (intento - 1));
+      }
+
+      if (intento < INTENTOS_GRAPH && !reloj.agotado(ESPERA_ENTRE_INTENTOS_MS)) {
+        await dormir(ESPERA_ENTRE_INTENTOS_MS);
       }
     }
-  }
 
-  throw ultimo instanceof Error ? ultimo : new Error("Graph API: fallo desconocido");
+    throw ultimo ?? new ErrorGraph("Graph API: fallo desconocido", 0, null, true);
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -171,24 +190,36 @@ const CONFLICTO_UNICO = "23505";
 
 function almacenSupabase(sb: SupabaseClient): Almacen {
   return {
-    async reclamar(evento: EventoLeadgen) {
-      const { error } = await sb.from("meta_leads").insert({
-        meta_lead_id: evento.leadgenId,
-        form_id: evento.formId,
-        page_id: evento.pageId,
-        ad_id: evento.adId,
-        creado_en_meta: evento.createdTime ? new Date(evento.createdTime * 1000).toISOString() : null,
-        estado: "pendiente",
-        intentos: 1,
+    /**
+     * Todo el reclamo ocurre dentro de `reclamar_meta_lead`, una funcion de
+     * Postgres. Tiene que ser una sola sentencia atomica: si esto fuera un SELECT
+     * seguido de un INSERT desde aca, dos entregas simultaneas pasarian las dos.
+     */
+    async reclamar(evento: EventoLeadgen): Promise<ResultadoReclamo> {
+      const { data, error } = await sb.rpc("reclamar_meta_lead", {
+        p_meta_lead_id: evento.leadgenId,
+        p_form_id: evento.formId,
+        p_page_id: evento.pageId,
+        p_ad_id: evento.adId,
+        p_created_time: evento.createdTime ? new Date(evento.createdTime * 1000).toISOString() : null,
       });
-      // Ya estaba: otra entrega del mismo lead llego primero.
-      if (error?.code === CONFLICTO_UNICO) return false;
       if (error) throw new Error(`reclamar: ${error.message}`);
-      return true;
+
+      const fila = Array.isArray(data) ? data[0] : data;
+      const resultado = fila?.resultado as string | undefined;
+
+      if (resultado === "claimed") return { tipo: "claimed", intento: fila?.intento ?? 1 };
+      if (resultado === "completed") return { tipo: "completed" };
+      if (resultado === "in_progress") return { tipo: "in_progress" };
+
+      // No deberia pasar: la funcion siempre devuelve una de las tres.
+      throw new Error(`reclamar: respuesta inesperada (${resultado ?? "vacia"})`);
     },
 
     async buscarEmpresaPorNombre(nombre: string) {
-      const { data } = await sb.from("empresas").select("id").ilike("nombre", nombre).limit(1).maybeSingle();
+      const { data, error } = await sb.from("empresas").select("id").ilike("nombre", nombre).limit(1)
+        .maybeSingle();
+      if (error) throw new Error(`buscar empresa: ${error.message}`);
       return data?.id ?? null;
     },
 
@@ -207,7 +238,9 @@ function almacenSupabase(sb: SupabaseClient): Almacen {
     },
 
     async buscarContactoPorEmail(email: string) {
-      const { data } = await sb.from("contactos").select("id").ilike("email", email).limit(1).maybeSingle();
+      const { data, error } = await sb.from("contactos").select("id").ilike("email", email).limit(1)
+        .maybeSingle();
+      if (error) throw new Error(`buscar contacto: ${error.message}`);
       return data?.id ?? null;
     },
 
@@ -239,7 +272,8 @@ function almacenSupabase(sb: SupabaseClient): Almacen {
         .select("id")
         .single();
 
-      // El indice unico (origen, origen_id) ya tenia este lead: no es un error.
+      // El indice unico (origen, origen_id) ya tenia este lead: no es un error,
+      // es un intento anterior que alcanzo a escribirlo antes de caerse.
       if (error?.code === CONFLICTO_UNICO) {
         const { data: existente } = await sb
           .from("leads")
@@ -253,7 +287,8 @@ function almacenSupabase(sb: SupabaseClient): Almacen {
       return data?.id ?? null;
     },
 
-    async marcarProcesado(leadgenId: string, d: DatosProcesado) {
+    async marcarCompletado(leadgenId: string, d: DatosProcesado) {
+      const ahora = new Date().toISOString();
       const { error } = await sb
         .from("meta_leads")
         .update({
@@ -269,26 +304,27 @@ function almacenSupabase(sb: SupabaseClient): Almacen {
           // Los ids de Graph completan lo que el webhook no traia.
           form_id: d.graph.formId ?? undefined,
           ad_id: d.graph.adId ?? undefined,
-          adset_id: d.graph.adsetId,
-          campaign_id: d.graph.campaignId,
-          plataforma: d.graph.plataforma,
-          es_organico: d.graph.esOrganico,
           respuestas: d.lead.respuestas,
           payload: d.graph.crudo,
           creado_en_meta: d.graph.createdTime ?? undefined,
-          estado: "procesado",
-          error_detalle: null,
-          updated_at: new Date().toISOString(),
+          status: "completed",
+          last_error: null,
+          processed_at: ahora,
+          updated_at: ahora,
         })
         .eq("meta_lead_id", leadgenId);
-      if (error) throw new Error(`marcarProcesado: ${error.message}`);
+      // Si esto falla, el lead esta en el CRM pero la fila no dice `completed`.
+      // Se propaga: mejor un 503 y una reentrega idempotente que una fila mintiendo.
+      if (error) throw new Error(`marcarCompletado: ${error.message}`);
     },
 
-    async marcarError(leadgenId: string, detalle: string) {
-      await sb
+    async marcarFallido(leadgenId: string, errorSaneado: string) {
+      const ahora = new Date().toISOString();
+      const { error } = await sb
         .from("meta_leads")
-        .update({ estado: "error", error_detalle: detalle, updated_at: new Date().toISOString() })
+        .update({ status: "failed", last_error: errorSaneado, updated_at: ahora })
         .eq("meta_lead_id", leadgenId);
+      if (error) log.error("no se pudo marcar el fallo", { detalle: error.message });
     },
   };
 }
@@ -308,15 +344,20 @@ async function avisarPorCorreo(lead: LeadNormalizado, graph: LeadDeGraph): Promi
       : "";
 
   const extras = Object.entries(lead.personalizadas)
-    .map(([p, r]) => `<tr><td colspan="2" style="padding:6px 12px;font:400 13px sans-serif;color:#52525b">${esc(p)}: ${esc(r)}</td></tr>`)
+    .map(([p, r]) =>
+      `<tr><td colspan="2" style="padding:6px 12px;font:400 13px sans-serif;color:#52525b">${esc(p)}: ${esc(r)}</td></tr>`
+    )
     .join("");
 
-  const origen = graph.plataforma ? `Formulario de ${esc(graph.plataforma)}` : "Formulario de Facebook/Instagram";
   const html = `<div style="font-family:sans-serif;max-width:520px">
     <h2 style="margin:0 0 4px">Nuevo lead desde Meta Ads</h2>
-    <p style="color:#71717a;margin:0 0 16px">${origen}${graph.formId ? ` &middot; form ${esc(graph.formId)}` : ""}</p>
+    <p style="color:#71717a;margin:0 0 16px">Formulario de Facebook/Instagram${
+    graph.formId ? ` &middot; form ${esc(graph.formId)}` : ""
+  }</p>
     <table style="border-collapse:collapse;width:100%">
-      ${fila("Nombre", lead.nombre)}${fila("Email", lead.email)}${fila("Telefono", lead.telefono)}${fila("Empresa", lead.empresa)}${fila("Cargo", lead.cargo)}${fila("Ciudad", lead.ciudad)}
+      ${fila("Nombre", lead.nombre)}${fila("Email", lead.email)}${fila("Telefono", lead.telefono)}${
+    fila("Empresa", lead.empresa)
+  }${fila("Cargo", lead.cargo)}${fila("Ciudad", lead.ciudad)}
       ${extras}
     </table>
     <p style="color:#a1a1aa;margin:18px 0 0;font-size:12px">Guardado en tu CRM como lead en etapa Nuevo.</p>
@@ -332,6 +373,7 @@ async function avisarPorCorreo(lead: LeadNormalizado, graph: LeadDeGraph): Promi
       subject: `Nuevo lead Meta: ${lead.nombre}`,
       html,
     }),
+    signal: AbortSignal.timeout(3_000),
   });
   if (!res.ok) {
     // Nunca el cuerpo entero: puede traer de vuelta los datos del lead.
@@ -378,24 +420,51 @@ Deno.serve(async (req: Request) => {
   // Lo que no sea `leadgen` se descarta sin ruido: la suscripcion a la pagina
   // trae cambios de otros campos que no nos incumben.
   const eventos = extraerEventosLeadgen(cuerpo);
-  if (eventos.length === 0) return json({ ok: true, recibidos: 0 });
+  if (eventos.length === 0) return json({ ok: true, recibidos: 0, procesados: 0 });
 
+  const reloj = presupuesto(PRESUPUESTO_TOTAL_MS);
   const sb = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
   const deps = {
     almacen: almacenSupabase(sb),
-    traerDeGraph,
+    traerDeGraph: hacerTraerDeGraph(reloj),
     notificar: avisarPorCorreo,
+    secretos: secretosConocidos(),
     log,
   };
 
-  // Meta reintenta si la respuesta tarda, asi que el trabajo pesado (Graph API +
-  // varias escrituras) va en segundo plano y el 200 sale de inmediato.
-  const trabajo = Promise.allSettled(eventos.map((e) => procesarEvento(e, deps)));
-  if (typeof EdgeRuntime !== "undefined") EdgeRuntime.waitUntil(trabajo);
-  else await trabajo;
+  // Secuencial y sincrono: el 200 sale recien cuando el lead esta guardado.
+  const desenlaces: Desenlace[] = [];
+  for (const evento of eventos) {
+    // Si no queda tiempo, ni se reclama: se deja intacto para la reentrega de Meta.
+    if (reloj.agotado(MINIMO_POR_EVENTO_MS)) {
+      log.error("sin presupuesto para el resto de la entrega", {
+        leadgenId: evento.leadgenId,
+        pendientes: eventos.length - desenlaces.length,
+      });
+      desenlaces.push("retry");
+      continue;
+    }
+    desenlaces.push(await procesarEvento(evento, deps));
+  }
 
-  return json({ ok: true, recibidos: eventos.length });
+  const status = codigoHttp(desenlaces);
+  const cuerpoRespuesta = {
+    ok: status === 200,
+    recibidos: eventos.length,
+    completados: desenlaces.filter((d) => d === "completed" || d === "already_completed").length,
+  };
+
+  if (status === 503) {
+    // Meta reintenta igual; la cabecera solo evita que lo haga de inmediato.
+    return json(cuerpoRespuesta, 503, { "Retry-After": "60" });
+  }
+  if (status === 500) {
+    // Error permanente de configuracion. El detalle esta en meta_leads.last_error,
+    // saneado; no se devuelve por la respuesta.
+    return json({ ...cuerpoRespuesta, error: "El lead quedo registrado como failed" }, 500);
+  }
+  return json(cuerpoRespuesta, 200);
 });

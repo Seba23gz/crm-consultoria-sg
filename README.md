@@ -48,12 +48,15 @@ En corto:
 - Secretos en Supabase → Edge Functions → Secrets:
   `META_WEBHOOK_VERIFY_TOKEN`, `META_APP_SECRET`, `META_PAGE_ACCESS_TOKEN` y,
   opcional, `META_GRAPH_API_VERSION`. Los nombres están en `.env.example`.
-- Valida la firma `X-Hub-Signature-256`, responde 200 de inmediato y procesa en
-  segundo plano, porque Meta reintenta si tarda.
-- No duplica: el índice único sobre `meta_leads.meta_lead_id` se reclama antes de
-  hacer nada, y `leads` tiene además su único sobre `(origen, origen_id)`.
+- Valida la firma `X-Hub-Signature-256` y procesa de forma **síncrona**: el `200`
+  sale recién cuando el lead está guardado. Ante fallo temporal devuelve `503` y
+  ante uno permanente `500`, para que Meta reintente en vez de dar la entrega por
+  buena. Presupuesto de tiempo: 10 s.
+- No duplica: el reclamo atómico (`reclamar_meta_lead`) sobre el único de
+  `meta_leads.meta_lead_id`, más el único de `leads (origen, origen_id)`.
 - Cada lead deja una fila en `meta_leads` con las respuestas completas del
-  formulario, los ids de la pauta y el estado del procesamiento.
+  formulario, los ids de la pauta y el estado (`pending` → `processing` →
+  `completed` / `failed`). Un `processing` abandonado se recupera solo.
 
 Permiso **`leads_retrieval`**: funciona de inmediato para administradores de la
 app, pero requiere **revisión de Meta** para operar en producción.

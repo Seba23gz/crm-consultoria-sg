@@ -19,17 +19,55 @@ Formulario en FB/IG
         │  1. POST con {leadgen_id, form_id, page_id, ad_id}
         ▼
 Edge Function `meta-lead`  ──── valida X-Hub-Signature-256 (HMAC SHA-256)
-        │                        responde 200 al toque
-        │  2. GET /{leadgen_id}?fields=…   (Authorization: Bearer <page token>)
-        ▼
-   Graph API  ─────────────►  field_data + ids de anuncio/adset/campaña
         │
-        │  3. normaliza y guarda, en segundo plano
+        │  2. reclamo atómico en meta_leads (status -> processing)
+        │  3. GET /{leadgen_id}?fields=…   (Authorization: Bearer <page token>)
+        ▼
+   Graph API  ─────────────►  field_data + form_id + ad_id
+        │
+        │  4. normaliza y guarda
         ▼
 Supabase Postgres
    meta_leads  (detalle crudo de Meta, una fila por leadgen_id)
    empresas / contactos / leads  (el pipeline de siempre)
+        │
+        │  5. recién ahora responde: 200 / 503 / 500
+        ▼
+      Meta
 ```
+
+### Entrega durable: el 200 significa que el lead está guardado
+
+El procesamiento es **síncrono**. La función no responde `200` hasta que el lead
+está en la base. Si respondiera `200` de inmediato y procesara después en segundo
+plano, un fallo posterior de Graph API o de Postgres perdería el lead para
+siempre: Meta ya lo daría por entregado y no lo reenviaría.
+
+| Situación | Código | Qué hace Meta |
+|---|---|---|
+| Lead guardado en este intento | `200` | Nada más |
+| El lead ya estaba `completed` | `200` | Nada más |
+| Fallo temporal: 429, 5xx, red, timeout, error de base de datos | `503` + `Retry-After: 60` | Reintenta |
+| Otra entrega lo está procesando ahora mismo | `503` | Reintenta; la reentrega verá `completed` |
+| Fallo permanente: token inválido/vencido, falta `leads_retrieval` | `500` | Reintenta, pero fallará igual hasta que arregles la configuración |
+| Firma inválida | `401` | — |
+| Evento que no es `leadgen` | `200` | Nada; se ignora sin ruido |
+
+**El costo de esto**: la respuesta tarda más. Meta puede desactivar una
+suscripción si el endpoint responde lento de forma sostenida, así que hay un
+presupuesto de tiempo estricto de **10 s** por entrega (`PRESUPUESTO_TOTAL_MS` en
+`index.ts`): la llamada a Graph tiene 4 s de timeout, un solo reintento con 300 ms
+de espera, y si el presupuesto se acaba a media entrega el resto queda sin
+reclamar y se devuelve `503`. Nunca hay esperas largas dentro del webhook.
+
+**Cómo recuperarse de un error permanente (`500`).** El lead no se pierde: queda
+en `meta_leads` con `status = 'failed'` y el detalle saneado en `last_error`.
+
+1. Ver qué pasó: `select meta_lead_id, last_error, attempt_count from meta_leads where status = 'failed';`
+2. Arreglar la causa (regenerar `META_PAGE_ACCESS_TOKEN`, o asignar el permiso que falte).
+3. Reprocesar: como `failed` es reclamable, basta con reenviar el lead desde la
+   herramienta de pruebas de Meta, o forzar el reintento con un `POST` firmado.
+   No hay que borrar la fila.
 
 ### Por qué es una Edge Function y no `/api/meta/webhook`
 
@@ -60,23 +98,60 @@ endpoint de Meta ahí: dos webhooks activos para el mismo evento significan lead
 | `supabase/functions/meta-lead/fixtures/` | Payloads de ejemplo, inventados |
 | `supabase/migrations/20260816173000_meta_leads.sql` | Tabla `meta_leads` (+ `_down.sql` para revertir) |
 
-### Idempotencia
+### Estados e idempotencia
 
-Meta reintenta la misma entrega si no recibe un 200 rápido, y a veces la manda repetida
-igual. La defensa es el índice único `meta_leads_meta_lead_id_uidx` sobre `meta_lead_id`:
+Cada `leadgen_id` tiene exactamente una fila en `meta_leads`, y su `status` gobierna todo:
 
-1. Lo primero que hace la función es **insertar** la fila en `meta_leads`. Ese insert es la
-   reclamación del lead.
-2. Si choca con el índice único (código `23505`), significa que otra entrega ya lo tomó:
-   se descarta en silencio, **sin volver a llamar a Graph API**.
-3. Recién después se consulta Graph y se crean empresa, contacto y lead.
+```
+                      ┌──────────────────────────────────────┐
+                      │                                      │
+   (fila nueva)       ▼                                      │
+        │        ┌─────────┐   reclamo    ┌────────────┐     │
+        └───────►│ pending │─────────────►│ processing │     │
+                 └─────────┘              └────────────┘     │
+                                            │        │       │
+                              todo salió    │        │ falló │
+                                  bien      │        ▼       │
+                                            │   ┌────────┐   │
+                                            │   │ failed │───┘
+                                            │   └────────┘  reclamo
+                                            ▼
+                                      ┌───────────┐
+                                      │ completed │  terminal
+                                      └───────────┘
+```
 
-Reclamar *antes* de trabajar es lo que evita que dos entregas simultáneas creen dos
-contactos. Además `leads` tiene su propio índice único `(origen, origen_id)` como segunda
-red.
+Más una arista que no se dibuja bien: `processing` **abandonado** (con
+`last_attempt_at` de hace más de 5 minutos) vuelve a ser reclamable. Eso es lo que
+impide que una caída justo después del reclamo deje el lead bloqueado para siempre.
 
-La columna `meta_leads.estado` (`pendiente` / `procesado` / `error`) deja ver qué pasó con
-cada lead sin tener que leer logs.
+La decisión de quién procesa vive entera en la función de Postgres
+`reclamar_meta_lead`, no en TypeScript. Tiene que ser atómica: un `SELECT` seguido
+de un `INSERT` desde la Edge Function dejaría pasar dos entregas simultáneas.
+
+| Estado al llegar una entrega | Resultado del reclamo | Desenlace |
+|---|---|---|
+| No existe la fila | `claimed` (insert) | Se procesa |
+| `pending` | `claimed` | Se procesa |
+| `failed` | `claimed`, `attempt_count + 1` | Se reintenta |
+| `processing` hace < 5 min | `in_progress` | No se toca. `503` |
+| `processing` hace > 5 min | `claimed`, `attempt_count + 1` | Se recupera |
+| `completed` | `completed` | No se toca. `200` |
+
+**Dos entregas simultáneas nunca crean dos contactos.** El `INSERT ... ON CONFLICT
+DO NOTHING` deja pasar a una sola; la segunda cae al `UPDATE`, que exige
+`status IN ('pending','failed')` o un `processing` vencido. En `READ COMMITTED`, la
+segunda sesión espera el lock de la primera y luego **re-evalúa** ese `WHERE`
+contra la fila ya actualizada: ve `processing` con `last_attempt_at` recién puesto,
+no calza, y actualiza cero filas. Ahí está la exclusión mutua.
+
+Como segunda red, `leads` tiene su propio índice único `(origen, origen_id)`: si un
+intento anterior alcanzó a escribir el lead antes de caerse, el reintento lo
+reutiliza en vez de duplicarlo.
+
+Campos de recuperación en la tabla: `status`, `attempt_count`, `last_attempt_at`,
+`last_error` (saneado, nunca con tokens), `processed_at`, y `lead_id` /
+`contacto_id` / `empresa_id` apuntando a lo que se creó.
 
 ## Variables de entorno
 
@@ -88,7 +163,7 @@ Los nombres están documentados en `.env.example` (solo nombres, nunca valores).
 | `META_WEBHOOK_VERIFY_TOKEN` | sí | Se compara con `hub.verify_token` en el GET de verificación |
 | `META_APP_SECRET` | sí | Valida la firma `X-Hub-Signature-256` de cada POST |
 | `META_PAGE_ACCESS_TOKEN` | sí | Lee el lead desde Graph API |
-| `META_GRAPH_API_VERSION` | no | Formato `vNN.N`. Por defecto `v21.0` |
+| `META_GRAPH_API_VERSION` | no | Formato `vNN.N`. Por defecto **`v26.0`** |
 | `META_PAGE_ID` | no | Solo si más adelante quieres filtrar por página |
 | `RESEND_API_KEY`, `RESEND_FROM` | no | Aviso por correo. Sin la clave, no manda nada |
 
@@ -97,6 +172,28 @@ Los nombres están documentados en `.env.example` (solo nombres, nunca valores).
 > **Compatibilidad.** Si ya tenías cargado `META_VERIFY_TOKEN` (el nombre que usaba el
 > README viejo), sigue funcionando: la función lo acepta como alternativa.
 > `META_WEBHOOK_VERIFY_TOKEN` tiene prioridad.
+
+### Campos que se piden a Graph API
+
+Solo estos cinco, que son los documentados para el nodo del lead en v26.0:
+
+```
+id, created_time, field_data, form_id, ad_id
+```
+
+**`adset_id`, `campaign_id`, `platform` e `is_organic` no se piden.** No aparecen
+en la referencia del nodo lead ni en los ejemplos de la
+[guía de recuperación de leads](https://developers.facebook.com/docs/marketing-api/guides/lead-ads/retrieving/);
+pedir un campo que la API no reconoce devuelve `400` y tumbaría **todos** los
+leads, no solo ese campo.
+
+Las columnas `adset_id`, `campaign_id`, `plataforma` y `es_organico` existen en
+`meta_leads` y quedan en `NULL`. Si más adelante hacen falta, la vía es consultar
+el nodo del anuncio (`/{ad_id}?fields=adset_id,campaign_id`) en un proceso aparte,
+no dentro del webhook: sería una segunda llamada a Graph y el presupuesto de
+tiempo es ajustado.
+
+`page_id` sí se guarda, pero viene del webhook, no de Graph.
 
 ### Generar el token de verificación
 
@@ -237,7 +334,8 @@ Meta tiene una herramienta oficial: **Lead Ads Testing Tool**
 Después, comprobar del lado del CRM:
 
 ```sql
-select meta_lead_id, estado, nombre, email, form_id, campaign_id, error_detalle, created_at
+select meta_lead_id, status, attempt_count, nombre, email, form_id, ad_id,
+       last_error, processed_at, created_at
 from public.meta_leads
 order by created_at desc
 limit 10;
@@ -270,18 +368,29 @@ De más frecuente a menos:
 | Nada, y la URL no verifica | Token de verificación distinto entre Meta y Supabase | Que `META_WEBHOOK_VERIFY_TOKEN` sea idéntico |
 | Todo responde `401` | Firma inválida: `META_APP_SECRET` es de otra app o está mal copiado | Configuración → Básica de la app |
 | Todo responde `401` sin tocar nada | La función quedó con `verify_jwt: true` | Redesplegar con `verify_jwt: false` |
-| Filas en `estado = 'error'` con código `190` | Token de página vencido o revocado | Regenerar `META_PAGE_ACCESS_TOKEN` |
-| Filas en `estado = 'error'` con código `200` o `100` | Falta `leads_retrieval` o falta el acceso a leads de la página | Permisos y paso 8 |
-| Filas en `estado = 'pendiente'` que no avanzan | Se cortó el procesamiento en segundo plano | Logs de la función |
+| Meta reporta `503` y reintenta | Fallo temporal de Graph o de la base | `last_error` de la fila; suele resolverse solo |
+| Meta reporta `500` | Fallo permanente de configuración | `last_error`: código `190` o `200` |
+| Filas en `status = 'failed'` con código `190` | Token de página vencido o revocado | Regenerar `META_PAGE_ACCESS_TOKEN` |
+| Filas en `status = 'failed'` con código `200` o `100` | Falta `leads_retrieval` o falta el acceso a leads de la página | Permisos y paso 8 |
+| Filas en `status = 'processing'` de hace rato | Se cortó a mitad de camino | Se recuperan solas al siguiente reintento pasados 5 min |
+| `attempt_count` crece y nunca llega a `completed` | Fallo persistente | `last_error`; cada reintento de Meta lo incrementa |
 | Llega el lead pero sin datos | El formulario no tiene los campos estándar | `select respuestas from meta_leads` — están todas ahí |
+| `adset_id` / `campaign_id` / `plataforma` siempre nulos | Es lo esperado: no se piden a Graph | Ver "Campos que se piden a Graph API" |
 
 Ver qué falló, sin exponer datos personales:
 
 ```sql
-select meta_lead_id, estado, error_detalle, intentos, created_at
+select meta_lead_id, status, attempt_count, last_attempt_at, last_error
 from public.meta_leads
-where estado <> 'procesado'
-order by created_at desc;
+where status <> 'completed'
+order by last_attempt_at desc nulls last;
+```
+
+Un `processing` viejo que quedó colgado se puede devolver a la cola a mano:
+
+```sql
+update public.meta_leads set status = 'failed', last_error = 'reencolado a mano'
+where meta_lead_id = '<leadgen_id>' and status = 'processing';
 ```
 
 Los logs de la función están en Supabase → Edge Functions → `meta-lead` → Logs. **No

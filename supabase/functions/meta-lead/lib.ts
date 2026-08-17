@@ -37,22 +37,27 @@ export interface LeadDeGraph {
   createdTime: string | null;
   formId: string | null;
   adId: string | null;
-  adsetId: string | null;
-  campaignId: string | null;
-  plataforma: string | null;
-  esOrganico: boolean | null;
   fieldData: { name: string; values: string[] }[];
   /** Copia saneada de la respuesta, para guardar como payload. Sin tokens. */
   crudo: Record<string, unknown>;
 }
 
+/**
+ * Que paso al intentar reclamar un lead.
+ *
+ *   claimed     -> lo tenemos nosotros, hay que procesarlo
+ *   completed   -> ya se proceso antes; no hay nada que hacer
+ *   in_progress -> otra entrega lo esta procesando ahora mismo
+ */
+export type ResultadoReclamo =
+  | { tipo: "claimed"; intento: number }
+  | { tipo: "completed" }
+  | { tipo: "in_progress" };
+
 /** Puerto de persistencia. La implementacion real usa supabase-js. */
 export interface Almacen {
-  /**
-   * Inserta la fila de reclamacion del lead. Devuelve `false` si ya existia
-   * (choque con el indice unico), que es como se resuelve la idempotencia.
-   */
-  reclamar(evento: EventoLeadgen): Promise<boolean>;
+  /** Reclamo atomico. Es lo unico que impide que dos entregas dupliquen. */
+  reclamar(evento: EventoLeadgen): Promise<ResultadoReclamo>;
   buscarEmpresaPorNombre(nombre: string): Promise<number | null>;
   crearEmpresa(datos: { nombre: string; ciudad: string | null }): Promise<number | null>;
   buscarContactoPorEmail(email: string): Promise<number | null>;
@@ -70,8 +75,9 @@ export interface Almacen {
     notas: string;
     leadgenId: string;
   }): Promise<number | null>;
-  marcarProcesado(leadgenId: string, datos: DatosProcesado): Promise<void>;
-  marcarError(leadgenId: string, detalle: string): Promise<void>;
+  marcarCompletado(leadgenId: string, datos: DatosProcesado): Promise<void>;
+  /** Deja la fila en `failed`, que es reclamable de nuevo. */
+  marcarFallido(leadgenId: string, errorSaneado: string): Promise<void>;
 }
 
 export interface DatosProcesado {
@@ -88,6 +94,8 @@ export interface Dependencias {
   traerDeGraph(leadgenId: string): Promise<LeadDeGraph>;
   /** Aviso por correo. Los fallos aca no deben tumbar el procesamiento. */
   notificar?(lead: LeadNormalizado, graph: LeadDeGraph): Promise<void>;
+  /** Valores que jamas deben terminar escritos en `last_error` ni en los logs. */
+  secretos?: string[];
   log?: Registro;
 }
 
@@ -110,6 +118,18 @@ export class ErrorGraph extends Error {
     this.reintentable = reintentable;
   }
 }
+
+/**
+ * Desenlace de un evento. Determina el codigo HTTP que se le devuelve a Meta.
+ *
+ *   completed          -> 200. El lead quedo en el CRM en este intento.
+ *   already_completed  -> 200. Ya estaba; la reentrega no hizo nada.
+ *   retry              -> 503. Fallo temporal (429, 5xx, red, base de datos) o
+ *                         hay otra entrega en curso. Meta debe reintentar.
+ *   permanent          -> 500. Token invalido, permiso faltante. Reintentar no
+ *                         sirve: hay que arreglar la configuracion.
+ */
+export type Desenlace = "completed" | "already_completed" | "retry" | "permanent";
 
 // ---------------------------------------------------------------------------
 // Firma X-Hub-Signature-256
@@ -241,7 +261,8 @@ export function extraerEventosLeadgen(cuerpo: unknown): EventoLeadgen[] {
         formId: texto(valor.form_id),
         // El page_id del `value` manda; si no viene, el `entry.id` es la pagina.
         pageId: texto(valor.page_id) ?? pageIdEntrada,
-        adId: texto(valor.ad_id),
+        // `adgroup_id` es el nombre antiguo de `ad_id` en el payload del webhook.
+        adId: texto(valor.ad_id) ?? texto(valor.adgroup_id),
         createdTime,
       });
     }
@@ -254,23 +275,29 @@ export function extraerEventosLeadgen(cuerpo: unknown): EventoLeadgen[] {
 // Graph API
 // ---------------------------------------------------------------------------
 
-/** Campos del nodo del lead que pedimos cuando la API los acepta. */
+/**
+ * Version de Graph API por defecto.
+ *
+ * v26.0 salio el 29 de julio de 2026 y es la vigente. Se puede cambiar sin tocar
+ * el codigo con `META_GRAPH_API_VERSION`.
+ */
+export const VERSION_GRAPH_POR_DEFECTO = "v26.0";
+
+/**
+ * Campos que se le piden al nodo del lead.
+ *
+ * Solo estos cinco estan documentados para el nodo lead. `adset_id`,
+ * `campaign_id`, `platform` e `is_organic` NO aparecen en la referencia de v26.0:
+ * pedirlos hace que Graph devuelva 400 y se caiga el lead entero. Las columnas
+ * existen en `meta_leads` y quedan nulas.
+ */
 export const CAMPOS_GRAPH = [
   "id",
   "created_time",
   "field_data",
   "form_id",
   "ad_id",
-  "adset_id",
-  "campaign_id",
-  "platform",
-  "is_organic",
 ] as const;
-
-/** Set minimo garantizado, por si la version en uso rechaza algun campo. */
-export const CAMPOS_GRAPH_MINIMOS = ["id", "created_time", "field_data", "form_id"] as const;
-
-const VERSION_POR_DEFECTO = "v21.0";
 
 /**
  * Valida la version de Graph que viene del entorno. Se interpola en una URL, asi
@@ -278,9 +305,9 @@ const VERSION_POR_DEFECTO = "v21.0";
  */
 export function versionGraph(valor: string | undefined): string {
   const v = (valor ?? "").trim();
-  if (!v) return VERSION_POR_DEFECTO;
+  if (!v) return VERSION_GRAPH_POR_DEFECTO;
   if (!/^v\d{1,3}\.\d{1,3}$/.test(v)) {
-    throw new Error("META_GRAPH_API_VERSION invalida: se espera el formato vNN.N (ej. v21.0)");
+    throw new Error("META_GRAPH_API_VERSION invalida: se espera el formato vNN.N (ej. v26.0)");
   }
   return v;
 }
@@ -303,10 +330,12 @@ const CODIGOS_PERMANENTES = new Set([
 const CODIGOS_LIMITE = new Set([4, 17, 32, 613, 80004]);
 
 export function esReintentable(status: number, codigo: number | null): boolean {
-  if (status === 429) return true;
-  if (status >= 500) return true;
   if (codigo !== null && CODIGOS_LIMITE.has(codigo)) return true;
   if (codigo !== null && CODIGOS_PERMANENTES.has(codigo)) return false;
+  if (status === 429) return true;
+  if (status >= 500) return true;
+  // Sin respuesta (fallo de red) se representa con status 0.
+  if (status === 0) return true;
   // 4xx que no reconocemos: no reintentar, no va a cambiar solo.
   return false;
 }
@@ -330,27 +359,17 @@ export function normalizarRespuestaGraph(crudo: unknown, leadgenId: string): Lea
     fieldData.push({ name: name.slice(0, 200), values });
   }
 
-  const esOrganico = typeof o.is_organic === "boolean" ? o.is_organic : null;
-
   return {
     id: texto(o.id) ?? leadgenId,
     createdTime: texto(o.created_time),
     formId: texto(o.form_id),
     adId: texto(o.ad_id),
-    adsetId: texto(o.adset_id),
-    campaignId: texto(o.campaign_id),
-    plataforma: texto(o.platform),
-    esOrganico,
     fieldData,
     crudo: {
       id: texto(o.id) ?? leadgenId,
       created_time: texto(o.created_time),
       form_id: texto(o.form_id),
       ad_id: texto(o.ad_id),
-      adset_id: texto(o.adset_id),
-      campaign_id: texto(o.campaign_id),
-      platform: texto(o.platform),
-      is_organic: esOrganico,
       field_data: fieldData,
     },
   };
@@ -364,7 +383,7 @@ export function normalizarRespuestaGraph(crudo: unknown, leadgenId: string): Lea
  * Nombres estandar de Meta y sus equivalentes en espanol, por si el formulario
  * se armo con preguntas propias en vez de los campos predefinidos.
  */
-const ALIAS: Record<keyof Omit<LeadNormalizado, "respuestas" | "personalizadas" | "nombre">, string[]> = {
+const ALIAS: Record<"email" | "telefono" | "empresa" | "cargo" | "ciudad", string[]> = {
   email: ["email", "correo", "correo_electronico", "e_mail"],
   telefono: ["phone_number", "telefono", "celular", "whatsapp", "fono"],
   empresa: ["company_name", "empresa", "compania", "negocio", "organizacion"],
@@ -452,7 +471,7 @@ export function normalizarCampos(fieldData: { name: string; values: string[] }[]
 }
 
 // ---------------------------------------------------------------------------
-// Logs sin datos personales
+// Higiene de errores y logs
 // ---------------------------------------------------------------------------
 
 /**
@@ -466,6 +485,43 @@ export function ofuscarEmail(email: string): string {
   return `${u}@${dominio}`;
 }
 
+function escaparRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Limpia un mensaje de error antes de guardarlo en `last_error` o escribirlo en
+ * un log.
+ *
+ * Dos capas, porque una sola no basta: primero se borran los valores concretos de
+ * los secretos que conocemos, y despues los patrones que parecen credenciales
+ * aunque no los tengamos en la lista (un token que Meta devuelva en su propio
+ * mensaje de error, por ejemplo).
+ */
+export function sanitizarError(mensaje: string, secretos: string[] = []): string {
+  let out = mensaje;
+
+  for (const secreto of secretos) {
+    // Tan cortos que redactarlos destrozaria el mensaje entero.
+    if (!secreto || secreto.length < 8) continue;
+    out = out.replace(new RegExp(escaparRegex(secreto), "g"), "[REDACTADO]");
+  }
+
+  // Patrones que parecen credenciales aunque no estuvieran en la lista.
+  out = out
+    .replace(/(access_token=)[^\s&"']+/gi, "$1[REDACTADO]")
+    .replace(/(Bearer\s+)[A-Za-z0-9._\-]{8,}/gi, "$1[REDACTADO]")
+    // Tokens de Meta: empiezan con EAA y siguen largo.
+    .replace(/EAA[A-Za-z0-9]{20,}/g, "[REDACTADO]");
+
+  return out.slice(0, 500);
+}
+
+export function mensajeDe(e: unknown): string {
+  if (e instanceof Error) return e.message;
+  return String(e);
+}
+
 // ---------------------------------------------------------------------------
 // Flujo de procesamiento
 // ---------------------------------------------------------------------------
@@ -476,26 +532,41 @@ function armarNotas(lead: LeadNormalizado, graph: LeadDeGraph): string {
     lineas.push(`${pregunta}: ${respuesta}`);
   }
   if (graph.formId) lineas.push(`Formulario: ${graph.formId}`);
-  if (graph.campaignId) lineas.push(`Campana Meta: ${graph.campaignId}`);
-  if (graph.plataforma) lineas.push(`Plataforma: ${graph.plataforma}`);
+  if (graph.adId) lineas.push(`Anuncio: ${graph.adId}`);
   lineas.push("Origen: Meta Lead Ads");
   return lineas.join("\n");
 }
 
 /**
- * Procesa un evento de punta a punta: reclama el lead, lo trae de Graph, crea
- * empresa + contacto + lead y cierra la fila de `meta_leads`.
+ * Procesa un evento de punta a punta y devuelve el desenlace, que es lo que
+ * decide el codigo HTTP.
  *
- * Idempotente: la reclamacion se apoya en el indice unico sobre `meta_lead_id`.
- * Si otra entrega ya la tomo, esta se retira sin tocar nada.
+ * Es sincrono a proposito: el 200 sale recien cuando el lead esta guardado. Si
+ * algo falla, la fila queda en `failed` (reclamable) y se responde un codigo que
+ * hace que Meta reintente.
  */
-export async function procesarEvento(evento: EventoLeadgen, deps: Dependencias): Promise<"nuevo" | "duplicado" | "error"> {
+export async function procesarEvento(evento: EventoLeadgen, deps: Dependencias): Promise<Desenlace> {
   const log = deps.log ?? consolaSilenciosa;
+  const limpiar = (e: unknown) => sanitizarError(mensajeDe(e), deps.secretos);
 
-  const reclamado = await deps.almacen.reclamar(evento);
-  if (!reclamado) {
-    log.info("lead ya reclamado, se ignora la reentrega", { leadgenId: evento.leadgenId });
-    return "duplicado";
+  let reclamo: ResultadoReclamo;
+  try {
+    reclamo = await deps.almacen.reclamar(evento);
+  } catch (e) {
+    // Si ni siquiera se pudo reclamar, no hay fila que marcar: que Meta reintente.
+    log.error("no se pudo reclamar el lead", { leadgenId: evento.leadgenId, detalle: limpiar(e) });
+    return "retry";
+  }
+
+  if (reclamo.tipo === "completed") {
+    log.info("lead ya estaba completado, se ignora la reentrega", { leadgenId: evento.leadgenId });
+    return "already_completed";
+  }
+  if (reclamo.tipo === "in_progress") {
+    // Otra entrega lo tiene tomado. No duplicamos y pedimos reintento: si ese otro
+    // intento falla, el lead no se pierde.
+    log.info("lead en curso en otra entrega", { leadgenId: evento.leadgenId });
+    return "retry";
   }
 
   try {
@@ -536,7 +607,8 @@ export async function procesarEvento(evento: EventoLeadgen, deps: Dependencias):
       leadgenId: evento.leadgenId,
     });
 
-    await deps.almacen.marcarProcesado(evento.leadgenId, { leadId, contactoId, empresaId, lead, graph });
+    // 4) Recien aca la fila pasa a `completed`.
+    await deps.almacen.marcarCompletado(evento.leadgenId, { leadId, contactoId, empresaId, lead, graph });
 
     log.info("lead guardado", {
       leadgenId: evento.leadgenId,
@@ -546,31 +618,54 @@ export async function procesarEvento(evento: EventoLeadgen, deps: Dependencias):
     });
 
     if (deps.notificar) {
-      // Un fallo del correo no invalida el lead, que ya esta guardado.
+      // El correo va despues de completar: si falla, el lead ya esta a salvo y no
+      // hay que reintentar la entrega entera por un aviso.
       try {
         await deps.notificar(lead, graph);
       } catch (e) {
-        log.error("no se pudo avisar por correo", { leadgenId: evento.leadgenId, detalle: mensajeDe(e) });
+        log.error("no se pudo avisar por correo", { leadgenId: evento.leadgenId, detalle: limpiar(e) });
       }
     }
 
-    return "nuevo";
+    return "completed";
   } catch (e) {
-    const detalle = mensajeDe(e);
-    log.error("fallo el procesamiento del lead", { leadgenId: evento.leadgenId, detalle });
-    // Se deja registrado para poder reprocesar a mano desde el CRM.
+    const detalle = limpiar(e);
+    const permanente = e instanceof ErrorGraph && !e.reintentable;
+
+    log.error("fallo el procesamiento del lead", {
+      leadgenId: evento.leadgenId,
+      permanente,
+      detalle,
+    });
+
+    // La fila vuelve a `failed`, que es reclamable: ni el reintento de Meta ni una
+    // reejecucion manual quedan bloqueados.
     try {
-      await deps.almacen.marcarError(evento.leadgenId, detalle);
+      await deps.almacen.marcarFallido(evento.leadgenId, detalle);
     } catch (e2) {
-      log.error("ademas fallo al registrar el error", { leadgenId: evento.leadgenId, detalle: mensajeDe(e2) });
+      log.error("ademas fallo al registrar el error", {
+        leadgenId: evento.leadgenId,
+        detalle: limpiar(e2),
+      });
     }
-    return "error";
+
+    return permanente ? "permanent" : "retry";
   }
 }
 
-export function mensajeDe(e: unknown): string {
-  if (e instanceof Error) return e.message.slice(0, 500);
-  return String(e).slice(0, 500);
+/**
+ * Codigo HTTP para el conjunto de desenlaces de una entrega.
+ *
+ * Meta manda varios eventos en un mismo POST y reintenta la entrega completa, no
+ * evento por evento. Por eso basta con que uno pida reintento para devolver 503:
+ * los que ya quedaron `completed` se resuelven solos en la reentrega.
+ *
+ * Precedencia: retry > permanent > ok.
+ */
+export function codigoHttp(desenlaces: Desenlace[]): number {
+  if (desenlaces.some((d) => d === "retry")) return 503;
+  if (desenlaces.some((d) => d === "permanent")) return 500;
+  return 200;
 }
 
 const consolaSilenciosa: Registro = { info: () => {}, error: () => {} };
