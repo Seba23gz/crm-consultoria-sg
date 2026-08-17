@@ -1,0 +1,17 @@
+{
+  "//": "Solo para las Edge Functions de Supabase (Deno). El sitio y el CRM son HTML plano y no tienen build.",
+  "workspace": ["./supabase/functions/meta-lead"],
+  "tasks": {
+    "test": "deno test --allow-read supabase/functions/",
+    "lint": "deno lint supabase/functions/",
+    "check": "deno check supabase/functions/meta-lead/index.ts supabase/functions/meta-lead/lib_test.ts",
+    "verify": "deno task lint && deno task check && deno task test"
+  },
+  "fmt": {
+    "lineWidth": 110,
+    "include": ["supabase/functions/"]
+  },
+  "lint": {
+    "include": ["supabase/functions/"]
+  }
+}

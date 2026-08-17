@@ -22,43 +22,54 @@ que se fusionó acá para tener todo en un solo proyecto de Vercel.
 
 ## Entrada de leads
 
-Hay dos vías, y cada lead queda marcado con su `origen` en la tabla `leads`:
+Hay dos vías:
 
-| Vía | Función | Origen |
+| Vía | Función | `leads.origen` |
 |---|---|---|
-| Formulario del sitio | Edge Function `nuevo-lead` | `web` |
-| Formularios de Meta (Facebook/Instagram) | Edge Function `meta-lead` | `meta_ads` |
+| Formulario del sitio | Edge Function `nuevo-lead` | queda en blanco |
+| Formularios de Meta (Facebook/Instagram) | Edge Function `meta-lead` | `meta_lead_ads` |
 
 `api/lead-form.js` hace lo mismo que `nuevo-lead` por otra vía y quedó sin
 conectar: si se activa, hay que apagar uno de los dos o cada lead entra duplicado.
 
-### Meta Lead Ads — configuración
+### Meta Lead Ads
 
-Meta **no** manda los datos en el webhook: manda un `leadgen_id` y hay que ir a
-buscarlos a la Graph API. Por eso hacen falta tres secretos en Supabase
-(Edge Functions → Secrets):
+Los formularios instantáneos de Facebook e Instagram entran solos al CRM. Meta
+**no** manda los datos en el webhook: manda un `leadgen_id` y la función va a
+buscarlos a Graph API con el token de la página.
 
-| Secreto | De dónde sale |
-|---|---|
-| `META_VERIFY_TOKEN` | Lo inventas tú; se pega igual en Meta al crear el webhook |
-| `META_APP_SECRET` | App de Meta → Configuración → Básica |
-| `META_PAGE_ACCESS_TOKEN` | Token de larga duración de la página (Graph API Explorer) |
+Guía completa —variables, pasos en Meta, pruebas, diagnóstico y cómo revocar—:
+**[docs/meta-lead-ads-integration.md](docs/meta-lead-ads-integration.md)**.
 
-Pasos en Meta (developers.facebook.com):
+En corto:
 
-1. Crear una app tipo **Negocio** y agregarle el producto **Webhooks**.
-2. Suscribirse al objeto **Page**, campo **`leadgen`**.
-3. URL de retrollamada:
-   `https://rayvimywyqjnzzmbagpv.supabase.co/functions/v1/meta-lead`
-   Token de verificación: el mismo `META_VERIFY_TOKEN`.
-4. Conectar la página de Veta Labs a la app y suscribirla al webhook.
-5. Permiso **`leads_retrieval`**: funciona de inmediato para administradores de la
-   app, pero requiere **revisión de Meta** para operar con la cuenta en producción.
+- Endpoint: `https://rayvimywyqjnzzmbagpv.supabase.co/functions/v1/meta-lead`
+  (`GET` para la verificación de Meta, `POST` para los eventos `leadgen`).
+- Secretos en Supabase → Edge Functions → Secrets:
+  `META_WEBHOOK_VERIFY_TOKEN`, `META_APP_SECRET`, `META_PAGE_ACCESS_TOKEN` y,
+  opcional, `META_GRAPH_API_VERSION`. Los nombres están en `.env.example`.
+- Valida la firma `X-Hub-Signature-256`, responde 200 de inmediato y procesa en
+  segundo plano, porque Meta reintenta si tarda.
+- No duplica: el índice único sobre `meta_leads.meta_lead_id` se reclama antes de
+  hacer nada, y `leads` tiene además su único sobre `(origen, origen_id)`.
+- Cada lead deja una fila en `meta_leads` con las respuestas completas del
+  formulario, los ids de la pauta y el estado del procesamiento.
 
-El endpoint valida la firma `X-Hub-Signature-256` (HMAC del cuerpo con el app
-secret), responde 200 de inmediato y procesa en segundo plano, porque Meta
-reintenta si tarda. Los reintentos no duplican: hay un índice único sobre
-`(origen, origen_id)`.
+Permiso **`leads_retrieval`**: funciona de inmediato para administradores de la
+app, pero requiere **revisión de Meta** para operar en producción.
+
+### Código de las Edge Functions
+
+`supabase/functions/meta-lead/` es la única función cuyo código está versionado
+acá. Las demás (`nuevo-lead`, `email-evento`, `recordatorio-diario`,
+`importar-empresas`) viven **solo** en Supabase: si las vas a tocar, conviene
+bajarlas al repo primero.
+
+Pruebas, lint y typecheck de las funciones (necesita [Deno](https://deno.com)):
+
+```bash
+deno task verify
+```
 
 ### Píxel de Meta
 El ID va en la constante `window.META_PIXEL_ID` de `index.html`. Mientras esté
@@ -79,6 +90,7 @@ nuevo → contactado → respondió → reunión agendada → propuesta enviada 
 - `leads` — oportunidades en el pipeline
 - `campanas` y `tareas` — prospección por campaña
 - `actividades` — historial de emails, llamadas, WhatsApp, reuniones y notas
+- `meta_leads` — detalle crudo de los leads que entran por Meta Lead Ads
 
 ## Configuración
 Las credenciales de Supabase están en `crm/index.html` (constantes `SUPABASE_URL` y

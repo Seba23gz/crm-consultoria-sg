@@ -1,0 +1,17 @@
+# Vercel sirve la raíz del proyecto tal cual (sin build), así que todo lo que
+# quede acá se publica en https://vetalabs.cl/<ruta>. Esto es lo que NO debe
+# publicarse: no son secretos (el repo es público), pero no tienen por qué
+# estar servidos, y un `.env.example` expuesto solo atrae escáneres.
+
+.env.example
+deno.json
+deno.lock
+
+# Código de las Edge Functions: corre en Supabase, no en Vercel.
+supabase/
+
+# Documentación y contexto para agentes.
+docs/
+AGENTS.md
+CLAUDE.md
+.claude/

@@ -2,3 +2,8 @@
 node_modules/
 .vercel
 *.log
+
+# Secretos locales. `.env.example` sí va al repo (solo nombres).
+.env
+.env.*
+!.env.example

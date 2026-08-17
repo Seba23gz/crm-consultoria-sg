@@ -1,0 +1,20 @@
+{
+  "id": "900000000000001",
+  "created_time": "2026-08-16T14:30:00+0000",
+  "form_id": "700000000000001",
+  "ad_id": "600000000000002",
+  "adset_id": "600000000000003",
+  "campaign_id": "600000000000004",
+  "platform": "ig",
+  "is_organic": false,
+  "field_data": [
+    { "name": "full_name", "values": ["Persona De Prueba"] },
+    { "name": "email", "values": ["prueba@example.com"] },
+    { "name": "phone_number", "values": ["+56900000000"] },
+    { "name": "company_name", "values": ["Empresa Ficticia SpA"] },
+    { "name": "job_title", "values": ["Gerente de Operaciones"] },
+    { "name": "city", "values": ["La Serena"] },
+    { "name": "¿Cuántas propiedades administras?", "values": ["Entre 10 y 50"] },
+    { "name": "¿Qué proceso te gustaría automatizar?", "values": ["Seguimiento de arriendos"] }
+  ]
+}
