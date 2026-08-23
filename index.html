@@ -1,495 +1,578 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Veta Labs — Creamos marcas digitales de e-commerce</title>
-  <meta name="description" content="Veta Labs crea marcas digitales de e-commerce listas para vender: identidad, tienda online, automatización, IA y datos. 100% remoto en Chile.">
-  <meta name="author" content="Veta Labs">
-  <meta name="theme-color" content="#111111">
-  <link rel="canonical" href="https://vetalabs.cl/">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='.15' y1='0' x2='.8' y2='1'%3E%3Cstop offset='0' stop-color='%23ffffff'/%3E%3Cstop offset='.22' stop-color='%23e8e8ec'/%3E%3Cstop offset='.48' stop-color='%23b9b9c0'/%3E%3Cstop offset='.72' stop-color='%239a9aa2'/%3E%3Cstop offset='1' stop-color='%23adadb5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%23111111'/%3E%3Cpath fill='url%28%23g%29' stroke='url%28%23g%29' stroke-width='2.2' stroke-linejoin='round' fill-rule='evenodd' d='M15 14.5L33 14.5L50 53L67 14.5L85 14.5L63.9 64.9A14.8 14.8 0 1 1 36.1 64.9ZM61 70A11 11 0 1 0 39 70A11 11 0 1 0 61 70Z'/%3E%3C/svg%3E">
-  <!-- Open Graph -->
-  <meta property="og:type" content="website">
-  <meta property="og:locale" content="es_CL">
-  <meta property="og:url" content="https://vetalabs.cl/">
-  <meta property="og:site_name" content="Veta Labs">
-  <meta property="og:title" content="Veta Labs — Creamos marcas digitales de e-commerce">
-  <meta property="og:description" content="De tu idea a una marca lista para vender. Identidad, tienda online, automatización, IA y datos en un solo proceso.">
-  <meta property="og:image" content="https://vetalabs.cl/og-image.png">
-  <meta property="og:image:type" content="image/png">
-  <meta property="og:image:width" content="2400">
-  <meta property="og:image:height" content="1260">
-  <meta property="og:image:alt" content="Isotipo de Veta Labs">
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Veta Labs — Creamos marcas digitales de e-commerce">
-  <meta name="twitter:description" content="De tu idea a una marca lista para vender. Identidad, tienda online, automatización, IA y datos en un solo proceso.">
-  <meta name="twitter:image" content="https://vetalabs.cl/og-image.png">
-  <meta name="twitter:image:alt" content="Isotipo de Veta Labs">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<style>
-  *{box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{margin:0;--brand:#111111;background:#f4f4f5;color:#111111;font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-  a{color:inherit;text-decoration:none}
-  input,textarea{font-family:inherit}
-  input:focus,textarea:focus{outline:none;border-color:#52525b !important}
-  ::placeholder{color:#a1a1aa}
-  @keyframes riseIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-  @keyframes pulseDot{0%,100%{box-shadow:0 0 0 0 rgba(17,17,17,.45)}70%{box-shadow:0 0 0 7px rgba(17,17,17,0)}}
-
-  /* ===== Sistema técnico: el mismo lenguaje de las piezas de marca ===== */
-  /* Titulares en caja alta y apretados, como en las publicaciones */
-  h1,h2{text-transform:uppercase;letter-spacing:-.025em}
-
-  /* Marcos de registro: esquinas en L, no un borde completo */
-  .marco{position:relative}
-  .marco::before,.marco::after{content:'';position:absolute;width:13px;height:13px;
-    border:1px solid currentColor;opacity:.5;pointer-events:none}
-  .marco::before{top:9px;left:9px;border-right:0;border-bottom:0}
-  .marco::after{bottom:9px;right:9px;border-left:0;border-top:0}
-
-  /* Índice de sección: cuadrado sólido + etiqueta mono, como "01 / 10" */
-  .indice{font:700 12px 'Space Mono',monospace;letter-spacing:.14em;color:#a1a1aa;
-    display:inline-flex;align-items:center;gap:10px;margin-bottom:14px}
-  .indice::before{content:'';width:6px;height:6px;background:#111111;flex:none}
-
-  /* Regla de cota: línea fina con topes cuadrados */
-  .regla{display:flex;align-items:center;gap:12px;width:100%}
-  .regla i{height:1px;background:#ebebed;flex:1}
-  .regla b{width:5px;height:5px;background:#111111;flex:none}
-</style>
-<script>
-  // ===== Meta Pixel =====
-  // Pega aquí el ID del píxel (Administrador de eventos → Orígenes de datos).
-  // Mientras esté vacío no se carga nada: la web funciona igual y no se envía
-  // ningún dato a Meta.
-  window.META_PIXEL_ID = '';
-
-  (function () {
-    if (!window.META_PIXEL_ID) return;
-    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
-    document,'script','https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', window.META_PIXEL_ID);
-    fbq('track', 'PageView');
-  })();
-</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Veta Labs — Tiendas online en Shopify para negocios que ya venden</title>
+<meta name="description" content="Creamos tiendas online en Shopify para negocios que ya venden por Instagram y WhatsApp. Desde $390.000 CLP. Diagnóstico gratuito, en todo Chile.">
+<meta name="author" content="Veta Labs">
+<meta name="theme-color" content="#111111">
+<link rel="canonical" href="https://vetalabs.cl/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='.15' y1='0' x2='.8' y2='1'%3E%3Cstop offset='0' stop-color='%23ffffff'/%3E%3Cstop offset='.22' stop-color='%23e8e8ec'/%3E%3Cstop offset='.48' stop-color='%23b9b9c0'/%3E%3Cstop offset='.72' stop-color='%239a9aa2'/%3E%3Cstop offset='1' stop-color='%23adadb5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='%23111111'/%3E%3Cpath fill='url%28%23g%29' stroke='url%28%23g%29' stroke-width='2.2' stroke-linejoin='round' fill-rule='evenodd' d='M15 14.5L33 14.5L50 53L67 14.5L85 14.5L63.9 64.9A14.8 14.8 0 1 1 36.1 64.9ZM61 70A11 11 0 1 0 39 70A11 11 0 1 0 61 70Z'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_CL">
+<meta property="og:site_name" content="Veta Labs">
+<meta property="og:url" content="https://vetalabs.cl/">
+<meta property="og:title" content="Veta Labs — Tiendas online en Shopify para negocios que ya venden">
+<meta property="og:description" content="Creamos tiendas online en Shopify para negocios que ya venden por Instagram y WhatsApp. Desde $390.000 CLP. Diagnóstico gratuito, en todo Chile.">
+<meta property="og:image" content="https://vetalabs.cl/og-image.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta property="og:image:alt" content="Isotipo de Veta Labs">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Veta Labs — Tiendas online en Shopify para negocios que ya venden">
+<meta name="twitter:description" content="Creamos tiendas online en Shopify para negocios que ya venden por Instagram y WhatsApp. Desde $390.000 CLP. Diagnóstico gratuito, en todo Chile.">
+<meta name="twitter:image" content="https://vetalabs.cl/og-image.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@700&display=swap">
+<link rel="stylesheet" href="assets/css/veta.css">
+<script defer src="assets/js/veta.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"ProfessionalService","@id":"https://vetalabs.cl/#organizacion","name":"Veta Labs","description":"Agencia chilena de e-commerce y crecimiento digital. Tiendas online en Shopify, páginas web y optimización de conversión (CRO).","url":"https://vetalabs.cl/","logo":"https://vetalabs.cl/og-image.png","image":"https://vetalabs.cl/og-image.png","email":"contacto@vetalabs.cl","priceRange":"$$","areaServed":{"@type":"Country","name":"Chile"},"address":{"@type":"PostalAddress","addressRegion":"Región de Coquimbo","addressCountry":"CL"},"sameAs":["https://www.instagram.com/vetalabs/","https://www.linkedin.com/in/sebasti%C3%A1n-gonzalo-g%C3%B3mez-past%C3%A9n/"],"founder":{"@type":"Person","name":"Sebastián Gómez Pastén"},"makesOffer":[{"@type":"Offer","name":"Tienda online en Shopify","priceCurrency":"CLP","price":"390000","priceSpecification":{"@type":"PriceSpecification","minPrice":"390000","priceCurrency":"CLP"}},{"@type":"Offer","name":"Landing page","priceCurrency":"CLP","price":"150000","priceSpecification":{"@type":"PriceSpecification","minPrice":"150000","priceCurrency":"CLP"}},{"@type":"Offer","name":"Shopify Growth","priceCurrency":"CLP","price":"690000","priceSpecification":{"@type":"PriceSpecification","minPrice":"690000","priceCurrency":"CLP"}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Veta Labs","url":"https://vetalabs.cl/","inLanguage":"es-CL"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"¿Tengo que saber usar Shopify?","acceptedAnswer":{"@type":"Answer","text":"No. Te entregamos la tienda funcionando y te capacitamos para administrarla: subir productos, cambiar precios, gestionar stock y procesar pedidos. La sesión queda grabada para que la revises cuando quieras."}},{"@type":"Question","name":"¿Puedo administrar la tienda yo después?","acceptedAnswer":{"@type":"Answer","text":"Sí, y es el objetivo. La cuenta de Shopify queda a tu nombre, con tus accesos y tu medio de pago. No trabajamos con cuentas nuestras ni retenemos accesos: si mañana quieres seguir con otra agencia o solo, puedes hacerlo."}},{"@type":"Question","name":"¿Cuántos productos incluye?","acceptedAnswer":{"@type":"Answer","text":"Dejamos configurados entre 10 y 15 productos, construidos bien: variantes, categorías, fotos, descripciones y SEO. No es un límite de tu tienda, es el punto de partida. Con esa plantilla armada, cargar el resto de tu catálogo es repetir un proceso que ya te enseñamos."}},{"@type":"Question","name":"¿Qué pasa si tengo muchos más productos?","acceptedAnswer":{"@type":"Answer","text":"Lo vemos en el diagnóstico. Si tienes un catálogo grande, normalmente conviene el plan Growth o una carga masiva cotizada aparte, porque el trabajo deja de ser diseño y pasa a ser estructura de datos."}},{"@type":"Question","name":"¿Shopify tiene un costo mensual?","acceptedAnswer":{"@type":"Answer","text":"Sí. Shopify cobra su propia suscripción mensual, aparte de nuestro trabajo, y se paga directamente a Shopify con tu tarjeta. En el diagnóstico te decimos qué plan te conviene y cuánto cuesta hoy, para que no haya sorpresas."}},{"@type":"Question","name":"¿Incluye el dominio?","acceptedAnswer":{"@type":"Answer","text":"Configuramos tu dominio y lo dejamos apuntando a la tienda. El dominio en sí se paga aparte (por ejemplo, un .cl se compra en NIC Chile) y queda registrado a tu nombre."}},{"@type":"Question","name":"¿Incluye los medios de pago?","acceptedAnswer":{"@type":"Answer","text":"Configuramos los medios de pago que puedas contratar en Chile y dejamos el checkout probado de punta a punta. Las cuentas con cada proveedor las abres tú, a nombre de tu negocio: es tu dinero y tiene que llegar directo a ti."}},{"@type":"Question","name":"¿Trabajan con negocios fuera de La Serena?","acceptedAnswer":{"@type":"Answer","text":"Sí. Trabajamos 100% online con negocios de cualquier ciudad de Chile. Las reuniones son por videollamada y la entrega es digital, así que la distancia no cambia nada del proceso."}},{"@type":"Question","name":"¿Necesito fotos profesionales?","acceptedAnswer":{"@type":"Answer","text":"Ayudan mucho, pero no siempre son imprescindibles. Trabajamos con el material que ya tienes y te decimos con franqueza qué fotos conviene rehacer y cómo. La producción fotográfica no la hacemos nosotros: si hace falta, te orientamos para contratarla o resolverla bien con tu celular."}},{"@type":"Question","name":"¿Hacen publicidad?","acceptedAnswer":{"@type":"Answer","text":"Configuramos y gestionamos Meta Ads (Instagram y Facebook) como servicio aparte, nunca incluido por defecto en el precio de la tienda. Hoy no trabajamos con Google Ads."}},{"@type":"Question","name":"¿Tengo que pagar una mantención mensual?","acceptedAnswer":{"@type":"Answer","text":"No. No vendemos contratos de mantención obligatoria. Terminado el proyecto, la tienda es tuya y no nos debes nada más. Si después quieres mejoras, CRO, automatizaciones o publicidad, se cotiza en ese momento."}},{"@type":"Question","name":"¿Cuánto demora un proyecto?","acceptedAnswer":{"@type":"Answer","text":"Depende del alcance y, sobre todo, de la rapidez con que recibamos tus fotos, textos y datos de productos: esa suele ser la parte que más se demora. En el diagnóstico te entregamos un plazo concreto por escrito antes de que decidas."}}]}</script>
 </head>
 <body>
+<a class="skip" href="#main">Saltar al contenido</a>
 
-<!-- Degradados del isotipo. El logo es metálico: cromo claro sobre fondos
-     oscuros, cromo oscuro sobre fondos claros, para que el brillo se lea en
-     los dos casos sin perder contraste. -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-  <linearGradient id="veta-plata" x1=".15" y1="0" x2=".8" y2="1">
-    <stop offset="0" stop-color="#ffffff"/><stop offset=".22" stop-color="#e8e8ec"/>
-    <stop offset=".48" stop-color="#b9b9c0"/><stop offset=".72" stop-color="#9a9aa2"/>
-    <stop offset="1" stop-color="#adadb5"/>
-  </linearGradient>
-  <linearGradient id="veta-grafito" x1=".15" y1="0" x2=".8" y2="1">
-    <stop offset="0" stop-color="#6b6b74"/><stop offset=".26" stop-color="#3f3f46"/>
-    <stop offset=".55" stop-color="#111111"/><stop offset=".8" stop-color="#2b2b31"/>
-    <stop offset="1" stop-color="#43434a"/>
-  </linearGradient>
-</defs></svg>
-<canvas id="bg-dots" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none"></canvas>
-<div style="position:relative;z-index:1;width:100%;overflow-x:hidden">
-
-  <!-- ===== NAV ===== -->
-  <div style="position:sticky;top:0;z-index:50;background:rgba(244,244,245,.82);backdrop-filter:blur(12px);border-bottom:1px solid #ebebed">
-    <div style="max-width:1120px;margin:0 auto;padding:16px clamp(20px,4vw,44px);display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
-      <a href="#top" style="font:700 18px 'Space Grotesk',sans-serif;letter-spacing:-.02em;display:flex;align-items:center;gap:10px"><svg width="24" height="24" viewBox="0 0 100 100" aria-hidden="true" style="flex:none"><path fill="url(#veta-grafito)" stroke="url(#veta-grafito)" stroke-width="2.2" stroke-linejoin="round" fill-rule="evenodd" d="M15 14.5L33 14.5L50 53L67 14.5L85 14.5L63.9 64.9A14.8 14.8 0 1 1 36.1 64.9ZM61 70A11 11 0 1 0 39 70A11 11 0 1 0 61 70Z"/></svg>Veta Labs</a>
-      <div style="display:flex;gap:26px;align-items:center;font:500 14.5px 'Inter',sans-serif;color:#52525b;flex-wrap:wrap">
-        <a href="#para-quien" data-navlink="para-quien" style="transition:color .2s" style-hover="color:#111111">Para quién</a>
-        <a href="#servicios" data-navlink="servicios" style="transition:color .2s" style-hover="color:#111111">Qué incluye</a>
-        <a href="#proceso" data-navlink="proceso" style="transition:color .2s" style-hover="color:#111111">Proceso</a>
-        <a href="#resultados" data-navlink="resultados" style="transition:color .2s" style-hover="color:#111111">Qué recibes</a>
-        <a href="#proyectos" data-navlink="proyectos" style="transition:color .2s" style-hover="color:#111111">Evidencia</a>
-        <a href="#sobre-mi" data-navlink="sobre-mi" style="transition:color .2s" style-hover="color:#111111">Nosotros</a>
-      </div>
-      <a href="#contacto" style="padding:11px 22px;background:var(--brand);color:#f4f4f5;border-radius:0;font:600 14.5px 'Inter',sans-serif;transition:opacity .2s" style-hover="opacity:.85">Cuéntanos tu idea</a>
-    </div>
+<header class="site-header">
+  <div class="wrap site-header__bar">
+    <a class="brand" href="/" aria-label="Veta Labs — ir al inicio"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false"><defs><linearGradient id="vg-dark" x1=".15" y1="0" x2=".8" y2="1"><stop offset="0" stop-color="#6b6b74"/><stop offset=".26" stop-color="#3f3f46"/><stop offset=".55" stop-color="#111111"/><stop offset=".8" stop-color="#2b2b31"/><stop offset="1" stop-color="#43434a"/></linearGradient></defs><path fill="url(#vg-dark)" stroke="url(#vg-dark)" stroke-width="2.2" stroke-linejoin="round" fill-rule="evenodd" d="M15 14.5L33 14.5L50 53L67 14.5L85 14.5L63.9 64.9A14.8 14.8 0 1 1 36.1 64.9ZM61 70A11 11 0 1 0 39 70A11 11 0 1 0 61 70Z"/></svg>Veta&nbsp;Labs</a>
+    <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="nav-principal">
+      <span class="nav-toggle__bars" aria-hidden="true"></span><span data-nav-label>Menú</span>
+    </button>
+    <nav class="nav" id="nav-principal" aria-label="Navegación principal">
+      <a href="/tiendas-online">Tiendas online</a>
+      <a href="/paginas-web">Páginas web</a>
+      <a href="/cro">CRO</a>
+      <a href="/proyectos">Proyectos</a>
+      <a href="/precios">Precios</a>
+      <a href="/nosotros">Nosotros</a>
+      <a class="btn btn--primary btn--sm" href="/contacto" data-ev="click_diagnostico" data-ev-pos="nav_mobile">Diagnóstico gratuito</a>
+    </nav>
+    <a class="btn btn--primary btn--sm site-header__cta" href="/contacto" data-ev="click_diagnostico" data-ev-pos="nav">Diagnóstico gratuito</a>
   </div>
+</header>
 
-  <!-- ===== HERO ===== -->
-  <div id="top" style="max-width:1180px;margin:0 auto;padding:clamp(44px,7vw,88px) clamp(20px,4vw,44px) clamp(32px,5vw,52px);display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:clamp(36px,5vw,60px);align-items:center">
-    <div style="display:flex;flex-direction:column;align-items:flex-start;text-align:left">
-      <div style="display:inline-flex;align-items:center;gap:9px;padding:8px 16px;background:#fff;border:1px solid #ebebed;color:#3f3f46;border-radius:0;font:600 13px 'Inter',sans-serif;margin-bottom:clamp(22px,3vw,30px);animation:riseIn .6s both" id="hero-badge"><span style="width:7px;height:7px;background:#111111;display:inline-block;animation:pulseDot 2.4s infinite"></span>Marcas digitales para e-commerce</div>
-      <h1 style="font:700 clamp(38px,6vw,62px)/1.04 'Space Grotesk',sans-serif;letter-spacing:-.03em;margin:0 0 22px;max-width:15ch;animation:riseIn .7s .06s both">Creamos marcas digitales <span style="color:#a1a1aa">listas para vender</span></h1>
-      <p style="font:400 clamp(17px,2.2vw,21px)/1.55 'Inter',sans-serif;color:#52525b;max-width:520px;margin:0 0 clamp(28px,4vw,40px);animation:riseIn .7s .14s both">Construimos tu identidad, tu tienda online y tu operación digital en un solo proceso, con automatización, IA y datos.</p>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;animation:riseIn .7s .22s both">
-        <a href="#contacto" style="padding:16px 32px;background:var(--brand);color:#f4f4f5;border-radius:0;font:700 15px 'Inter',sans-serif;transition:opacity .2s" style-hover="opacity:.85">Cuéntanos tu idea</a>
-        <a href="#servicios" style="padding:16px 32px;background:#fff;border:1px solid #ebebed;border-radius:0;font:600 15px 'Inter',sans-serif;transition:border-color .2s" style-hover="border-color:#111111">Ver cómo trabajamos</a>
-      </div>
-    </div>
-    <div style="justify-self:center;width:100%;max-width:440px;animation:riseIn .8s .3s both">
-      <div id="dotgrid-panel" style="position:relative;aspect-ratio:1;border-radius:0;overflow:hidden;background:radial-gradient(120% 120% at 50% 45%,#111111 0%,#111111 55%,#111111 100%);cursor:crosshair;-webkit-mask-image:radial-gradient(135% 135% at 50% 50%,#000 55%,rgba(0,0,0,.45) 82%,transparent 100%);mask-image:radial-gradient(135% 135% at 50% 50%,#000 55%,rgba(0,0,0,.45) 82%,transparent 100%)">
-        <canvas id="dotgrid" style="position:absolute;inset:0;width:100%;height:100%;display:block"></canvas>
-      </div>
-    </div>
-  </div>
+<main id="main">
 
-  <!-- ===== TRUST STRIP ===== -->
-  <div id="trust-strip" style="max-width:1000px;margin:0 auto;padding:clamp(28px,4vw,44px) clamp(20px,4vw,44px) clamp(48px,7vw,72px)">
-    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px 26px;font:500 13.5px 'Inter',sans-serif;color:#52525b">
-      <span>100% remoto en todo Chile</span><span style="color:#a1a1aa">•</span><span>Respuesta en menos de 24 h</span><span style="color:#a1a1aa">•</span><span>Sin permanencia ni letra chica</span>
-    </div>
-  </div>
-
-  <!-- ===== PARA QUIÉN ===== -->
-  <div id="para-quien" style="background:#ebebed;scroll-margin-top:60px">
-    <div style="max-width:1120px;margin:0 auto;padding:clamp(48px,7vw,80px) clamp(20px,4vw,44px)">
-      <div data-reveal="0" style="text-align:center;margin-bottom:clamp(32px,5vw,46px)">
-        <div class="indice">01 / 06  PARA QUIÉN</div>
-        <h2 style="font:700 clamp(30px,4.5vw,42px) 'Space Grotesk',sans-serif;letter-spacing:-.02em;margin:0 0 12px">Vendes por WhatsApp, Instagram o en persona</h2>
-        <p style="font:400 17px/1.6 'Inter',sans-serif;color:#52525b;margin:0 auto;max-width:600px">Tienes producto y tienes clientes. Lo que todavía no tienes es una marca propia donde te compren sin que tengas que estar tú.</p>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px">
-        <div data-reveal="0" style="background:#f4f4f5;border-radius:0;padding:28px"><h3 style="font:600 17px 'Space Grotesk',sans-serif;margin:0 0 8px">Cada venta pasa por tus manos</h3><p style="font:400 14.5px/1.55 'Inter',sans-serif;color:#52525b;margin:0">Si no respondes el mensaje, no hay venta. Tu negocio no puede vender sin ti.</p></div>
-        <div data-reveal="0.06" style="background:#f4f4f5;border-radius:0;padding:28px"><h3 style="font:600 17px 'Space Grotesk',sans-serif;margin:0 0 8px">Tu imagen cambia en cada post</h3><p style="font:400 14.5px/1.55 'Inter',sans-serif;color:#52525b;margin:0">Sin un sistema visual, el cliente no te reconoce ni te recuerda.</p></div>
-        <div data-reveal="0.12" style="background:#f4f4f5;border-radius:0;padding:28px"><h3 style="font:600 17px 'Space Grotesk',sans-serif;margin:0 0 8px">Todo vive en conversaciones</h3><p style="font:400 14.5px/1.55 'Inter',sans-serif;color:#52525b;margin:0">Pedidos, precios y stock repartidos entre chats y planillas. Crecer solo genera más desorden.</p></div>
-        <div data-reveal="0.18" class="marco" style="background:var(--brand);color:#f4f4f5;border-radius:0;padding:32px;display:flex;flex-direction:column;justify-content:center"><h3 style="font:600 17px 'Space Grotesk',sans-serif;margin:0 0 8px">¿Te reconociste?</h3><p style="font:400 14.5px/1.55 'Inter',sans-serif;color:#a1a1aa;margin:0 0 14px">Entonces Veta Labs es para ti.</p><a href="#contacto" style="font:700 14px 'Inter',sans-serif;color:#f4f4f5;transition:opacity .2s" style-hover="opacity:.7">Cuéntanos tu idea →</a></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== SERVICIOS ===== -->
-  <div id="servicios" style="max-width:1120px;margin:0 auto;padding:clamp(40px,6vw,68px) clamp(20px,4vw,44px);scroll-margin-top:72px">
-    <div data-reveal="0" style="text-align:center;margin-bottom:clamp(36px,5vw,52px)">
-      <div class="indice">02 / 06  QUÉ INCLUYE</div>
-      <h2 style="font:700 clamp(30px,4.5vw,42px) 'Space Grotesk',sans-serif;letter-spacing:-.02em;margin:0 0 12px">Todo lo que tu marca necesita para vender</h2>
-      <p style="font:400 17px 'Inter',sans-serif;color:#52525b;margin:0">Un solo proceso, no cinco proveedores distintos.</p>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px">
-      <div data-reveal="0" style="background:#fff;border-radius:0;padding:32px;border:1px solid #ebebed;transition:border-color .18s ease" style-hover="border-color:#111111"><div style="font:700 12px 'Space Mono',monospace;color:#a1a1aa;letter-spacing:.1em;margin-bottom:16px">01</div><h3 style="font:600 20px 'Space Grotesk',sans-serif;margin:0 0 9px">Estrategia de marca</h3><p style="font:400 15.5px/1.55 'Inter',sans-serif;color:#52525b;margin:0">Posicionamiento, propuesta de valor, cliente ideal y el tono con que tu marca habla.</p></div>
-      <div data-reveal="0.06" style="background:#fff;border-radius:0;padding:32px;border:1px solid #ebebed;transition:border-color .18s ease" style-hover="border-color:#111111"><div style="font:700 12px 'Space Mono',monospace;color:#a1a1aa;letter-spacing:.1em;margin-bottom:16px">02</div><h3 style="font:600 20px 'Space Grotesk',sans-serif;margin:0 0 9px">Identidad visual</h3><p style="font:400 15.5px/1.55 'Inter',sans-serif;color:#52525b;margin:0">Logo, colores, tipografías y un sistema visual que se sostiene en cada punto de contacto.</p></div>
-      <div data-reveal="0.12" style="background:#fff;border-radius:0;padding:32px;border:1px solid #ebebed;transition:border-color .18s ease" style-hover="border-color:#111111"><div style="font:700 12px 'Space Mono',monospace;color:#a1a1aa;letter-spacing:.1em;margin-bottom:16px">03</div><h3 style="font:600 20px 'Space Grotesk',sans-serif;margin:0 0 9px">Tienda online</h3><p style="font:400 15.5px/1.55 'Inter',sans-serif;color:#52525b;margin:0">Un e-commerce claro y rápido, pensado para el celular, con pagos y envíos configurados.</p></div>
-      <div data-reveal="0" style="background:#fff;border-radius:0;padding:32px;border:1px solid #ebebed;transition:border-color .18s ease" style-hover="border-color:#111111"><div style="font:700 12px 'Space Mono',monospace;color:#a1a1aa;letter-spacing:.1em;margin-bottom:16px">04</div><h3 style="font:600 20px 'Space Grotesk',sans-serif;margin:0 0 9px">Catálogo y contenido</h3><p style="font:400 15.5px/1.55 'Inter',sans-serif;color:#52525b;margin:0">Colecciones, fichas de producto y descripciones escritas para que el cliente compre.</p></div>
-      <div data-reveal="0.06" style="background:#fff;border-radius:0;padding:32px;border:1px solid #ebebed;transition:border-color .18s ease" style-hover="border-color:#111111"><div style="font:700 12px 'Space Mono',monospace;color:#a1a1aa;letter-spacing:.1em;margin-bottom:16px">05</div><h3 style="font:600 20px 'Space Grotesk',sans-serif;margin:0 0 9px">Automatización, IA y datos</h3><p style="font:400 15.5px/1.55 'Inter',sans-serif;color:#52525b;margin:0">Menos tareas repetitivas, y la medición lista para saber qué producto y qué canal funcionan.</p></div>
-      <div data-reveal="0.12" class="marco" style="background:var(--brand);color:#f4f4f5;border-radius:0;padding:36px;display:flex;flex-direction:column;justify-content:center"><h3 style="font:600 20px 'Space Grotesk',sans-serif;margin:0 0 9px">¿Tienes un producto o una idea?</h3><p style="font:400 15.5px/1.55 'Inter',sans-serif;color:#a1a1aa;margin:0 0 16px">Cuéntanos qué quieres vender y armamos el alcance que tenga sentido para tu etapa.</p><a href="#contacto" style="font:700 14.5px 'Inter',sans-serif;color:#f4f4f5;transition:opacity .2s" style-hover="opacity:.7">Hablemos →</a></div>
-    </div>
-  </div>
-
-  <!-- ===== PROCESO ===== -->
-  <div id="proceso" style="background:#ebebed;scroll-margin-top:60px">
-    <div style="max-width:1120px;margin:0 auto;padding:clamp(48px,7vw,80px) clamp(20px,4vw,44px)">
-      <div data-reveal="0" style="text-align:center;margin-bottom:clamp(36px,5vw,48px)">
-        <div class="indice">03 / 06  PROCESO</div>
-        <h2 style="font:700 clamp(30px,4.5vw,42px) 'Space Grotesk',sans-serif;letter-spacing:-.02em;margin:0">De tu idea al lanzamiento</h2>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px">
-        <div data-reveal="0" style="position:relative;background:#f4f4f5;border-radius:0;padding:30px 28px;overflow:hidden"><span style="position:absolute;top:14px;right:18px;font:700 44px 'Space Grotesk',sans-serif;color:#ebebed">01</span><div style="font:700 12px 'Space Mono',monospace;color:#111111;margin-bottom:14px;letter-spacing:.06em">DIAGNÓSTICO</div><h3 style="font:600 18px 'Space Grotesk',sans-serif;margin:0 0 8px">Entendemos tu producto</h3><p style="font:400 14.5px/1.55 'Inter',sans-serif;color:#52525b;margin:0">Tu producto, tus clientes, dónde vendes hoy y hacia dónde quieres ir.</p></div>
-        <div data-reveal="0.06" style="position:relative;background:#f4f4f5;border-radius:0;padding:30px 28px;overflow:hidden"><span style="position:absolute;top:14px;right:18px;font:700 44px 'Space Grotesk',sans-serif;color:#ebebed">02</span><div style="font:700 12px 'Space Mono',monospace;color:#111111;margin-bottom:14px;letter-spacing:.06em">ESTRATEGIA</div><h3 style="font:600 18px 'Space Grotesk',sans-serif;margin:0 0 8px">Definimos la marca</h3><p style="font:400 14.5px/1.55 'Inter',sans-serif;color:#52525b;margin:0">Cómo debe posicionarse, verse y hablar tu marca.</p></div>
-        <div data-reveal="0.12" style="position:relative;background:#f4f4f5;border-radius:0;padding:30px 28px;overflow:hidden"><span style="position:absolute;top:14px;right:18px;font:700 44px 'Space Grotesk',sans-serif;color:#ebebed">03</span><div style="font:700 12px 'Space Mono',monospace;color:#111111;margin-bottom:14px;letter-spacing:.06em">CONSTRUCCIÓN</div><h3 style="font:600 18px 'Space Grotesk',sans-serif;margin:0 0 8px">Identidad y tienda</h3><p style="font:400 14.5px/1.55 'Inter',sans-serif;color:#52525b;margin:0">Diseñamos la identidad y levantamos el e-commerce completo.</p></div>
-        <div data-reveal="0.18" style="position:relative;background:#f4f4f5;border-radius:0;padding:30px 28px;overflow:hidden"><span style="position:absolute;top:14px;right:18px;font:700 44px 'Space Grotesk',sans-serif;color:#ebebed">04</span><div style="font:700 12px 'Space Mono',monospace;color:#111111;margin-bottom:14px;letter-spacing:.06em">LANZAMIENTO</div><h3 style="font:600 18px 'Space Grotesk',sans-serif;margin:0 0 8px">Lanzamos y te enseñamos</h3><p style="font:400 14.5px/1.55 'Inter',sans-serif;color:#52525b;margin:0">Probamos la compra de punta a punta y te dejamos administrando tu marca.</p></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== RESULTADOS ===== -->
-  <div id="resultados" style="max-width:1120px;margin:0 auto;padding:clamp(48px,7vw,80px) clamp(20px,4vw,44px);text-align:center;scroll-margin-top:72px">
-    <div data-reveal="0">
-      <div class="indice">04 / 06  QUÉ RECIBES</div>
-      <h2 style="font:700 clamp(30px,4.5vw,42px) 'Space Grotesk',sans-serif;letter-spacing:-.02em;margin:0 0 clamp(32px,5vw,44px)">Con qué te quedas al final</h2>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px">
-      <div data-reveal="0" style="background:#fff;border-radius:0;padding:40px 32px;border:1px solid #ebebed"><div style="font:700 clamp(40px,6vw,52px) 'Space Grotesk',sans-serif;color:#111111;margin-bottom:8px;letter-spacing:-.02em">Marca</div><p style="font:500 15.5px/1.5 'Inter',sans-serif;color:#52525b;margin:0">Identidad completa: logo, colores, tipografías y criterios para mantenerla coherente.</p></div>
-      <div data-reveal="0.08" style="background:#fff;border-radius:0;padding:40px 32px;border:1px solid #ebebed"><div style="font:700 clamp(40px,6vw,52px) 'Space Grotesk',sans-serif;color:#111111;margin-bottom:8px;letter-spacing:-.02em">Tienda</div><p style="font:500 15.5px/1.5 'Inter',sans-serif;color:#52525b;margin:0">Un e-commerce funcionando, con catálogo, pagos y envíos configurados.</p></div>
-      <div data-reveal="0.16" style="background:#fff;border-radius:0;padding:40px 32px;border:1px solid #ebebed"><div style="font:700 clamp(40px,6vw,52px) 'Space Grotesk',sans-serif;color:#111111;margin-bottom:8px;letter-spacing:-.02em">Datos</div><p style="font:500 15.5px/1.5 'Inter',sans-serif;color:#52525b;margin:0">Procesos automatizados y la medición lista para decidir con información real.</p></div>
-    </div>
-  </div>
-
-  <!-- ===== PROYECTOS ===== -->
-  <div id="proyectos" style="max-width:1120px;margin:0 auto;padding:clamp(40px,6vw,68px) clamp(20px,4vw,44px);scroll-margin-top:72px">
-    <div data-reveal="0" style="text-align:center;margin-bottom:clamp(32px,5vw,48px)">
-      <div class="indice">05 / 06  EVIDENCIA</div>
-      <h2 style="font:700 clamp(30px,4.5vw,42px) 'Space Grotesk',sans-serif;letter-spacing:-.02em;margin:0 0 12px">Tecnología que ya construimos</h2>
-      <p style="font:400 17px 'Inter',sans-serif;color:#52525b;margin:0;max-width:640px;margin-inline:auto">Marcas hermanas de Veta Labs: las construimos nosotros y están en producción. Son la prueba de la capacidad técnica que aplicamos a cada marca que creamos.</p>
-    </div>
-
-    <!-- Feature: CheckYourCars -->
-    <div data-reveal="0" style="background:#fff;border:1px solid #ebebed;border-radius:0;overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
-      <div style="position:relative;min-height:280px;background:#111111;display:flex;align-items:center;justify-content:center;padding:36px">
-        <img src="checkyourcars.png" alt="CheckYourCars" loading="lazy" style="width:100%;max-width:420px;height:auto;border-radius:0">
-      </div>
-      <div style="padding:clamp(28px,4vw,44px);display:flex;flex-direction:column;justify-content:center">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-          <span style="font:700 22px 'Space Grotesk',sans-serif">CheckYourCars</span>
-          <span style="font:700 11px 'Space Mono',monospace;color:#f4f4f5;background:#111111;padding:3px 9px;border-radius:0;display:inline-flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#f4f4f5;display:inline-block;animation:pulseDot 2.4s infinite"></span>EN VIVO</span>
+  <!-- ===================== HERO ===================== -->
+  <section class="sec hero" data-dock-after>
+    <div class="wrap hero__grid">
+      <div>
+        <p class="eyebrow">Agencia de e-commerce · Chile</p>
+        <h1>Tu negocio ya vende.<br>Ahora haz que <span class="muted">venda mejor</span>.</h1>
+        <p class="lead">Creamos tiendas online en Shopify pensadas para convertir: tu catálogo ordenado, la compra clara y tu negocio dejando de depender de responder mensajes uno por uno.</p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="#diagnostico" data-ev="click_diagnostico" data-ev-pos="hero">Diagnóstico gratuito</a>
+          <a class="btn btn--ghost" href="#proyectos">Ver proyectos</a>
         </div>
-        <p style="font:400 16px/1.6 'Inter',sans-serif;color:#52525b;margin:0 0 18px">SaaS y CRM para automotoras chilenas: centraliza inventario, prospectos y ventas en un solo lugar, con embudo visual, reportes y <strong style="color:#111">descripciones de autos generadas con IA</strong>. Diseño, desarrollo e infraestructura, de la idea a producción.</p>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px">
-          <span style="font:600 12.5px 'Inter',sans-serif;color:#3f3f46;background:#f4f4f5;border:1px solid #ebebed;padding:6px 12px;border-radius:0">Plataforma a medida</span>
-          <span style="font:600 12.5px 'Inter',sans-serif;color:#3f3f46;background:#f4f4f5;border:1px solid #ebebed;padding:6px 12px;border-radius:0">IA aplicada</span>
-          <span style="font:600 12.5px 'Inter',sans-serif;color:#3f3f46;background:#f4f4f5;border:1px solid #ebebed;padding:6px 12px;border-radius:0">Automatización</span>
-          <span style="font:600 12.5px 'Inter',sans-serif;color:#3f3f46;background:#f4f4f5;border:1px solid #ebebed;padding:6px 12px;border-radius:0">Datos</span>
-        </div>
-        <a href="https://www.checkyourcars.cl" target="_blank" rel="noopener" style="align-self:flex-start;padding:14px 26px;background:var(--brand);color:#f4f4f5;border-radius:0;font:700 14.5px 'Inter',sans-serif;transition:opacity .2s" style-hover="opacity:.85">Visitar checkyourcars.cl ↗</a>
+        <p class="hero__price"><b>Tiendas online desde $390.000 CLP</b> <span aria-hidden="true">·</span> Landing desde $150.000 <span aria-hidden="true">·</span> sin mantención obligatoria</p>
       </div>
-    </div>
 
-    <!-- Feature: CheckYourWeb -->
-    <div data-reveal="0" style="background:#fff;border:1px solid #ebebed;border-radius:0;overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));margin-top:20px">
-      <div style="padding:clamp(28px,4vw,44px);display:flex;flex-direction:column;justify-content:center;order:2">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-          <span style="font:700 22px 'Space Grotesk',sans-serif">CheckYourWeb</span>
-          <span style="font:700 11px 'Space Mono',monospace;color:#f4f4f5;background:#111111;padding:3px 9px;border-radius:0;display:inline-flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#f4f4f5;display:inline-block;animation:pulseDot 2.4s infinite"></span>EN VIVO</span>
-        </div>
-        <p style="font:400 16px/1.6 'Inter',sans-serif;color:#52525b;margin:0 0 18px">Estudio de <strong style="color:#111">desarrollo web con IA</strong> para negocios locales —restaurantes, estética, e-commerce—. Sitios rápidos, responsive y orientados a conversión, con demos navegables por industria y prototipo listo en 7–14 días.</p>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px">
-          <span style="font:600 12.5px 'Inter',sans-serif;color:#3f3f46;background:#f4f4f5;border:1px solid #ebebed;padding:6px 12px;border-radius:0">Automatización</span>
-          <span style="font:600 12.5px 'Inter',sans-serif;color:#3f3f46;background:#f4f4f5;border:1px solid #ebebed;padding:6px 12px;border-radius:0">IA aplicada</span>
-          <span style="font:600 12.5px 'Inter',sans-serif;color:#3f3f46;background:#f4f4f5;border:1px solid #ebebed;padding:6px 12px;border-radius:0">Diseño</span>
-          <span style="font:600 12.5px 'Inter',sans-serif;color:#3f3f46;background:#f4f4f5;border:1px solid #ebebed;padding:6px 12px;border-radius:0">Landing</span>
-        </div>
-        <a href="https://check-your-web.vercel.app/" target="_blank" rel="noopener" style="align-self:flex-start;padding:14px 26px;background:var(--brand);color:#f4f4f5;border-radius:0;font:700 14.5px 'Inter',sans-serif;transition:opacity .2s" style-hover="opacity:.85">Visitar check-your-web ↗</a>
-      </div>
-      <div style="order:1;min-height:280px;background:radial-gradient(120% 120% at 50% 30%,#111111 0%,#111111 60%,#111111 100%);color:#f4f4f5;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:44px 32px;gap:18px">
-        <div style="font:700 12px 'Space Mono',monospace;letter-spacing:.16em;color:#a1a1aa">CHECKYOURWEB</div>
-        <div style="font:700 clamp(26px,3.4vw,36px)/1.1 'Space Grotesk',sans-serif;letter-spacing:-.02em;max-width:14ch">Tu web no debería verse como una plantilla.</div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">
-          <span style="font:600 12px 'Inter',sans-serif;color:#a1a1aa;border:1px solid #3f3f46;padding:6px 13px;border-radius:0">Restaurantes</span>
-          <span style="font:600 12px 'Inter',sans-serif;color:#a1a1aa;border:1px solid #3f3f46;padding:6px 13px;border-radius:0">Estética</span>
-          <span style="font:600 12px 'Inter',sans-serif;color:#a1a1aa;border:1px solid #3f3f46;padding:6px 13px;border-radius:0">E-commerce</span>
+      <!-- Mockup en HTML/CSS: sin imagen, sin peso y nítido en cualquier pantalla. -->
+      <div aria-hidden="true">
+        <div class="phone">
+          <div class="phone__screen">
+            <div class="phone__bar"><span>TU MARCA</span><i><b></b><b></b><b></b></i></div>
+            <div class="phone__body">
+              <div class="phone__img"></div>
+              <div>
+                <p class="phone__title">Zapato Vera — Negro</p>
+                <p class="phone__price">$39.990</p>
+              </div>
+              <div class="phone__sizes"><b>37</b><b>38</b><b>39</b><b>40</b></div>
+              <div class="phone__buy">Agregar al carro</div>
+              <div class="phone__trust"><span>Despacho a todo Chile</span><span>Cambios en 30 días</span></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+  </section>
 
-    <!-- CTA -->
-    <div data-reveal="0" style="background:#111111;color:#f4f4f5;border-radius:0;padding:clamp(24px,3vw,32px) clamp(28px,4vw,40px);margin-top:20px;display:flex;flex-wrap:wrap;gap:16px 24px;align-items:center;justify-content:space-between">
-      <div><h3 style="font:600 20px 'Space Grotesk',sans-serif;margin:0 0 4px">¿Tu proyecto aquí?</h3><p style="font:400 15px 'Inter',sans-serif;color:#a1a1aa;margin:0">Construimos tu producto de la idea a producción.</p></div>
-      <a href="#contacto" style="padding:14px 26px;background:#f4f4f5;color:#111111;border-radius:0;font:700 14.5px 'Inter',sans-serif;transition:opacity .2s" style-hover="opacity:.85">Hablemos →</a>
-    </div>
-  </div>
-
-  <!-- ===== SOBRE MÍ ===== -->
-  <div id="sobre-mi" style="max-width:1120px;margin:0 auto;padding:clamp(12px,2vw,24px) clamp(20px,4vw,44px) clamp(56px,8vw,80px);scroll-margin-top:72px">
-    <div data-reveal="0" style="background:#fff;border-radius:0;border:1px solid #ebebed;padding:clamp(28px,4vw,48px);display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:clamp(28px,4vw,44px);align-items:center">
-      <div style="max-width:220px;width:100%;justify-self:center"><div style="aspect-ratio:1;border-radius:50%;overflow:hidden"><img src="profile.jpg" alt="Sebastian Gomez" style="width:100%;height:100%;object-fit:cover;display:block"></div></div>
-      <div style="grid-column:span 2;min-width:min(100%,320px)">
-        <div class="indice" style="margin-bottom:16px">06 / 06&nbsp;&nbsp;QUIÉNES SOMOS</div>
-        <h2 style="font:700 clamp(24px,3.5vw,30px) 'Space Grotesk',sans-serif;letter-spacing:-.02em;margin:0 0 14px">Quién construye tu marca</h2>
-        <p style="font:400 16.5px/1.6 'Inter',sans-serif;color:#52525b;margin:0">Veta Labs nace del trabajo de <strong style="color:#111">Sebastián Gómez</strong>, Ingeniero Comercial y <strong style="color:#111">Master in Business Analytics</strong> de la Universidad Adolfo Ibáñez, con experiencia en análisis de datos de negocio, e-commerce, tecnología e IA dentro de grandes empresas. Combinamos el lado comercial con el técnico: entendemos tu negocio y también lo construimos. De aquí salieron <a href="https://www.checkyourcars.cl" target="_blank" rel="noopener" style="font-weight:600;border-bottom:2px solid #111111;transition:opacity .2s" style-hover="opacity:.6">CheckYourCars</a> y <a href="https://check-your-web.vercel.app/" target="_blank" rel="noopener" style="font-weight:600;border-bottom:2px solid #111111;transition:opacity .2s" style-hover="opacity:.6">CheckYourWeb</a>, negocios que hoy operan con clientes reales.</p>
+  <!-- ===================== FRANJA DE CONFIANZA ===================== -->
+  <section class="sec sec--card sec--tight" style="padding-block:clamp(28px,4vw,40px)">
+    <div class="wrap">
+      <p class="trust">
+        <span>Trabajamos 100% online con todo Chile</span><span aria-hidden="true">·</span>
+        <span>Precios públicos</span><span aria-hidden="true">·</span>
+        <span>Sin contratos de mantención</span><span aria-hidden="true">·</span>
+        <span>La tienda queda a tu nombre</span>
+      </p>
+      <div class="rule" style="margin-block:clamp(24px,3vw,32px)"><b></b><i></i><b></b></div>
+      <div class="grid grid--3" style="text-align:center">
+        <p class="fine"><strong style="display:block;font:600 16px var(--font-display);margin-bottom:4px">Pecadoras Shoes</strong>Tienda online de calzado que antes vendía solo por Instagram y WhatsApp</p>
+        <p class="fine"><strong style="display:block;font:600 16px var(--font-display);margin-bottom:4px">CheckYourCars</strong>Plataforma de gestión y ventas para automotoras, en producción</p>
+        <p class="fine"><strong style="display:block;font:600 16px var(--font-display);margin-bottom:4px">CheckYourWeb</strong>Estudio de sitios web para negocios locales, en producción</p>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- ===== CONTACTO ===== -->
-  <div id="contacto" style="background:var(--brand);color:#f4f4f5;scroll-margin-top:60px">
-    <div style="max-width:1120px;margin:0 auto;padding:clamp(56px,8vw,88px) clamp(20px,4vw,44px);display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(36px,5vw,56px);align-items:start">
-      <div data-reveal="0">
-        <div style="font:700 12px 'Space Mono',monospace;letter-spacing:.14em;color:#52525b;margin-bottom:20px">CONTACTO</div>
-        <h2 style="font:700 clamp(32px,5vw,46px)/1.08 'Space Grotesk',sans-serif;letter-spacing:-.02em;margin:0 0 18px">¿Hablamos?<br>Cuéntanos tu idea.</h2>
-        <p style="font:400 17px/1.6 'Inter',sans-serif;color:#a1a1aa;margin:0 0 34px;max-width:400px">Agenda una reunión de 30 minutos. Vemos qué quieres vender y qué necesita tu marca para lograrlo. Sin compromiso.</p>
-        <div style="display:flex;flex-direction:column;gap:18px">
-          <a href="https://www.linkedin.com/in/sebastián-gonzalo-gómez-pastén/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:14px;transition:opacity .2s" style-hover="opacity:.7"><span style="width:44px;height:44px;border-radius:0;background:#3f3f46;display:flex;align-items:center;justify-content:center;font:700 15px 'Space Mono',monospace">in</span><span><span style="display:block;font:700 11px 'Space Mono',monospace;color:#52525b;letter-spacing:.08em">LINKEDIN</span><span style="font:600 16px 'Inter',sans-serif">Sebastián Gómez Pastén</span></span></a>
-          <a href="https://www.instagram.com/vetalabs/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:14px;transition:opacity .2s" style-hover="opacity:.7"><span style="width:44px;height:44px;border-radius:0;background:#3f3f46;display:flex;align-items:center;justify-content:center;font:700 15px 'Space Mono',monospace">ig</span><span><span style="display:block;font:700 11px 'Space Mono',monospace;color:#52525b;letter-spacing:.08em">INSTAGRAM</span><span style="font:600 16px 'Inter',sans-serif">@vetalabs</span></span></a>
+  <!-- ===================== PROBLEMA ===================== -->
+  <section class="sec sec--sunk" id="problema">
+    <div class="wrap">
+      <div class="sec__head">
+        <p class="eyebrow">01 · El problema</p>
+        <h2>Tu negocio creció. La forma de vender, no.</h2>
+        <p class="lead">Empezaste vendiendo por Instagram y por WhatsApp, y funcionó. El problema no es el canal: es que cada venta sigue pasando por una conversación que tienes que sostener tú.</p>
+      </div>
+      <div class="grid grid--2">
+        <ul class="ticks" data-reveal="0">
+          <li>Respondes “¿cuánto vale?” diez veces al día</li>
+          <li>Tallas, colores y stock se preguntan de nuevo en cada chat</li>
+          <li>Mandas fotos una por una por privado</li>
+          <li>Explicas medios de pago y despacho en cada conversación</li>
+        </ul>
+        <ul class="ticks" data-reveal="0.06">
+          <li>Se pierden pedidos entre mensajes sin leer</li>
+          <li>Tu catálogo vive repartido entre historias destacadas y publicaciones viejas</li>
+          <li>Si no estás conectado, no hay venta</li>
+          <li>No sabes qué producto se mira más ni dónde se cae la compra</li>
+        </ul>
+      </div>
+      <p class="lead" style="margin-top:clamp(28px,4vw,40px);font-weight:500;color:var(--ink)">Ninguno de estos problemas se arregla publicando más seguido.</p>
+    </div>
+  </section>
+
+  <!-- ===================== SOLUCIÓN ===================== -->
+  <section class="sec">
+    <div class="wrap">
+      <div class="sec__head">
+        <p class="eyebrow">02 · La solución</p>
+        <h2>Una tienda responde por ti</h2>
+        <p class="lead">Instagram sigue siendo tu vitrina: ahí te descubren. La tienda es donde se cierra la venta, sin que tengas que estar conectado.</p>
+      </div>
+      <div class="grid grid--4">
+        <article class="card card--hover" data-reveal="0"><span class="card__num">01</span><h3>El precio ya está escrito</h3><p>Precio, tallas, colores y stock visibles. Nadie tiene que preguntar para poder comprar.</p></article>
+        <article class="card card--hover" data-reveal="0.06"><span class="card__num">02</span><h3>Todo tu catálogo en un lugar</h3><p>Ordenado por categorías, buscable y siempre disponible. No en historias que caducan.</p></article>
+        <article class="card card--hover" data-reveal="0.12"><span class="card__num">03</span><h3>Te compran a las 2 de la mañana</h3><p>El cliente paga cuando quiere, con el medio de pago que ya usa, aunque tú estés durmiendo.</p></article>
+        <article class="card card--hover" data-reveal="0.18"><span class="card__num">04</span><h3>Sabes qué está pasando</h3><p>Qué se mira, qué se agrega al carro y dónde se cae la compra. Con datos, no con intuición.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SERVICIO PRINCIPAL: SHOPIFY ===================== -->
+  <section class="sec sec--card" id="shopify" data-view-ev="view_project" data-view-id="shopify">
+    <div class="wrap">
+      <div class="grid grid--2" style="gap:clamp(32px,5vw,60px);align-items:start">
+        <div>
+          <p class="eyebrow">03 · Servicio principal</p>
+          <h2 style="margin-bottom:18px">Tiendas online en Shopify</h2>
+          <p class="lead" style="margin-bottom:26px">Es lo que mejor hacemos y donde más impacto tiene nuestro trabajo. Shopify porque es estable, se administra sin saber programar y crece contigo: tú te dedicas a vender, no a mantener un sitio.</p>
+          <p class="plan__price" style="margin-bottom:22px"><em>Desde</em> <b>$390.000</b> <i>CLP</i></p>
+          <div class="row">
+            <a class="btn btn--primary" href="/tiendas-online" data-ev="click_shopify" data-ev-pos="home_servicio">Ver qué incluye</a>
+            <a class="btn btn--ghost" href="#diagnostico" data-ev="click_diagnostico" data-ev-pos="home_servicio">Diagnóstico gratuito</a>
+          </div>
         </div>
+        <ul class="ticks" data-reveal="0">
+          <li>Implementación y personalización visual con tu marca</li>
+          <li>Navegación, categorías y colecciones ordenadas</li>
+          <li>Fichas de producto con variantes: talla, color, modelo</li>
+          <li>Medios de pago, despacho, carrito y checkout probados</li>
+          <li>10 a 15 productos cargados y bien construidos</li>
+          <li>WhatsApp, Meta Pixel y Google Analytics conectados</li>
+          <li>Capacitación para que la administres tú</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== MÉTODO / CRO ===================== -->
+  <section class="sec sec--dark grid-bg" id="metodo">
+    <div class="wrap">
+      <div class="sec__head">
+        <p class="eyebrow">04 · Cómo trabajamos</p>
+        <h2>No hacemos una tienda bonita</h2>
+        <p class="lead">Una tienda bonita que no vende es un gasto. Construimos pensando en cómo compra realmente una persona, y eso se traduce en seis preguntas concretas que tienen que quedar resueltas.</p>
+      </div>
+      <ol class="method" data-reveal="0">
+        <li><h3>Que encuentre lo que busca</h3><p>Navegación, categorías y buscador que funcionan. Si el cliente no encuentra el producto en tres toques, no compra.</p></li>
+        <li><h3>Que entienda el producto rápido</h3><p>Fotos, medidas, materiales y descripciones que responden las preguntas que hoy te llegan por privado.</p></li>
+        <li><h3>Que confíe en la marca</h3><p>Quién está detrás, cómo contactar, política de cambios, reseñas. Comprar en internet es un acto de confianza.</p></li>
+        <li><h3>Que las condiciones estén claras</h3><p>Costo y plazo de despacho, cambios y devoluciones. Visibles antes del carrito, no como sorpresa en el checkout.</p></li>
+        <li><h3>Que compre con la menor fricción</h3><p>Pensado para el celular, con un checkout corto y los medios de pago que la gente ya usa en Chile.</p></li>
+        <li><h3>Que tú puedas medir</h3><p>Analytics y Pixel bien instalados, con los eventos que importan. Sin medición no hay decisiones, hay opiniones.</p></li>
+      </ol>
+      <div class="row" style="margin-top:clamp(28px,4vw,38px)">
+        <a class="btn btn--light" href="/cro">¿Ya tienes tienda y no convierte?</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PROYECTOS ===================== -->
+  <section class="sec" id="proyectos">
+    <div class="wrap">
+      <div class="sec__head">
+        <p class="eyebrow">05 · Proyectos</p>
+        <h2>Lo que hemos construido</h2>
+        <p class="lead">Proyectos reales, con nombre y en producción. Sin métricas que no podamos respaldar.</p>
       </div>
 
-      <form id="lead-form" data-reveal="0.08" novalidate style="background:#3f3f46;border-radius:0;padding:clamp(24px,3vw,34px);display:flex;flex-direction:column;gap:16px">
-        <div style="display:flex;flex-direction:column;gap:7px"><label style="font:700 12px 'Space Mono',monospace;color:#52525b;text-transform:uppercase;letter-spacing:.08em">Nombre *</label><input id="f-nombre" name="nombre" required autocomplete="name" placeholder="Tu nombre" style="width:100%;box-sizing:border-box;background:#111111;border:1px solid #3f3f46;border-radius:0;padding:14px 15px;font-size:15px;color:#f4f4f5;transition:border-color .2s"></div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
-          <div style="display:flex;flex-direction:column;gap:7px"><label style="font:700 12px 'Space Mono',monospace;color:#52525b;text-transform:uppercase;letter-spacing:.08em">Email *</label><input id="f-email" name="email" type="email" required autocomplete="email" placeholder="tucorreo@ejemplo.cl" style="width:100%;box-sizing:border-box;background:#111111;border:1px solid #3f3f46;border-radius:0;padding:14px 15px;font-size:15px;color:#f4f4f5;transition:border-color .2s"></div>
-          <div style="display:flex;flex-direction:column;gap:7px"><label style="font:700 12px 'Space Mono',monospace;color:#52525b;text-transform:uppercase;letter-spacing:.08em">Teléfono</label><input id="f-telefono" name="telefono" type="tel" autocomplete="tel" placeholder="+56 9 1234 5678" style="width:100%;box-sizing:border-box;background:#111111;border:1px solid #3f3f46;border-radius:0;padding:14px 15px;font-size:15px;color:#f4f4f5;transition:border-color .2s"></div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
-          <div style="display:flex;flex-direction:column;gap:7px"><label style="font:700 12px 'Space Mono',monospace;color:#52525b;text-transform:uppercase;letter-spacing:.08em">Empresa</label><input id="f-empresa" name="empresa" autocomplete="organization" placeholder="Nombre de tu empresa" style="width:100%;box-sizing:border-box;background:#111111;border:1px solid #3f3f46;border-radius:0;padding:14px 15px;font-size:15px;color:#f4f4f5;transition:border-color .2s"></div>
-          <div style="display:flex;flex-direction:column;gap:7px"><label style="font:700 12px 'Space Mono',monospace;color:#52525b;text-transform:uppercase;letter-spacing:.08em">Cargo</label><input id="f-cargo" name="cargo" autocomplete="organization-title" placeholder="Tu cargo" style="width:100%;box-sizing:border-box;background:#111111;border:1px solid #3f3f46;border-radius:0;padding:14px 15px;font-size:15px;color:#f4f4f5;transition:border-color .2s"></div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:7px"><label style="font:700 12px 'Space Mono',monospace;color:#52525b;text-transform:uppercase;letter-spacing:.08em">Negocio o rubro</label><input id="f-negocio" name="negocio" placeholder="¿A qué te dedicas?" style="width:100%;box-sizing:border-box;background:#111111;border:1px solid #3f3f46;border-radius:0;padding:14px 15px;font-size:15px;color:#f4f4f5;transition:border-color .2s"></div>
-        <div style="display:flex;flex-direction:column;gap:7px"><label style="font:700 12px 'Space Mono',monospace;color:#52525b;text-transform:uppercase;letter-spacing:.08em">¿Qué quieres vender?</label><textarea id="f-mensaje" name="mensaje" placeholder="Tu producto, tu idea o en qué etapa estás" rows="3" style="width:100%;box-sizing:border-box;background:#111111;border:1px solid #3f3f46;border-radius:0;padding:14px 15px;font-size:15px;color:#f4f4f5;resize:vertical;min-height:88px;transition:border-color .2s"></textarea></div>
-        <input id="f-website" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;pointer-events:none">
-        <button id="f-enviar" type="submit" style="margin-top:4px;padding:16px;background:#f4f4f5;color:#111111;border:none;border-radius:0;font:700 15px 'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .2s" style-hover="opacity:.85">Enviar mensaje</button>
-        <p id="f-status" role="status" aria-live="polite" style="display:none;font:600 13.5px/1.5 'Inter',sans-serif;text-align:center;margin:0"></p>
-      </form>
-    </div>
+      <div class="stack">
+        <!-- Pecadoras Shoes -->
+        <article class="case" data-reveal="0" data-view-ev="view_project" data-view-id="pecadoras">
+          <div class="case__media">
+            <img src="assets/img/pecadoras-tienda-portada.webp" alt="Portada de la tienda de Pecadoras Shoes en un celular, con las condiciones de envío arriba y el mensaje «Las pecadoras visten a la moda»" width="760" height="1359" loading="lazy" decoding="async">
+          </div>
+          <div class="case__body">
+            <div class="case__head">
+              <h3>Pecadoras Shoes</h3>
+              <span class="chip">Tienda online</span>
+            </div>
+            <p>Una marca de moda de La Serena que vendía por Instagram: sin enlace en la bio, cada venta empezaba con un mensaje. Le montamos su tienda en Shopify, con el catálogo ordenado y fichas con tallas.</p>
+            <a class="link-arrow" href="/proyectos/pecadoras-shoes">Ver el caso completo <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
 
-    <div style="border-top:1px solid #3f3f46">
-      <div style="max-width:1120px;margin:0 auto;padding:26px clamp(20px,4vw,44px);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;font:500 13.5px 'Inter',sans-serif;color:#52525b">
-        <span style="display:flex;align-items:center;gap:9px;font:700 15px 'Space Grotesk',sans-serif;letter-spacing:-.02em;color:#f4f4f5"><svg width="20" height="20" viewBox="0 0 100 100" aria-hidden="true" style="flex:none"><path fill="url(#veta-plata)" stroke="url(#veta-plata)" stroke-width="2.2" stroke-linejoin="round" fill-rule="evenodd" d="M15 14.5L33 14.5L50 53L67 14.5L85 14.5L63.9 64.9A14.8 14.8 0 1 1 36.1 64.9ZM61 70A11 11 0 1 0 39 70A11 11 0 1 0 61 70Z"/></svg>Veta Labs</span>
-        <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
-          <a href="/privacidad" style="transition:color .2s" style-hover="color:#f4f4f5">Privacidad</a>
-          <a href="https://www.instagram.com/vetalabs/" target="_blank" rel="noopener" style="transition:color .2s" style-hover="color:#f4f4f5">Instagram</a>
-          <a href="https://www.linkedin.com/in/sebastián-gonzalo-gómez-pastén/" target="_blank" rel="noopener" style="transition:color .2s" style-hover="color:#f4f4f5">LinkedIn</a>
-          <span>Marca · Tienda · Automatización · Datos · © 2026</span>
+        <!-- CheckYourCars -->
+        <article class="case case--flip" data-reveal="0" data-view-ev="view_project" data-view-id="checkyourcars">
+          <div class="case__media">
+            <img src="assets/img/checkyourcars-inicio.webp" alt="Portada de checkyourcars.cl en un celular: el logo, el descriptor «CRM para automotoras» y el titular «Ordena inventario, prospectos y ventas en un solo lugar»" width="900" height="1435" loading="lazy" decoding="async">
+          </div>
+          <div class="case__body">
+            <div class="case__head">
+              <h3>CheckYourCars</h3>
+              <span class="chip chip--live"><i aria-hidden="true"></i>En vivo</span>
+            </div>
+            <p>CRM para automotoras chilenas: inventario, prospectos y embudo de ventas en un solo lugar, con publicación de autos asistida. Es una marca hermana, construida por nosotros de la idea a producción.</p>
+            <a class="link-arrow" href="/proyectos/checkyourcars">Ver el caso completo <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        <!-- CheckYourWeb -->
+        <article class="case" data-reveal="0" data-view-ev="view_project" data-view-id="checkyourweb">
+          <div class="case__media" style="text-align:center;flex-direction:column;gap:16px">
+            <p class="mono" style="font:700 11px var(--font-mono);letter-spacing:.16em;color:var(--ink-faint)">CHECKYOURWEB</p>
+            <p style="font:700 clamp(24px,3vw,32px)/1.1 var(--font-display);letter-spacing:-.02em;color:var(--paper);max-width:15ch;text-transform:uppercase">Tu web no debería verse como una plantilla</p>
+          </div>
+          <div class="case__body">
+            <div class="case__head">
+              <h3>CheckYourWeb</h3>
+              <span class="chip chip--live"><i aria-hidden="true"></i>En vivo</span>
+            </div>
+            <p>Estudio de sitios web para negocios locales —restaurantes, estética, comercio—, con demos navegables por rubro. También es una marca hermana y funciona con clientes reales.</p>
+            <a class="link-arrow" href="/proyectos/checkyourweb">Ver el caso completo <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+      </div>
+
+      <div class="row" style="margin-top:clamp(26px,3vw,34px)">
+        <a class="btn btn--ghost" href="/proyectos">Ver todos los proyectos</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PROCESO ===================== -->
+  <section class="sec sec--sunk" id="proceso">
+    <div class="wrap">
+      <div class="sec__head">
+        <p class="eyebrow">06 · Proceso</p>
+        <h2>Cómo trabajamos, paso a paso</h2>
+        <p class="lead">Cinco etapas. Sabes en cuál estás y qué falta para la siguiente.</p>
+      </div>
+      <div class="grid grid--3">
+        <article class="step" data-reveal="0"><span class="step__n" aria-hidden="true">01</span><span class="step__tag">Diagnóstico</span><h3>Entendemos tu negocio</h3><p>Qué vendes, a quién, por dónde, qué te está costando hoy y a qué competencia te enfrentas. Gratis y sin compromiso.</p></article>
+        <article class="step" data-reveal="0.05"><span class="step__n" aria-hidden="true">02</span><span class="step__tag">Estrategia</span><h3>Definimos la solución</h3><p>Arquitectura, categorías, navegación, contenido y qué funcionalidades valen la pena para tu etapa. Con alcance y precio por escrito.</p></article>
+        <article class="step" data-reveal="0.1"><span class="step__n" aria-hidden="true">03</span><span class="step__tag">Construcción</span><h3>Diseñamos y desarrollamos</h3><p>Levantamos la tienda o el sitio, con revisiones tuyas en el camino. Nada se construye a ciegas.</p></article>
+        <article class="step" data-reveal="0.15"><span class="step__n" aria-hidden="true">04</span><span class="step__tag">Configuración</span><h3>Dejamos todo conectado</h3><p>Pagos, despachos, dominio, Analytics, Meta Pixel, productos iniciales y las automatizaciones que correspondan.</p></article>
+        <article class="step" data-reveal="0.2"><span class="step__n" aria-hidden="true">05</span><span class="step__tag">Entrega</span><h3>Te enseñamos a usarla</h3><p>Accesos a tu nombre y capacitación grabada: productos, precios, stock, pedidos y colecciones. Después sigues tú.</p></article>
+        <article class="step marco" style="background:var(--ink);color:var(--paper)" data-reveal="0.25"><h3 style="color:var(--paper)">¿Empezamos por el diagnóstico?</h3><p style="color:var(--ink-faint);margin-bottom:16px">Es gratis, dura una videollamada y sales con un plan claro, lo trabajes con nosotros o no.</p><a class="link-arrow" style="color:var(--paper)" href="#diagnostico" data-ev="click_diagnostico" data-ev-pos="proceso">Solicitar diagnóstico <span aria-hidden="true">→</span></a></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PRECIOS ===================== -->
+  <section class="sec sec--card" id="precios" data-view-ev="view_pricing">
+    <div class="wrap">
+      <div class="sec__head sec__head--center">
+        <p class="eyebrow" style="justify-content:center">07 · Precios</p>
+        <h2>Precios públicos, desde el primer minuto</h2>
+        <p class="lead" style="margin-inline:auto">No creemos en el “cotiza para saber”. Estos son nuestros puntos de partida: si no calza con lo que tienes pensado invertir, mejor saberlo ahora.</p>
+      </div>
+      <div class="plans">
+        <article class="plan" data-reveal="0.00">
+          <span class="plan__flag">Landing page</span>
+          <h3>Landing Page</h3>
+          <p class="plan__for">Para presentar un servicio, sostener una campaña o validar una idea sin montar una tienda completa.</p>
+          <p class="plan__price"><em>Desde</em> <b>$150.000</b> <i>CLP</i></p>
+          <ul class="plan__list">
+            <li>Una página construida para una sola acción</li>
+            <li>Diseño responsive, pensado primero para el celular</li>
+            <li>Formulario de contacto y botón de WhatsApp</li>
+            <li>Google Analytics y Meta Pixel instalados</li>
+            <li>SEO técnico básico y dominio configurado</li>
+            <li>Capacitación para que puedas editarla</li>
+          </ul>
+          <a class="btn btn--ghost" href="/paginas-web">Ver si es lo que necesito</a>
+        </article>
+        <article class="plan plan--feature marco" data-reveal="0.06" data-ev-plan="shopify">
+          <span class="plan__flag">Producto principal</span>
+          <h3>Shopify</h3>
+          <p class="plan__for">Para negocios que ya venden por Instagram o WhatsApp y quieren una tienda propia que ordene la venta.</p>
+          <p class="plan__price"><em>Desde</em> <b>$390.000</b> <i>CLP</i></p>
+          <ul class="plan__list">
+            <li>Implementación completa en Shopify</li>
+            <li>Diseño responsive y personalización visual de tu marca</li>
+            <li>Navegación, categorías y colecciones ordenadas</li>
+            <li>Fichas de producto con variantes (talla, color, modelo)</li>
+            <li>Medios de pago, despacho, carrito y checkout probados</li>
+            <li>10 a 15 productos cargados y bien construidos</li>
+            <li>WhatsApp, Meta Pixel y Google Analytics conectados</li>
+            <li>Elementos de confianza y SEO técnico básico</li>
+            <li>Capacitación en video para que la administres tú</li>
+          </ul>
+          <a class="btn btn--light" href="/tiendas-online" data-ev="click_shopify" data-ev-pos="precios">Ver qué incluye</a>
+        </article>
+        <article class="plan" data-reveal="0.12">
+          <span class="plan__flag">Más volumen</span>
+          <h3>Shopify Growth</h3>
+          <p class="plan__for">Para negocios con más productos, más pedidos y necesidad real de exprimir la conversión.</p>
+          <p class="plan__price"><em>Desde</em> <b>$690.000</b> <i>CLP</i></p>
+          <ul class="plan__list">
+            <li>Todo lo del plan Shopify</li>
+            <li>Diseño más personalizado y arquitectura a medida</li>
+            <li>Optimización de fichas de producto y colecciones</li>
+            <li>Cross-selling, upselling y bundles</li>
+            <li>Reseñas y elementos de confianza avanzados</li>
+            <li>Recuperación de carrito abandonado y correos automáticos</li>
+            <li>Medición avanzada: eventos y embudo de compra</li>
+            <li>Revisión de fricción en navegación y checkout</li>
+          </ul>
+          <a class="btn btn--ghost" href="/contacto">Conversemos el alcance</a>
+        </article>
+      </div>
+      <p class="fine" style="margin-top:22px;max-width:78ch">Todos los valores son <strong>desde</strong> y en pesos chilenos: cada negocio necesita cosas distintas, así que el precio final sale del diagnóstico, por escrito y antes de empezar. No incluyen la suscripción mensual de Shopify, el dominio ni las comisiones de los medios de pago, que se pagan directamente a cada proveedor.</p>
+      <p style="margin-top:14px"><a class="link-arrow" href="/precios">Ver el detalle de cada plan <span aria-hidden="true">→</span></a></p>
+    </div>
+  </section>
+
+  <!-- ===================== INDEPENDENCIA ===================== -->
+  <section class="sec sec--dark">
+    <div class="wrap grid grid--2" style="gap:clamp(32px,5vw,56px);align-items:center">
+      <div>
+        <p class="eyebrow">08 · Independencia</p>
+        <h2 style="margin-bottom:18px">Tu tienda es realmente tuya</h2>
+        <p class="lead">Mucha agencia deja al cliente amarrado: accesos a medias, mantención obligatoria, un correo cada vez que hay que cambiar un precio. Nos parece mal negocio para los dos.</p>
+      </div>
+      <ul class="ticks" data-reveal="0">
+        <li>La cuenta de Shopify queda a tu nombre, con tus accesos</li>
+        <li>Te capacitamos para administrar productos, precios, stock y pedidos</li>
+        <li>La capacitación queda grabada, para que la revises cuando la necesites</li>
+        <li>Sin contratos de mantención obligatoria</li>
+        <li>Si después quieres mejoras, CRO o publicidad, se cotiza en ese momento</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===================== FAQ ===================== -->
+  <section class="sec" id="faq">
+    <div class="wrap wrap--narrow">
+      <div class="sec__head">
+        <p class="eyebrow">09 · Dudas frecuentes</p>
+        <h2>Lo que todos preguntan antes de decidir</h2>
+      </div>
+      <div class="faq">
+        <details>
+          <summary>¿Tengo que saber usar Shopify?</summary>
+          <div class="faq__a"><p>No. Te entregamos la tienda funcionando y te capacitamos para administrarla: subir productos, cambiar precios, gestionar stock y procesar pedidos. La sesión queda grabada para que la revises cuando quieras.</p></div>
+        </details>
+        <details>
+          <summary>¿Puedo administrar la tienda yo después?</summary>
+          <div class="faq__a"><p>Sí, y es el objetivo. La cuenta de Shopify queda a tu nombre, con tus accesos y tu medio de pago. No trabajamos con cuentas nuestras ni retenemos accesos: si mañana quieres seguir con otra agencia o solo, puedes hacerlo.</p></div>
+        </details>
+        <details>
+          <summary>¿Cuántos productos incluye?</summary>
+          <div class="faq__a"><p>Dejamos configurados entre 10 y 15 productos, construidos bien: variantes, categorías, fotos, descripciones y SEO. No es un límite de tu tienda, es el punto de partida. Con esa plantilla armada, cargar el resto de tu catálogo es repetir un proceso que ya te enseñamos.</p></div>
+        </details>
+        <details>
+          <summary>¿Qué pasa si tengo muchos más productos?</summary>
+          <div class="faq__a"><p>Lo vemos en el diagnóstico. Si tienes un catálogo grande, normalmente conviene el plan Growth o una carga masiva cotizada aparte, porque el trabajo deja de ser diseño y pasa a ser estructura de datos.</p></div>
+        </details>
+        <details>
+          <summary>¿Shopify tiene un costo mensual?</summary>
+          <div class="faq__a"><p>Sí. Shopify cobra su propia suscripción mensual, aparte de nuestro trabajo, y se paga directamente a Shopify con tu tarjeta. En el diagnóstico te decimos qué plan te conviene y cuánto cuesta hoy, para que no haya sorpresas.</p></div>
+        </details>
+        <details>
+          <summary>¿Incluye el dominio?</summary>
+          <div class="faq__a"><p>Configuramos tu dominio y lo dejamos apuntando a la tienda. El dominio en sí se paga aparte (por ejemplo, un <code>.cl</code> se compra en NIC Chile) y queda registrado a tu nombre.</p></div>
+        </details>
+        <details>
+          <summary>¿Incluye los medios de pago?</summary>
+          <div class="faq__a"><p>Configuramos los medios de pago que puedas contratar en Chile y dejamos el checkout probado de punta a punta. Las cuentas con cada proveedor las abres tú, a nombre de tu negocio: es tu dinero y tiene que llegar directo a ti.</p></div>
+        </details>
+        <details>
+          <summary>¿Trabajan con negocios fuera de La Serena?</summary>
+          <div class="faq__a"><p>Sí. Trabajamos 100% online con negocios de cualquier ciudad de Chile. Las reuniones son por videollamada y la entrega es digital, así que la distancia no cambia nada del proceso.</p></div>
+        </details>
+        <details>
+          <summary>¿Necesito fotos profesionales?</summary>
+          <div class="faq__a"><p>Ayudan mucho, pero no siempre son imprescindibles. Trabajamos con el material que ya tienes y te decimos con franqueza qué fotos conviene rehacer y cómo. La producción fotográfica no la hacemos nosotros: si hace falta, te orientamos para contratarla o resolverla bien con tu celular.</p></div>
+        </details>
+        <details>
+          <summary>¿Hacen publicidad?</summary>
+          <div class="faq__a"><p>Configuramos y gestionamos Meta Ads (Instagram y Facebook) como servicio aparte, nunca incluido por defecto en el precio de la tienda. Hoy no trabajamos con Google Ads.</p></div>
+        </details>
+        <details>
+          <summary>¿Tengo que pagar una mantención mensual?</summary>
+          <div class="faq__a"><p>No. No vendemos contratos de mantención obligatoria. Terminado el proyecto, la tienda es tuya y no nos debes nada más. Si después quieres mejoras, CRO, automatizaciones o publicidad, se cotiza en ese momento.</p></div>
+        </details>
+        <details>
+          <summary>¿Cuánto demora un proyecto?</summary>
+          <div class="faq__a"><p>Depende del alcance y, sobre todo, de la rapidez con que recibamos tus fotos, textos y datos de productos: esa suele ser la parte que más se demora. En el diagnóstico te entregamos un plazo concreto por escrito antes de que decidas.</p></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== DIAGNÓSTICO ===================== -->
+  <section class="sec sec--dark grid-bg" id="diagnostico">
+    <div class="wrap grid grid--2" style="gap:clamp(36px,5vw,60px);align-items:start">
+      <div>
+        <p class="eyebrow">Diagnóstico gratuito</p>
+        <h2 style="margin-bottom:18px">Veamos qué le falta a tu negocio</h2>
+        <p class="lead" style="margin-bottom:28px">Cuéntanos cómo vendes hoy. Miramos tu Instagram o tu sitio, y en una videollamada corta te decimos qué haríamos, con qué prioridad y cuánto costaría. Sin costo y sin compromiso.</p>
+        <ul class="ticks">
+          <li>Te decimos qué mejorar aunque no trabajes con nosotros</li>
+          <li>Sin presentaciones de venta de 40 minutos</li>
+          <li>Si no somos lo que necesitas, te lo decimos</li>
+        </ul>
+        <div class="rule"><b></b><i></i><b></b></div>
+        <p class="fine">¿Prefieres escribir? <a class="link" href="mailto:contacto@vetalabs.cl">contacto@vetalabs.cl</a> <span aria-hidden="true">·</span> <a class="link" data-whatsapp data-ev="click_whatsapp" data-ev-pos="diagnostico" href="#" hidden target="_blank" rel="noopener">WhatsApp</a></p>
+      </div>
+      <div class="on-dark">
+        <form class="form" id="form-diagnostico" data-lead-form="diagnostico" data-done-target="form-listo" novalidate>
+          <div class="form__row">
+            <div class="field">
+              <label for="form-diagnostico-nombre">Nombre *</label>
+              <input id="form-diagnostico-nombre" name="nombre" required autocomplete="name" placeholder="Tu nombre" aria-describedby="form-diagnostico-nombre-err">
+              <p class="field__error" id="form-diagnostico-nombre-err" data-error-for="nombre" role="alert"></p>
+            </div>
+            <div class="field">
+              <label for="form-diagnostico-empresa">Marca o negocio</label>
+              <input id="form-diagnostico-empresa" name="empresa" autocomplete="organization" placeholder="Nombre de tu marca">
+            </div>
+          </div>
+          <div class="form__row">
+            <div class="field">
+              <label for="form-diagnostico-email">Email *</label>
+              <input id="form-diagnostico-email" name="email" type="email" required autocomplete="email" inputmode="email" placeholder="tucorreo@ejemplo.cl" aria-describedby="form-diagnostico-email-err">
+              <p class="field__error" id="form-diagnostico-email-err" data-error-for="email" role="alert"></p>
+            </div>
+            <div class="field">
+              <label for="form-diagnostico-telefono">WhatsApp</label>
+              <input id="form-diagnostico-telefono" name="telefono" type="tel" autocomplete="tel" inputmode="tel" placeholder="+56 9 1234 5678">
+            </div>
+          </div>
+          <div class="field">
+            <label for="form-diagnostico-sitio">Instagram o sitio web</label>
+            <input id="form-diagnostico-sitio" name="sitio" placeholder="@tumarca o tutienda.cl" aria-describedby="form-diagnostico-sitio-hint">
+            <p class="field__hint" id="form-diagnostico-sitio-hint">Lo miramos antes de escribirte: así el diagnóstico habla de tu negocio y no en general.</p>
+          </div>
+          <fieldset class="fieldset">
+            <legend class="fieldset__legend">¿Cómo vendes hoy?</legend>
+            <div class="opts">
+              <label class="opt"><input type="checkbox" name="canales" value="Instagram" id="form-diagnostico-c0"><span>Instagram</span></label>
+              <label class="opt"><input type="checkbox" name="canales" value="WhatsApp" id="form-diagnostico-c1"><span>WhatsApp</span></label>
+              <label class="opt"><input type="checkbox" name="canales" value="Tienda física" id="form-diagnostico-c2"><span>Tienda física</span></label>
+              <label class="opt"><input type="checkbox" name="canales" value="Web propia" id="form-diagnostico-c3"><span>Web propia</span></label>
+              <label class="opt"><input type="checkbox" name="canales" value="Shopify" id="form-diagnostico-c4"><span>Shopify</span></label>
+              <label class="opt"><input type="checkbox" name="canales" value="Otro" id="form-diagnostico-c5"><span>Otro</span></label>
+            </div>
+          </fieldset>
+          <div class="form__row">
+            <div class="field">
+              <label for="form-diagnostico-necesidad">¿Qué necesitas?</label>
+              <select id="form-diagnostico-necesidad" name="necesidad">
+                <option value="">Elige una opción</option>
+                <option>Tienda online</option>
+                <option>Mejorar mi tienda actual</option>
+                <option>Página web o landing</option>
+                <option>CRO: vendo poco para las visitas que tengo</option>
+                <option>Meta Ads</option>
+                <option>Todavía no lo tengo claro</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="form-diagnostico-presupuesto">Presupuesto aproximado</label>
+              <select id="form-diagnostico-presupuesto" name="presupuesto">
+                <option value="">Prefiero conversarlo</option>
+                <option>Hasta $390.000</option>
+                <option>Entre $390.000 y $690.000</option>
+                <option>Sobre $690.000</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="form-diagnostico-mensaje">¿Algo más que debamos saber?</label>
+            <textarea id="form-diagnostico-mensaje" name="mensaje" rows="3" placeholder="Qué vendes, qué te está costando hoy, si tienes una fecha en mente…"></textarea>
+          </div>
+          <div class="honey" aria-hidden="true"><label for="form-diagnostico-website">No completar</label><input id="form-diagnostico-website" name="website" tabindex="-1" autocomplete="off"></div>
+          <button class="btn btn--light btn--block" type="submit" data-submit data-ev="click_diagnostico" data-ev-pos="form">Solicitar mi diagnóstico gratuito</button>
+          <p class="form__status" data-status role="status" aria-live="polite" hidden></p>
+          <p class="fine">Te respondemos por correo o WhatsApp. No compartimos tus datos con nadie: <a class="link" href="/privacidad">cómo tratamos tus datos</a>.</p>
+        </form>
+        <div class="form__done" id="form-listo" hidden>
+          <h3>Recibimos tu solicitud</h3>
+          <p>Vamos a mirar tu Instagram o tu sitio antes de escribirte. Te vamos a contactar por correo o WhatsApp para coordinar el diagnóstico: una videollamada corta donde te decimos qué haríamos, en qué orden y cuánto costaría.</p>
+          <p>Si prefieres adelantarlo, escríbenos a <a class="link" href="mailto:contacto@vetalabs.cl">contacto@vetalabs.cl</a>.</p>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
+</main>
+
+<footer class="site-footer">
+  <div class="wrap site-footer__grid">
+    <div class="site-footer__col">
+      <a class="site-footer__brand" href="/"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false"><defs><linearGradient id="vg-light" x1=".15" y1="0" x2=".8" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".22" stop-color="#e8e8ec"/><stop offset=".48" stop-color="#b9b9c0"/><stop offset=".72" stop-color="#9a9aa2"/><stop offset="1" stop-color="#adadb5"/></linearGradient></defs><path fill="url(#vg-light)" stroke="url(#vg-light)" stroke-width="2.2" stroke-linejoin="round" fill-rule="evenodd" d="M15 14.5L33 14.5L50 53L67 14.5L85 14.5L63.9 64.9A14.8 14.8 0 1 1 36.1 64.9ZM61 70A11 11 0 1 0 39 70A11 11 0 1 0 61 70Z"/></svg>Veta&nbsp;Labs</a>
+      <p style="margin-bottom:20px;max-width:34ch">Agencia de e-commerce y crecimiento digital. Construimos tiendas online pensadas para convertir. 100% online, con negocios de todo Chile.</p>
+      <a class="btn btn--light btn--sm" href="/contacto" data-ev="click_diagnostico" data-ev-pos="footer">Diagnóstico gratuito</a>
+    </div>
+    <div class="site-footer__col">
+      <h3>Servicios</h3>
+      <ul>
+        <li><a href="/tiendas-online">Tiendas online (Shopify)</a></li>
+        <li><a href="/paginas-web">Páginas web y landings</a></li>
+        <li><a href="/cro">CRO: mejorar conversión</a></li>
+        <li><a href="/contacto">Meta Ads</a></li>
+      </ul>
+    </div>
+    <div class="site-footer__col">
+      <h3>Estudio</h3>
+      <ul>
+        <li><a href="/proyectos">Proyectos</a></li>
+        <li><a href="/precios">Precios</a></li>
+        <li><a href="/nosotros">Nosotros</a></li>
+        <li><a href="/contacto">Contacto</a></li>
+      </ul>
+    </div>
+    <div class="site-footer__col">
+      <h3>Hablemos</h3>
+      <ul>
+        <li><a href="mailto:contacto@vetalabs.cl">contacto@vetalabs.cl</a></li>
+        <li><a href="https://www.instagram.com/vetalabs/" target="_blank" rel="noopener">Instagram @vetalabs</a></li>
+        <li><a href="https://www.linkedin.com/in/sebasti%C3%A1n-gonzalo-g%C3%B3mez-past%C3%A9n/" target="_blank" rel="noopener">LinkedIn</a></li>
+        <li><a data-whatsapp data-ev="click_whatsapp" data-ev-pos="footer" href="#" hidden target="_blank" rel="noopener">WhatsApp</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="site-footer__base">
+      <span>© 2026 Veta Labs · E-commerce y crecimiento digital · Chile</span>
+      <span><a href="/privacidad">Política de privacidad</a></span>
+    </div>
+  </div>
+</footer>
+
+<div class="dock" data-dock>
+  <a class="btn btn--primary" href="/contacto" data-ev="click_diagnostico" data-ev-pos="dock">Diagnóstico gratuito</a>
+  <a class="dock__wa" data-whatsapp data-ev="click_whatsapp" data-ev-pos="dock" href="#" hidden target="_blank" rel="noopener" aria-label="Escribir por WhatsApp">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2Zm0 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.83 2.42a8.2 8.2 0 0 1 2.41 5.83c0 4.54-3.7 8.23-8.24 8.23Zm4.52-6.16c-.25-.13-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.24-.64.8-.78.97-.15.16-.29.18-.54.06-.25-.13-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.38-1.72-.15-.25-.02-.38.11-.5.11-.11.25-.29.37-.44.13-.15.17-.25.25-.41.09-.17.04-.31-.02-.44-.06-.12-.56-1.35-.77-1.85-.2-.48-.4-.42-.56-.43h-.47c-.16 0-.43.06-.65.31-.23.25-.86.84-.86 2.05s.88 2.38 1 2.54c.13.17 1.74 2.66 4.22 3.73.59.25 1.05.4 1.41.52.59.19 1.13.16 1.56.1.47-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.11-.22-.17-.47-.29Z"/></svg>
+  </a>
 </div>
-<script>
-(function () {
-  // ===== hover effects (replaces DClogic style-hover attribute) =====
-  document.querySelectorAll('[style-hover]').forEach(function (el) {
-    var hover = el.getAttribute('style-hover');
-    var saved = null;
-    el.addEventListener('mouseenter', function () { saved = el.getAttribute('style'); el.setAttribute('style', (saved || '') + ';' + hover); });
-    el.addEventListener('mouseleave', function () { if (saved !== null) el.setAttribute('style', saved); });
-  });
-
-  // ===== contact form -> CRM + correo (Resend v\u00eda Edge Function) =====
-  var form = document.getElementById('lead-form');
-  var statusEl = document.getElementById('f-status');
-  var sendBtn = document.getElementById('f-enviar');
-  function setStatus(msg, ok) {
-    if (!statusEl) return;
-    statusEl.textContent = msg;
-    // Monocromo por manual de marca: el error destaca por contraste, no por color.
-    statusEl.style.color = ok ? '#a1a1aa' : '#f4f4f5';
-    statusEl.style.fontWeight = ok ? '400' : '600';
-    statusEl.style.display = 'block';
-  }
-  if (form) form.addEventListener('submit', function (ev) {
-    ev.preventDefault();
-    var v = function (id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; };
-    var nombre = v('f-nombre'), email = v('f-email');
-    if (!nombre) { setStatus('Escribe tu nombre.', false); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setStatus('Escribe un correo v\u00e1lido.', false); return; }
-    var original = sendBtn.textContent;
-    sendBtn.disabled = true; sendBtn.textContent = 'Enviando\u2026'; sendBtn.style.opacity = '.7';
-    fetch('https://rayvimywyqjnzzmbagpv.supabase.co/functions/v1/nuevo-lead', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        nombre: nombre, email: email, telefono: v('f-telefono'),
-        empresa: v('f-empresa'), cargo: v('f-cargo'),
-        negocio: v('f-negocio'), mensaje: v('f-mensaje'), website: v('f-website')
-      })
-    }).then(function (r) {
-      if (!r.ok) throw new Error('bad status');
-      form.reset();
-      setStatus('\u00a1Gracias! Recib\u00ed tu mensaje y te contactar\u00e9 pronto.', true);
-      // Conversi\u00f3n: le dice a Meta qu\u00e9 visitas terminaron en contacto, que es lo
-      // que le permite optimizar el anuncio hacia gente parecida.
-      if (window.fbq) fbq('track', 'Lead');
-    }).catch(function () {
-      setStatus('No se pudo enviar. Intenta de nuevo o escr\u00edbeme por LinkedIn.', false);
-    }).then(function () {
-      sendBtn.disabled = false; sendBtn.textContent = original; sendBtn.style.opacity = '';
-    });
-  });
-
-  // ===== scroll reveal =====
-  var reveal = [].slice.call(document.querySelectorAll('[data-reveal]'));
-  if ('IntersectionObserver' in window && reveal.length) {
-    reveal.forEach(function (el) {
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(22px)';
-      el.style.transition = 'opacity .75s cubic-bezier(.2,.7,.2,1), transform .75s cubic-bezier(.2,.7,.2,1)';
-    });
-    var show = function (el) {
-      el.style.transitionDelay = (parseFloat(el.dataset.reveal) || 0) + 's';
-      el.style.opacity = '1'; el.style.transform = 'none';
-    };
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) { if (e.isIntersecting) { show(e.target); io.unobserve(e.target); } });
-    }, { threshold: 0.14, rootMargin: '0px 0px -6% 0px' });
-    reveal.forEach(function (el) { io.observe(el); });
-    setTimeout(function () { reveal.forEach(function (el) { if (el.style.opacity === '0') show(el); }); }, 2800);
-  }
-
-  // ===== active nav link highlight =====
-  var links = {};
-  document.querySelectorAll('[data-navlink]').forEach(function (a) { links[a.dataset.navlink] = a; });
-  if ('IntersectionObserver' in window) {
-    var secObs = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        if (e.isIntersecting) {
-          Object.keys(links).forEach(function (k) { links[k].style.color = ''; links[k].style.fontWeight = '500'; });
-          var a = links[e.target.id];
-          if (a) { a.style.color = '#111111'; a.style.fontWeight = '700'; }
-        }
-      });
-    }, { threshold: 0.001, rootMargin: '-45% 0px -50% 0px' });
-    ['para-quien', 'servicios', 'proceso', 'resultados', 'proyectos', 'sobre-mi', 'contacto'].forEach(function (id) {
-      var s = document.getElementById(id); if (s) secObs.observe(s);
-    });
-  }
-
-  // ===== interactive dot grid (hero panel) =====
-  function dotGrid(cvsId, panelId, opts) {
-    var cvs = document.getElementById(cvsId), panel = document.getElementById(panelId);
-    if (!cvs || !panel) return;
-    var ctx = cvs.getContext('2d');
-    var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    var GAP = opts.gap, R = opts.r, PUSH = opts.push;
-    var dots = [], w = 0, h = 0, mouse = { x: -9999, y: -9999 };
-    function build() {
-      var rect = panel.getBoundingClientRect(); w = rect.width; h = rect.height;
-      if (!w || !h) return;
-      cvs.width = w * dpr; cvs.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      dots = [];
-      var cols = Math.max(2, Math.round(w / GAP)), rows = Math.max(2, Math.round(h / GAP));
-      var gx = w / (cols - 1), gy = h / (rows - 1);
-      for (var i = 0; i < cols; i++) for (var j = 0; j < rows; j++) { var ox = i * gx, oy = j * gy; dots.push({ ox: ox, oy: oy, x: ox, y: oy, vx: 0, vy: 0 }); }
-    }
-    var t = 0;
-    function frame() {
-      t += 0.016; ctx.clearRect(0, 0, w, h);
-      for (var k = 0; k < dots.length; k++) {
-        var d = dots[k];
-        var wave = Math.sin(t * 1.1 + d.ox * 0.03 + d.oy * 0.045), wave2 = Math.cos(t * 0.8 + d.oy * 0.035);
-        var tx = d.ox + wave * 3.2, ty = d.oy + wave2 * 3.2;
-        var glow = 0.12 + Math.max(0, wave) * 0.16;
-        var dx = d.x - mouse.x, dy = d.y - mouse.y, dist = Math.hypot(dx, dy) || 0.0001;
-        if (dist < R) { var f = 1 - dist / R; tx += (dx / dist) * f * PUSH; ty += (dy / dist) * f * PUSH; glow = Math.max(glow, f); }
-        d.vx = (d.vx + (tx - d.x) * 0.14) * 0.74; d.vy = (d.vy + (ty - d.y) * 0.14) * 0.74; d.x += d.vx; d.y += d.vy;
-        var r = 1.5 + glow * 2.4, a = 0.22 + glow * 0.78;
-        ctx.beginPath(); ctx.arc(d.x, d.y, r, 0, 6.2832); ctx.fillStyle = 'rgba(244,244,245,' + a + ')'; ctx.fill();
-      }
-      requestAnimationFrame(frame);
-    }
-    function onMove(e) { var rect = panel.getBoundingClientRect(); mouse.x = e.clientX - rect.left; mouse.y = e.clientY - rect.top; }
-    function onLeave() { mouse.x = -9999; mouse.y = -9999; }
-    panel.addEventListener('pointermove', onMove);
-    panel.addEventListener('mousemove', onMove);
-    panel.addEventListener('pointerleave', onLeave);
-    panel.addEventListener('mouseleave', onLeave);
-    build();
-    if ('ResizeObserver' in window) new ResizeObserver(build).observe(panel);
-    requestAnimationFrame(frame);
-  }
-  dotGrid('dotgrid', 'dotgrid-panel', { gap: 24, r: 116, push: 26 });
-
-  // ===== page background dots =====
-  (function () {
-    var cvs = document.getElementById('bg-dots'); if (!cvs) return;
-    var ctx = cvs.getContext('2d'); var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    var GAP = 34, R = 130, PUSH = 16; var dots = [], w = 0, h = 0, mouse = { x: -9999, y: -9999 };
-    function build() {
-      w = window.innerWidth; h = window.innerHeight; cvs.width = w * dpr; cvs.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      dots = []; var cols = Math.ceil(w / GAP) + 1, rows = Math.ceil(h / GAP) + 1;
-      for (var i = 0; i < cols; i++) for (var j = 0; j < rows; j++) { var ox = i * GAP, oy = j * GAP; dots.push({ ox: ox, oy: oy, x: ox, y: oy, vx: 0, vy: 0 }); }
-    }
-    var t = 0;
-    function frame() {
-      t += 0.016; ctx.clearRect(0, 0, w, h);
-      for (var k = 0; k < dots.length; k++) {
-        var d = dots[k];
-        var wave = Math.sin(t * 0.7 + d.ox * 0.02 + d.oy * 0.03);
-        var tx = d.ox + wave * 2.4, ty = d.oy + Math.cos(t * 0.5 + d.oy * 0.025) * 2.4; var glow = 0;
-        var dx = d.x - mouse.x, dy = d.y - mouse.y, dist = Math.hypot(dx, dy) || 0.0001;
-        if (dist < R) { var f = 1 - dist / R; tx += (dx / dist) * f * PUSH; ty += (dy / dist) * f * PUSH; glow = f; }
-        d.vx = (d.vx + (tx - d.x) * 0.12) * 0.76; d.vy = (d.vy + (ty - d.y) * 0.12) * 0.76; d.x += d.vx; d.y += d.vy;
-        var r = 1.1 + glow * 1.4, a = 0.05 + glow * 0.22;
-        ctx.beginPath(); ctx.arc(d.x, d.y, r, 0, 6.2832); ctx.fillStyle = 'rgba(17,17,17,' + a + ')'; ctx.fill();
-      }
-      requestAnimationFrame(frame);
-    }
-    function onBgMove(e) { mouse.x = e.clientX; mouse.y = e.clientY; }
-    window.addEventListener('pointermove', onBgMove);
-    window.addEventListener('mousemove', onBgMove);
-    window.addEventListener('resize', build); build(); requestAnimationFrame(frame);
-  })();
-})();
-</script>
 </body>
 </html>
