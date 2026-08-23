@@ -67,6 +67,8 @@ body{
   overflow-x:hidden;
 }
 
+[hidden]{display:none!important}
+
 h1,h2,h3,h4,p,figure,ul,ol{margin:0}
 ul,ol{padding:0;list-style:none}
 img,svg,video{max-width:100%;height:auto;display:block}
