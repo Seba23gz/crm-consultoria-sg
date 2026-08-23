@@ -18,6 +18,7 @@ HTML plano, sin build. Vercel sirve la raíz tal cual, con `cleanUrls: true`
 | `/tiendas-online` | `tiendas-online.html` | Servicio principal (Shopify) |
 | `/paginas-web` | `paginas-web.html` | Landing pages, web corporativa y proyectos a medida |
 | `/cro` | `cro.html` | Optimización de conversión, también para tiendas de terceros |
+| `/precios#servicios-aparte` | dentro de `precios.html` | Servicios que se cotizan aparte: identidad de marca, Meta Ads, CRO y consultoría |
 | `/proyectos` | `proyectos/index.html` | Índice de casos |
 | `/proyectos/<slug>` | `proyectos/<slug>.html` | Caso: contexto / problema / solución / resultado |
 | `/precios` | `precios.html` | Planes, tabla comparativa, servicios aparte y FAQ completo |
@@ -85,7 +86,7 @@ agregan sin tocar el JS.
 
 Eventos en uso: `click_diagnostico`, `form_start`, `form_submit`,
 `click_whatsapp`, `view_pricing`, `view_project`, `click_shopify`,
-`click_meta_ads`.
+`click_meta_ads`, `click_identidad`.
 
 ## Entrada de leads
 

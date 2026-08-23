@@ -32,8 +32,13 @@ que "hace páginas web". El producto estrella son **tiendas online en Shopify**.
 - **CTA único en toda la web**: **Diagnóstico gratuito** → `/contacto`.
 - **Modelo**: sin mantención obligatoria. Los accesos quedan a nombre del
   cliente y se le capacita para que administre su tienda solo.
-- **Servicios**: tiendas online (Shopify), páginas web/landings, CRO y Meta Ads.
-  **Meta Ads se cotiza aparte, nunca va incluido en un plan de tienda.**
+- **Servicios**: tiendas online (Shopify), páginas web/landings, CRO,
+  identidad de marca y Meta Ads. Los tres últimos **se cotizan aparte y nunca
+  van incluidos en un plan de tienda**; viven en `/precios#servicios-aparte`,
+  no en la navegación, para no diluir el foco en e-commerce.
+  Identidad de marca cubre logo, colores, tipografías y su sistema de
+  aplicación (portadas de destacadas, plantillas de publicación, bio). Se sumó
+  porque el caso de Pecadoras ya lo mostraba: o se vendía o se sacaba del caso.
   **No ofrecemos Google Ads.** No ofrecemos fotografía ni nada presencial:
   Veta Labs opera 100% online.
 - **Precios públicos**: Landing desde $150.000 · Shopify desde $390.000 ·
