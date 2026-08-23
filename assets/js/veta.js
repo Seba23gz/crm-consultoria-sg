@@ -18,10 +18,10 @@
     // Google Analytics 4 (formato G-XXXXXXX). Vacío = no se carga nada.
     GA_MEASUREMENT_ID: '',
 
-    // PLACEHOLDER: WhatsApp comercial en formato internacional sin signos,
-    // ej. '56912345678'. Mientras esté vacío, los enlaces de WhatsApp se
+    // WhatsApp comercial, en formato internacional y sin signos ni espacios
+    // (es lo que espera wa.me). Si se deja vacío, los enlaces de WhatsApp se
     // ocultan solos: preferimos no mostrarlo antes que mostrarlo roto.
-    WHATSAPP: '',
+    WHATSAPP: '56963060767',
     WHATSAPP_TEXTO: 'Hola, vengo desde la web de Veta Labs y quiero mi diagnóstico gratuito.',
 
     // Endpoint que ya usa el CRM (Edge Function `nuevo-lead` en Supabase).
