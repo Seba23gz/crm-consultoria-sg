@@ -571,3 +571,8 @@ table.cmp tr:last-child th,table.cmp tr:last-child td{border-bottom:0}
 .shots figure{margin:0;display:flex;flex-direction:column;gap:12px}
 .shots img{width:100%;border:1px solid var(--line);background:var(--card)}
 .shots figcaption{font-size:13.5px;line-height:1.5;color:var(--ink-soft)}
+
+/* Rótulo de una captura dentro de .shots (por ejemplo "Antes" / "Ahora"). */
+.shots figure>b{font:700 11.5px var(--font-mono);letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink);display:flex;align-items:center;gap:9px}
+.shots figure>b::before{content:'';width:6px;height:6px;background:currentColor;flex:none}
