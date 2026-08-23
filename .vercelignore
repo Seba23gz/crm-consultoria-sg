@@ -15,6 +15,3 @@ docs/
 AGENTS.md
 CLAUDE.md
 .claude/
-
-# Plantilla de artículo: se publica recién cuando haya blog de verdad.
-blog/_plantilla-articulo.html

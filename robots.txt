@@ -2,6 +2,5 @@ User-agent: *
 Allow: /
 Disallow: /crm
 Disallow: /api/
-Disallow: /blog/_
 
 Sitemap: https://vetalabs.cl/sitemap.xml

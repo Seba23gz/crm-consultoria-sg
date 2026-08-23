@@ -1,110 +1,73 @@
-# Contexto del proyecto — Veta Labs
+# Contexto del proyecto — CRM Veta Labs
 
 Este archivo le da contexto a Codex sobre el proyecto y de dónde viene.
 
 ## Qué es
 
-Repositorio de **Veta Labs**, la agencia digital de Sebastián Gómez. Contiene dos
-cosas que comparten un mismo proyecto de Vercel:
+CRM propio para Veta Labs, la consultora de Sebastián Gómez: un negocio remoto de
+**automatización de procesos, IA y dashboards para PYMEs** (foco inicial en
+inmobiliarias y empresas de gestión de espacios de la Región de Coquimbo, Chile).
 
-1. **El sitio público** (`/`) — la web comercial de la agencia.
-2. **El CRM interno** (`/crm`) — pipeline de clientes, detrás del login de Supabase.
+Este CRM sirve para gestionar el pipeline de clientes de esa consultora
+(no confundir con CheckYourCars, que es un producto aparte del mismo dueño).
 
-No confundir con **CheckYourCars** ni **CheckYourWeb**: son marcas hermanas del
-mismo dueño, productos aparte, y en el sitio aparecen como casos.
+## Estado actual (lo que YA está hecho)
 
-**Pecadoras Shoes** sí es cliente: marca de moda de La Serena, tienda en
-**Shopify** (`pecadoras-shoes.myshopify.com`), con variantes de color y talla,
-Mercado Pago y envío gratis en La Serena y Coquimbo. Es el caso que mejor
-representa al cliente que buscamos, y el único con capturas de todo el recorrido.
+- **App construida**: `crm/index.html`, una sola página, HTML/CSS/JS puro sin build.
+  En la raíz vive `index.html`, la landing pública de Veta Labs; el CRM queda en `/crm`
+  y no se enlaza desde ella.
+  Login con Supabase Auth + tablero de pipeline por columnas + registro de actividades.
+- **Base de datos creada y funcionando** en Supabase.
+- **Credenciales ya insertadas** en `crm/index.html` (URL + clave anon pública).
+- **Git inicializado** con un commit inicial.
+- **RLS activo** en las tres tablas (solo usuarios autenticados acceden).
 
-## Posicionamiento (esto manda sobre todo el copy)
+## Lo que FALTA (tareas para Codex)
 
-Veta Labs es una **agencia de e-commerce y crecimiento digital**, no un estudio
-que "hace páginas web". El producto estrella son **tiendas online en Shopify**.
-
-- **Cliente ideal**: negocios que **ya venden** por Instagram y WhatsApp, con
-  producto, clientes y volumen creciente, que dependen demasiado de responder
-  mensajes a mano. No es alguien que recién parte.
-- **Promesa**: no prometemos "vas a vender más" (hay variables que no
-  controlamos). Prometemos mejor conversión, menos trabajo manual, catálogo
-  centralizado, compra sin fricción y medición.
-- **CTA único en toda la web**: **Diagnóstico gratuito** → `/contacto`.
-- **Modelo**: sin mantención obligatoria. Los accesos quedan a nombre del
-  cliente y se le capacita para que administre su tienda solo.
-- **Servicios**: tiendas online (Shopify), páginas web/landings, CRO y Meta Ads.
-  **Meta Ads se cotiza aparte, nunca va incluido en un plan de tienda.**
-  **No ofrecemos Google Ads.** No ofrecemos fotografía ni nada presencial:
-  Veta Labs opera 100% online.
-- **Precios públicos**: Landing desde $150.000 · Shopify desde $390.000 ·
-  Shopify Growth desde $690.000 CLP. Siempre "desde".
-
-### Reglas de contenido que no se rompen
-
-- **Nada inventado**: ni métricas, ni porcentajes, ni testimonios, ni clientes,
-  ni logos, ni plazos exactos. Si no hay dato medido, se habla del cambio
-  cualitativo y se dice por qué no hay cifras.
-- **Nada de lenguaje vacío**: prohibido "impulsamos tu presencia digital",
-  "transformamos ideas en experiencias", "al siguiente nivel", "soluciones
-  innovadoras". Se explica lo que se hace, en concreto.
-- **Tono**: chileno neutro, directo, comercial, sin tecnicismos. El cliente
-  compra el resultado, no el stack. No hablar de APIs, IA ni infraestructura.
-- **Lo que falta se marca**: clase `.placeholder` + comentario `PLACEHOLDER` en
-  el HTML, nunca contenido inventado para rellenar.
-
-## Estado actual
-
-- **Sitio reconstruido** en HTML/CSS/JS puro, sin build, con sistema visual
-  compartido en `assets/css/veta.css` y `assets/js/veta.js`. Doce páginas.
-- **Desplegado** en Vercel sobre `https://vetalabs.cl`, con `cleanUrls: true`.
-- **CRM funcionando** en `/crm` con Supabase Auth + RLS.
-- **Meta Lead Ads integrado** por Edge Function (`supabase/functions/meta-lead`).
-- **Sin placeholders de contenido**: los casos tienen capturas reales.
-
-La estructura del sitio, el sistema visual, los eventos de medición y el mapeo
-del formulario están documentados en **[README.md](README.md)**. Leerlo antes de
-tocar el sitio.
-
-## Pendientes conocidos
-
-1. **Medición**: `META_PIXEL_ID` y `GA_MEASUREMENT_ID` vacíos. Al activarlos hay
-   que actualizar el párrafo de cookies de `privacidad.html`.
-2. **Blog**: sin contenido. La plantilla y los temas están en
-   `blog/_plantilla-articulo.html` (no publicado).
-3. Mover las credenciales de Supabase de `crm/index.html` a variables de entorno.
-   La clave anon es pública por diseño y RLS protege los datos, así que no es
-   urgente.
+1. Crear un repositorio en GitHub y subir este proyecto (`git push`).
+2. Desplegar en Vercel conectado a ese repo. Framework = **"Other"**, sin build,
+   output = raíz del proyecto.
+   - Nota: intentar crear el proyecto vía API falló antes por permisos;
+     hacerlo desde la cuenta personal del usuario con `vercel` CLI o el dashboard
+     debería funcionar.
+3. (Opcional, buena práctica) Mover `SUPABASE_URL` y `SUPABASE_ANON_KEY` desde el
+   código a variables de entorno de Vercel. La clave anon es pública por diseño y
+   RLS protege los datos, así que no es urgente, pero deja el proyecto más prolijo.
 
 ## Supabase
 
 - Proyecto: **CRM-Consultoria-SG** (id: `rayvimywyqjnzzmbagpv`, región us-east-2).
-  Conserva el nombre anterior al rebrand; renombrarlo es opcional.
+  Conserva el nombre anterior al rebrand a Veta Labs; renombrarlo en Supabase es opcional.
 - URL: `https://rayvimywyqjnzzmbagpv.supabase.co`
-- La clave anon (pública) está en `crm/index.html`. La clave `service_role` NO
-  está acá y no debe exponerse nunca.
+- La clave anon (pública) está en `crm/index.html`. La clave `service_role` NO está
+  aquí y no debe exponerse nunca.
 
 ### Tablas
-`empresas` · `contactos` · `leads` · `campanas` · `tareas` · `actividades` ·
-`meta_leads`
+- `empresas` — cuentas (nombre, rubro, ciudad, num_empleados, sitio_web, telefono, notas)
+- `contactos` — personas. Campos clave: `empresa_id`, nombre, cargo, email, telefono,
+  linkedin_url, `etapa`, prioridad, ultimo_contacto, `proximo_seguimiento`, notas.
+- `actividades` — historial (contacto_id, tipo, descripcion, fecha).
 
-### Pipeline (campo `etapa`)
-`nuevo` → `contactado` → `respondio` → `reunion_agendada` → `propuesta_enviada`
-→ `ganado` / `perdido`
+### Pipeline (campo `etapa` en contactos)
+`nuevo` → `contactado` → `respondio` → `reunion_agendada` → `propuesta_enviada` → `ganado` / `perdido`
 
-### Edge Functions
-Solo `meta-lead` está versionada en el repo. `nuevo-lead` (la que recibe el
-formulario del sitio), `email-evento`, `recordatorio-diario` e
-`importar-empresas` viven **solo** en Supabase: si hay que tocarlas, bajarlas
-primero al repo.
-
-`nuevo-lead` acepta exactamente: `nombre` (obligatorio), `email`, `telefono`,
-`empresa`, `cargo`, `negocio`, `mensaje` y `website` (honeypot). El formulario
-del sitio pregunta más cosas y las pliega dentro de `mensaje`; el mapeo está
-comentado en `assets/js/veta.js`.
+### Datos ya cargados
+4 contactos reales de inmobiliarias de Coquimbo, en etapa "contactado", con su
+primer correo registrado como actividad y próximo seguimiento agendado:
+Gabriel Leyton (JG Puerto Velero, prioridad alta), Matías De La Piedra
+(Facility Manager, alta), Mariano Torrealba (Terranostra, media), Mauricio Pereira
+(Empresas Serena, media).
 
 ## Config de Auth (recordatorio)
 En Supabase → Authentication → Providers → Email. Si el usuario quiere entrar sin
 confirmar correo, desactivar "Confirm email". Es el único usuario del CRM.
 
+## Ideas de mejora pendientes (backlog)
+- Arrastrar tarjetas entre columnas (drag & drop) para cambiar de etapa.
+- Vista de "seguimientos de hoy / vencidos".
+- Conectar el formulario de la web del usuario (https://vetalabs.cl)
+  para que los leads entren solos al CRM.
+- Mover credenciales a variables de entorno.
+
 ## Stack
-HTML/CSS/JS puro · Supabase (Postgres + Auth + RLS) · Vercel · Google Fonts.
+HTML/CSS/JS puro · Supabase (Postgres + Auth + RLS) · Vercel · Supabase JS v2 por CDN.
