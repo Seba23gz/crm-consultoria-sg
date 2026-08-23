@@ -61,10 +61,11 @@ tocar el sitio.
 
 ## Pendientes conocidos
 
-1. **Capturas reales**: faltan las de Pecadoras Shoes (el caso más importante) y
-   una del panel de CheckYourCars. `grep -rn PLACEHOLDER *.html proyectos/*.html`
-   los lista. Ojo: `checkyourcars.png` (en la raíz) **no sirve**: muestra otra
-   URL y cifras inventadas. Ya no se usa en ninguna página.
+1. **Capturas de Pecadoras Shoes**: es el caso más importante y sigue con
+   placeholders. `grep -rn PLACEHOLDER *.html proyectos/*.html` los lista.
+   CheckYourCars ya tiene capturas reales en `assets/img/`. El antiguo
+   `checkyourcars.png` de la raíz se borró: mostraba otra URL y cifras
+   inventadas (sigue en el historial de git si hiciera falta).
 2. **Medición**: `META_PIXEL_ID` y `GA_MEASUREMENT_ID` vacíos. Al activarlos hay
    que actualizar el párrafo de cookies de `privacidad.html`.
 3. **Blog**: sin contenido. La plantilla y los temas están en

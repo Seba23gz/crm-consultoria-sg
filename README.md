@@ -145,17 +145,23 @@ comentario `PLACEHOLDER` en el HTML. Para listarlos:
 grep -rn "PLACEHOLDER" *.html proyectos/*.html
 ```
 
-Hoy faltan:
+Hoy falta una sola cosa: **las capturas de Pecadoras Shoes** (portada, ficha de
+producto y vista mobile). Es el caso más importante del sitio, porque es el que
+representa al cliente que queremos captar.
 
-- **Pecadoras Shoes** — capturas de la tienda (portada, ficha de producto y
-  vista mobile). Es el caso más importante del sitio: es el que representa al
-  cliente que queremos captar.
-- **CheckYourCars** — captura real del panel. El `checkyourcars.png` que estaba
-  en el repo **no sirve como captura del producto**: muestra la URL
-  `panel.sebastiangomez.cl` y cifras inventadas (412 horas ahorradas, +18%,
-  68% IA). Quedó en el repo pero ya no se usa en ninguna página.
+CheckYourCars ya tiene capturas reales del sitio en producción, en
+`assets/img/checkyourcars-{inicio,panel,comparacion}.webp`. El antiguo
+`checkyourcars.png` de la raíz se borró: no era una captura del producto, sino
+un mockup con la URL `panel.sebastiangomez.cl` y cifras inventadas (412 horas
+ahorradas, +18%, 68% IA). Sigue en el historial de git.
 
-Guardarlas en `assets/img/`, en `.webp` si es posible, y siempre con `width`,
+> El panel que aparece en `checkyourcars-panel.webp` es el **mockup de
+> demostración del propio sitio de CheckYourCars**, rotulado «Automotora
+> Ejemplo». Sus cifras son de ejemplo y el pie de foto lo dice explícitamente:
+> no son resultados de una automotora real ni de Veta Labs. Si alguna vez se
+> reemplaza esa imagen, hay que mantener esa advertencia.
+
+Guardar las nuevas en `assets/img/`, en `.webp`, y siempre con `width`,
 `height`, `alt` y `loading="lazy"`.
 
 ## Blog
