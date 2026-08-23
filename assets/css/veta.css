@@ -559,3 +559,15 @@ table.cmp tr:last-child th,table.cmp tr:last-child td{border-bottom:0}
 .prose th,.prose td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);
   font-size:15px;line-height:1.5;color:var(--ink-soft);vertical-align:top}
 .prose th{font-weight:600;color:var(--ink);white-space:nowrap}
+
+/* ================== CAPTURAS DE PRODUCTO ================================= */
+/* Las capturas de celular son verticales y muy altas. En las tarjetas de caso
+   se muestran recortadas por arriba —que es donde se identifica el producto—
+   y en la página del caso se ven completas. */
+.case__media img{max-height:min(46vh,360px);width:auto;object-fit:cover;object-position:top center;
+  border:1px solid var(--ink-3)}
+
+.shots{display:grid;gap:var(--gap);grid-template-columns:repeat(auto-fit,minmax(240px,1fr));align-items:start}
+.shots figure{margin:0;display:flex;flex-direction:column;gap:12px}
+.shots img{width:100%;border:1px solid var(--line);background:var(--card)}
+.shots figcaption{font-size:13.5px;line-height:1.5;color:var(--ink-soft)}
