@@ -13,6 +13,10 @@ cosas que comparten un mismo proyecto de Vercel:
 No confundir con **CheckYourCars** ni **CheckYourWeb**: son marcas hermanas del
 mismo dueño, productos aparte, y en el sitio aparecen como casos.
 
+**Pecadoras Shoes** sí es cliente: marca de moda de La Serena, tienda en
+**Shopify** (`pecadoras-shoes.myshopify.com`, enlazada desde su bio de
+Instagram). Es el caso que mejor representa al cliente que buscamos.
+
 ## Posicionamiento (esto manda sobre todo el copy)
 
 Veta Labs es una **agencia de e-commerce y crecimiento digital**, no un estudio
@@ -61,11 +65,11 @@ tocar el sitio.
 
 ## Pendientes conocidos
 
-1. **Capturas de Pecadoras Shoes**: es el caso más importante y sigue con
-   placeholders. `grep -rn PLACEHOLDER *.html proyectos/*.html` los lista.
-   CheckYourCars ya tiene capturas reales en `assets/img/`. El antiguo
-   `checkyourcars.png` de la raíz se borró: mostraba otra URL y cifras
-   inventadas (sigue en el historial de git si hiciera falta).
+1. **Capturas de la tienda de Pecadoras Shoes**: el caso ya tiene el antes y
+   después del perfil de Instagram, pero falta la tienda misma (portada y ficha
+   de producto). `grep -rn PLACEHOLDER *.html proyectos/*.html` lo lista.
+   El antiguo `checkyourcars.png` de la raíz se borró: mostraba otra URL y
+   cifras inventadas (sigue en el historial de git si hiciera falta).
 2. **Medición**: `META_PIXEL_ID` y `GA_MEASUREMENT_ID` vacíos. Al activarlos hay
    que actualizar el párrafo de cookies de `privacidad.html`.
 3. **Blog**: sin contenido. La plantilla y los temas están en

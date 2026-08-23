@@ -145,9 +145,15 @@ comentario `PLACEHOLDER` en el HTML. Para listarlos:
 grep -rn "PLACEHOLDER" *.html proyectos/*.html
 ```
 
-Hoy falta una sola cosa: **las capturas de Pecadoras Shoes** (portada, ficha de
-producto y vista mobile). Es el caso más importante del sitio, porque es el que
-representa al cliente que queremos captar.
+Hoy falta una sola cosa: **capturas de la tienda de Pecadoras Shoes** (portada y
+ficha de producto con tallas). El caso ya tiene el antes y después del perfil de
+Instagram, que es lo que mejor cuenta la historia, pero no hay ninguna imagen de
+la tienda misma.
+
+> La captura del "antes" tiene una costura: se quitó la franja
+> «Followed by <usuario>», que mostraba el nombre y la foto de una tercera
+> persona. No cambia nada de lo que la imagen prueba. Si se rehace, mantener ese
+> criterio: no publicamos la identidad de gente que no dio su permiso.
 
 CheckYourCars ya tiene capturas reales del sitio en producción, en
 `assets/img/checkyourcars-{inicio,panel,comparacion}.webp`. El antiguo
