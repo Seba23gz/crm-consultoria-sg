@@ -65,13 +65,11 @@ tocar el sitio.
    una del panel de CheckYourCars. `grep -rn PLACEHOLDER *.html proyectos/*.html`
    los lista. Ojo: `checkyourcars.png` (en la raíz) **no sirve**: muestra otra
    URL y cifras inventadas. Ya no se usa en ninguna página.
-2. **WhatsApp**: la constante `WHATSAPP` de `assets/js/veta.js` está vacía, así
-   que los enlaces de WhatsApp se ocultan solos. Poner el número para activarlos.
-3. **Medición**: `META_PIXEL_ID` y `GA_MEASUREMENT_ID` vacíos. Al activarlos hay
+2. **Medición**: `META_PIXEL_ID` y `GA_MEASUREMENT_ID` vacíos. Al activarlos hay
    que actualizar el párrafo de cookies de `privacidad.html`.
-4. **Blog**: sin contenido. La plantilla y los temas están en
+3. **Blog**: sin contenido. La plantilla y los temas están en
    `blog/_plantilla-articulo.html` (no publicado).
-5. Mover las credenciales de Supabase de `crm/index.html` a variables de entorno.
+4. Mover las credenciales de Supabase de `crm/index.html` a variables de entorno.
    La clave anon es pública por diseño y RLS protege los datos, así que no es
    urgente.
 

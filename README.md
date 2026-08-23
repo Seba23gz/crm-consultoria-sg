@@ -70,7 +70,7 @@ Todo lo que hay que encender vive en el bloque `CONFIG` al principio de
 |---|---|---|
 | `META_PIXEL_ID` | Píxel de Meta | vacío = no se carga nada |
 | `GA_MEASUREMENT_ID` | Google Analytics 4 | vacío = no se carga nada |
-| `WHATSAPP` | Número comercial, formato `569XXXXXXXX` | **vacío**: los enlaces de WhatsApp se ocultan solos |
+| `WHATSAPP` | Número comercial, formato `569XXXXXXXX` | configurado |
 | `LEAD_ENDPOINT` | Edge Function `nuevo-lead` | ya apunta al proyecto de Supabase |
 
 > Si se activa el píxel o Analytics hay que actualizar el párrafo de cookies de
