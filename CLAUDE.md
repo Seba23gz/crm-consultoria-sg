@@ -14,8 +14,9 @@ No confundir con **CheckYourCars** ni **CheckYourWeb**: son marcas hermanas del
 mismo dueño, productos aparte, y en el sitio aparecen como casos.
 
 **Pecadoras Shoes** sí es cliente: marca de moda de La Serena, tienda en
-**Shopify** (`pecadoras-shoes.myshopify.com`, enlazada desde su bio de
-Instagram). Es el caso que mejor representa al cliente que buscamos.
+**Shopify** (`pecadoras-shoes.myshopify.com`), con variantes de color y talla,
+Mercado Pago y envío gratis en La Serena y Coquimbo. Es el caso que mejor
+representa al cliente que buscamos, y el único con capturas de todo el recorrido.
 
 ## Posicionamiento (esto manda sobre todo el copy)
 
@@ -58,6 +59,7 @@ que "hace páginas web". El producto estrella son **tiendas online en Shopify**.
 - **Desplegado** en Vercel sobre `https://vetalabs.cl`, con `cleanUrls: true`.
 - **CRM funcionando** en `/crm` con Supabase Auth + RLS.
 - **Meta Lead Ads integrado** por Edge Function (`supabase/functions/meta-lead`).
+- **Sin placeholders de contenido**: los casos tienen capturas reales.
 
 La estructura del sitio, el sistema visual, los eventos de medición y el mapeo
 del formulario están documentados en **[README.md](README.md)**. Leerlo antes de
@@ -65,16 +67,11 @@ tocar el sitio.
 
 ## Pendientes conocidos
 
-1. **Capturas de la tienda de Pecadoras Shoes**: el caso ya tiene el antes y
-   después del perfil de Instagram, pero falta la tienda misma (portada y ficha
-   de producto). `grep -rn PLACEHOLDER *.html proyectos/*.html` lo lista.
-   El antiguo `checkyourcars.png` de la raíz se borró: mostraba otra URL y
-   cifras inventadas (sigue en el historial de git si hiciera falta).
-2. **Medición**: `META_PIXEL_ID` y `GA_MEASUREMENT_ID` vacíos. Al activarlos hay
+1. **Medición**: `META_PIXEL_ID` y `GA_MEASUREMENT_ID` vacíos. Al activarlos hay
    que actualizar el párrafo de cookies de `privacidad.html`.
-3. **Blog**: sin contenido. La plantilla y los temas están en
+2. **Blog**: sin contenido. La plantilla y los temas están en
    `blog/_plantilla-articulo.html` (no publicado).
-4. Mover las credenciales de Supabase de `crm/index.html` a variables de entorno.
+3. Mover las credenciales de Supabase de `crm/index.html` a variables de entorno.
    La clave anon es pública por diseño y RLS protege los datos, así que no es
    urgente.
 

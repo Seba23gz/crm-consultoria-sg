@@ -136,39 +136,46 @@ Pruebas, lint y typecheck de las funciones (necesita [Deno](https://deno.com)):
 deno task verify
 ```
 
-## Imágenes pendientes
+## Imágenes
 
-El sitio marca en pantalla lo que falta, con la clase `.placeholder` y un
-comentario `PLACEHOLDER` en el HTML. Para listarlos:
+**No queda ningún placeholder de contenido en el sitio.** Los dos comentarios
+`PLACEHOLDER` que siguen en el HTML son instrucciones para trabajo futuro (sumar
+gente al equipo en `nosotros.html`, sumar un proyecto en `proyectos/index.html`),
+no contenido faltante. Para revisarlos:
 
 ```bash
 grep -rn "PLACEHOLDER" *.html proyectos/*.html
 ```
 
-Hoy falta una sola cosa: **capturas de la tienda de Pecadoras Shoes** (portada y
-ficha de producto con tallas). El caso ya tiene el antes y después del perfil de
-Instagram, que es lo que mejor cuenta la historia, pero no hay ninguna imagen de
-la tienda misma.
+Cuando falte una imagen de verdad, marcarla con la clase `.placeholder` y un
+comentario `PLACEHOLDER`: se ve en pantalla a propósito, para que no se escape a
+producción. Nunca rellenar con una imagen que no corresponda.
 
-> La captura del "antes" tiene una costura: se quitó la franja
-> «Followed by <usuario>», que mostraba el nombre y la foto de una tercera
-> persona. No cambia nada de lo que la imagen prueba. Si se rehace, mantener ese
-> criterio: no publicamos la identidad de gente que no dio su permiso.
-
-CheckYourCars ya tiene capturas reales del sitio en producción, en
-`assets/img/checkyourcars-{inicio,panel,comparacion}.webp`. El antiguo
-`checkyourcars.png` de la raíz se borró: no era una captura del producto, sino
-un mockup con la URL `panel.sebastiangomez.cl` y cifras inventadas (412 horas
-ahorradas, +18%, 68% IA). Sigue en el historial de git.
-
-> El panel que aparece en `checkyourcars-panel.webp` es el **mockup de
-> demostración del propio sitio de CheckYourCars**, rotulado «Automotora
-> Ejemplo». Sus cifras son de ejemplo y el pie de foto lo dice explícitamente:
-> no son resultados de una automotora real ni de Veta Labs. Si alguna vez se
-> reemplaza esa imagen, hay que mantener esa advertencia.
-
-Guardar las nuevas en `assets/img/`, en `.webp`, y siempre con `width`,
+Todas las imágenes viven en `assets/img/` en `.webp`, y van siempre con `width`,
 `height`, `alt` y `loading="lazy"`.
+
+| Archivo | Qué es |
+|---|---|
+| `pecadoras-tienda-{portada,catalogo,ficha}.webp` | La tienda en Shopify, sacadas de una grabación de pantalla |
+| `pecadoras-instagram-{antes,ahora}.webp` | El perfil de Instagram antes y después |
+| `checkyourcars-{inicio,panel,comparacion}.webp` | checkyourcars.cl en producción |
+
+Dos cosas que hay que mantener si alguna se reemplaza:
+
+> **El panel de CheckYourCars** es el mockup de demostración del propio sitio,
+> rotulado «Automotora Ejemplo». Sus cifras son de ejemplo y el pie de foto lo
+> dice: no son resultados de una automotora real ni de Veta Labs.
+
+> **La captura del «antes» de Instagram** tiene una costura: se quitó la franja
+> «Followed by <usuario>», que mostraba el nombre y la foto de una tercera
+> persona. No publicamos la identidad de gente que no dio su permiso.
+
+El antiguo `checkyourcars.png` de la raíz se borró: no era una captura del
+producto, sino un mockup con la URL `panel.sebastiangomez.cl` y cifras
+inventadas. Sigue en el historial de git.
+
+Para sacar fotogramas de un video hace falta ffmpeg (`npx ffmpeg-static`): el
+Chromium de Playwright no decodifica H.264 ni HEVC.
 
 ## Blog
 
