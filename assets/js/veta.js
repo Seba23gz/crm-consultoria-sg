@@ -272,6 +272,9 @@
           done.hidden = false;
           done.setAttribute('tabindex', '-1');
           done.focus();
+          // La barra fija ofrecía el diagnóstico que la persona acaba de pedir.
+          var barra = doc.querySelector('[data-dock]');
+          if (barra) barra.hidden = true;
         } else {
           setStatus('¡Listo! Revisaremos tu negocio y te escribiremos para coordinar el diagnóstico.', true);
         }
