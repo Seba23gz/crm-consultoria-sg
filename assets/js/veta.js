@@ -230,17 +230,10 @@
       }
       setStatus('', true);
 
-      // La Edge Function `nuevo-lead` recibe siete campos fijos. Las respuestas
-      // del diagnóstico que no tienen columna propia se pliegan dentro de
-      // `mensaje`, que es texto libre y viaja completo al correo y al CRM.
-      var canales = checked('canales');
-      var extra = [
-        val('sitio') && 'Instagram o web: ' + val('sitio'),
-        canales.length && 'Vende hoy por: ' + canales.join(', '),
-        val('presupuesto') && 'Presupuesto estimado: ' + val('presupuesto'),
-        val('mensaje') && 'Cuenta: ' + val('mensaje')
-      ].filter(Boolean).join('\n');
-
+      // Cada pregunta del diagnóstico viaja en su propio campo: en el CRM son
+      // columnas de `leads`, así que se puede filtrar y ordenar por ellas.
+      // Antes iban todas plegadas dentro de `mensaje` y quedaban como texto
+      // suelto imposible de consultar.
       var payload = {
         nombre: nombre,
         email: email,
@@ -249,8 +242,13 @@
         cargo: '',
         // `negocio` es lo que termina titulando la oportunidad en el CRM
         // ("Interés: Tienda online"), por eso va la necesidad declarada.
+        // `necesidad` es el mismo dato con el nombre de la columna.
         negocio: val('necesidad'),
-        mensaje: extra.slice(0, 2900),
+        necesidad: val('necesidad'),
+        sitio: val('sitio'),
+        canales: checked('canales'), // selección múltiple → arreglo
+        presupuesto: val('presupuesto'),
+        mensaje: val('mensaje').slice(0, 2900),
         website: val('website') // honeypot
       };
 
