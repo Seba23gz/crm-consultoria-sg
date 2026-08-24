@@ -97,10 +97,17 @@ tocar el sitio.
 → `ganado` / `perdido`
 
 ### Edge Functions
-Solo `meta-lead` está versionada en el repo. `nuevo-lead` (la que recibe el
-formulario del sitio), `email-evento`, `recordatorio-diario` e
+`meta-lead` y `nuevo-lead` (la que recibe el formulario del sitio) están
+versionadas en el repo. `email-evento`, `recordatorio-diario` e
 `importar-empresas` viven **solo** en Supabase: si hay que tocarlas, bajarlas
 primero al repo.
+
+**Aviso de leads por correo.** La cuenta de Resend está en modo prueba: sin
+dominio verificado, el remitente `onboarding@resend.dev` solo entrega al correo
+del dueño de la cuenta. Por eso `NOTIFY_TO` cae por defecto en el Gmail. Para
+volver a contacto@vetalabs.cl: verificar vetalabs.cl en resend.com/domains y
+poner los secretos `RESEND_FROM` y `NOTIFY_TO` en Supabase. No hay que
+redesplegar la función.
 
 `nuevo-lead` acepta exactamente: `nombre` (obligatorio), `email`, `telefono`,
 `empresa`, `cargo`, `negocio`, `mensaje` y `website` (honeypot). El formulario
