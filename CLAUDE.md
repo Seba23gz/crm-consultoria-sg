@@ -109,10 +109,13 @@ volver a contacto@vetalabs.cl: verificar vetalabs.cl en resend.com/domains y
 poner los secretos `RESEND_FROM` y `NOTIFY_TO` en Supabase. No hay que
 redesplegar la función.
 
-`nuevo-lead` acepta exactamente: `nombre` (obligatorio), `email`, `telefono`,
-`empresa`, `cargo`, `negocio`, `mensaje` y `website` (honeypot). El formulario
-del sitio pregunta más cosas y las pliega dentro de `mensaje`; el mapeo está
-comentado en `assets/js/veta.js`.
+`nuevo-lead` acepta: `nombre` (obligatorio), `email`, `telefono`, `empresa`,
+`cargo`, `negocio`/`necesidad`, `sitio`, `canales` (arreglo), `presupuesto`,
+`mensaje` y `website` (honeypot). Cada pregunta del formulario tiene su columna
+en `leads` —`necesidad`, `sitio`, `canales`, `presupuesto`— y `notas` queda para
+el texto libre. Los campos nuevos son opcionales a propósito: si el sitio
+publicado va una versión atrás y pliega todo dentro de `mensaje`, entra igual.
+El mapeo está comentado en `assets/js/veta.js` y en el README.
 
 ## Config de Auth (recordatorio)
 En Supabase → Authentication → Providers → Email. Si el usuario quiere entrar sin

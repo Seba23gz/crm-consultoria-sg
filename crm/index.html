@@ -155,6 +155,12 @@
   .autocomp .ac-item:last-child{border-bottom:none}
   .autocomp .ac-item:hover{background:var(--paper)}
   .autocomp .ac-sub{font-size:11px;color:var(--ink-soft)}
+  /* Casillas de "vende hoy por": la pregunta es de selección múltiple. */
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chips label{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink-soft);
+    border:1px solid var(--line);padding:8px 11px;cursor:pointer;user-select:none}
+  .chips label:hover{border-color:var(--ink);color:var(--ink)}
+  .chips input{width:auto;margin:0;padding:0}
   .sub-list{margin-top:20px;border-top:1px solid var(--line);padding-top:16px}
   .sub-list h4{font-family:var(--font-mono);font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);margin-bottom:10px;font-weight:400}
   .li{font-size:13px;padding:9px 0;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
@@ -356,6 +362,44 @@
       <div class="field"><label>Próximo seguimiento</label><input type="date" id="l_seguimiento"></div>
     </div>
     <div class="field"><label>Notas</label><textarea id="l_notas" rows="2"></textarea></div>
+
+    <!-- Las cuatro preguntas del formulario de diagnóstico del sitio. Llegan
+         llenas cuando el lead entra por la web; se pueden completar a mano para
+         los que entran por otro lado, así el pipeline se lee parejo. -->
+    <div class="sub-list">
+      <h4>Diagnóstico</h4>
+      <div class="row2">
+        <div class="field"><label>Qué necesita</label>
+          <input id="l_necesidad" list="dlNecesidad" placeholder="Ej: Tienda online" autocomplete="off">
+          <datalist id="dlNecesidad">
+            <option>Tienda online</option><option>Mejorar mi tienda actual</option>
+            <option>Página web o landing</option><option>CRO: vendo poco para las visitas que tengo</option>
+            <option>Meta Ads</option><option>Identidad de marca</option><option>Todavía no lo tengo claro</option>
+          </datalist>
+        </div>
+        <div class="field"><label>Presupuesto declarado</label>
+          <!-- Input con datalist y no un select: si el formulario del sitio cambia
+               sus tramos, un select dejaría el campo vacío al abrir el lead y lo
+               borraría al guardar. Así el valor guardado siempre se ve. -->
+          <input id="l_presupuesto" list="dlPresupuesto" placeholder="Prefiere conversarlo" autocomplete="off">
+          <datalist id="dlPresupuesto">
+            <option>Hasta $390.000</option><option>Entre $390.000 y $690.000</option><option>Sobre $690.000</option>
+          </datalist>
+        </div>
+      </div>
+      <div class="field"><label>Instagram o sitio web</label>
+        <input id="l_sitio" placeholder="@sumarca o sutienda.cl" autocomplete="off"></div>
+      <div class="field"><label>Vende hoy por</label>
+        <div class="chips" id="l_canales">
+          <label><input type="checkbox" value="Instagram"> Instagram</label>
+          <label><input type="checkbox" value="WhatsApp"> WhatsApp</label>
+          <label><input type="checkbox" value="Tienda física"> Tienda física</label>
+          <label><input type="checkbox" value="Web propia"> Web propia</label>
+          <label><input type="checkbox" value="Shopify"> Shopify</label>
+          <label><input type="checkbox" value="Otro"> Otro</label>
+        </div>
+      </div>
+    </div>
 
     <!-- Solo para leads que entraron por Meta: lo que respondió la persona, tal cual. -->
     <div class="sub-list" id="l_metaBox" style="display:none">
@@ -789,7 +833,8 @@ function card(l){
     <div class="name">${esc(c?c.nombre:'(sin contacto)')}</div>
     <div class="role">${esc((c&&c.cargo)||l.titulo||'')}</div>
     <div class="co">${esc(empName(l.empresa_id))}</div>
-    ${l.valor_estimado?`<div class="val">${money(l.valor_estimado)}</div>`:''}
+    ${l.valor_estimado ? `<div class="val">${money(l.valor_estimado)}</div>`
+      : l.presupuesto ? `<div class="val">${esc(l.presupuesto)} declarado</div>` : ''}
     <div class="foot">
       <span style="display:flex;gap:6px;align-items:center">
         <span class="pill ${l.prioridad||'media'}">${l.prioridad||'media'}</span>
@@ -814,7 +859,7 @@ function renderLeads(){
   let rows = leads.filter(l => {
     if(fe && l.etapa!==fe) return false;
     if(fp && (l.prioridad||'media')!==fp) return false;
-    if(q){ const hay=[cName(l.contacto_id), empName(l.empresa_id), l.titulo].join(' ').toLowerCase(); if(!hay.includes(q)) return false; }
+    if(q){ const hay=[cName(l.contacto_id), empName(l.empresa_id), l.titulo, l.necesidad, l.presupuesto, l.sitio, canalesTexto(l)].join(' ').toLowerCase(); if(!hay.includes(q)) return false; }
     return true;
   });
   $('lBody').innerHTML = rows.length ? rows.map(l => {
@@ -912,6 +957,11 @@ function fillContactoSelect(sel){
   updateLeadEmpresaDisp();
 }
 function updateLeadEmpresaDisp(){ const c=cById(Number($('l_contacto').value)); $('l_empresa_disp').value = c?empName(c.empresa_id):'—'; }
+// `canales` es un arreglo en la base porque se vende por varios lados a la vez.
+const canalesInputs = () => [...$('l_canales').querySelectorAll('input')];
+const setCanales = arr => { const v = arr||[]; canalesInputs().forEach(i => i.checked = v.includes(i.value)); };
+const getCanales = () => canalesInputs().filter(i=>i.checked).map(i=>i.value);
+const canalesTexto = l => (l.canales||[]).join(', ');
 $('l_contacto').addEventListener('change', updateLeadEmpresaDisp);
 
 function openLead(id, presetContacto){
@@ -921,6 +971,8 @@ function openLead(id, presetContacto){
   fillContactoSelect(l?l.contacto_id:presetContacto);
   $('l_titulo').value=l?.titulo||''; $('l_etapa').value=l?.etapa||'nuevo'; $('l_prioridad').value=l?.prioridad||'media';
   $('l_valor').value=l?.valor_estimado??''; $('l_seguimiento').value=l?.proximo_seguimiento||''; $('l_notas').value=l?.notas||'';
+  $('l_necesidad').value=l?.necesidad||''; $('l_presupuesto').value=l?.presupuesto||''; $('l_sitio').value=l?.sitio||'';
+  setCanales(l?.canales);
   updateLeadEmpresaDisp();
   $('l_actsBox').style.display = l?'block':'none';
   $('btnDeleteLead').style.display = l?'inline-flex':'none';
@@ -970,11 +1022,13 @@ $('btnCancelLead').onclick = () => $('modalLead').classList.remove('open');
 $('btnSaveLead').onclick = async () => {
   const cid = Number($('l_contacto').value);
   if(!cid){ alert('Elige un contacto para el lead.'); return; }
-  const valor=$('l_valor').value;
+  const valor=$('l_valor').value, canales=getCanales();
   const payload = {
     contacto_id: cid, empresa_id: cById(cid)?.empresa_id ?? null,
     titulo:$('l_titulo').value.trim()||null, etapa:$('l_etapa').value, prioridad:$('l_prioridad').value,
-    valor_estimado: valor!==''?Number(valor):null, proximo_seguimiento:$('l_seguimiento').value||null, notas:$('l_notas').value.trim()||null
+    valor_estimado: valor!==''?Number(valor):null, proximo_seguimiento:$('l_seguimiento').value||null, notas:$('l_notas').value.trim()||null,
+    necesidad:$('l_necesidad').value.trim()||null, presupuesto:$('l_presupuesto').value.trim()||null,
+    sitio:$('l_sitio').value.trim()||null, canales: canales.length?canales:null
   };
   const {error} = editLeadId ? await sb.from('leads').update(payload).eq('id',editLeadId) : await sb.from('leads').insert(payload);
   if(error){ alert('No se pudo guardar: '+error.message); return; }
@@ -1486,8 +1540,9 @@ function downloadCSV(filename, headers, rows){
   setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
 }
 $('btnExportLeads').onclick = () => downloadCSV('leads.csv',
-  ['Contacto','Empresa','Titulo','Etapa','Prioridad','Valor estimado','Proximo seguimiento','Notas'],
-  leads.map(l=>[cName(l.contacto_id), empName(l.empresa_id), l.titulo, etLabel(l.etapa), l.prioridad, l.valor_estimado, l.proximo_seguimiento, l.notas]));
+  ['Contacto','Empresa','Titulo','Etapa','Prioridad','Valor estimado','Proximo seguimiento','Origen','Que necesita','Presupuesto','Vende por','Instagram o sitio','Notas'],
+  leads.map(l=>[cName(l.contacto_id), empName(l.empresa_id), l.titulo, etLabel(l.etapa), l.prioridad, l.valor_estimado, l.proximo_seguimiento,
+                l.origen?origenLabel(l.origen):'', l.necesidad, l.presupuesto, canalesTexto(l), l.sitio, l.notas]));
 $('btnExportContactos').onclick = () => downloadCSV('contactos.csv',
   ['Nombre','Cargo','Empresa','Email','Telefono','LinkedIn','Notas'],
   contactos.map(c=>[c.nombre, c.cargo, empName(c.empresa_id), c.email, c.telefono, c.linkedin_url, c.notas]));

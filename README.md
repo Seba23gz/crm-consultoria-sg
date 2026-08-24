@@ -92,15 +92,27 @@ Eventos en uso: `click_diagnostico`, `form_start`, `form_submit`,
 
 | Vía | Función | `leads.origen` |
 |---|---|---|
-| Formulario del sitio | Edge Function `nuevo-lead` | queda en blanco |
+| Formulario del sitio | Edge Function `nuevo-lead` | `web` |
 | Formularios de Meta (Facebook/Instagram) | Edge Function `meta-lead` | `meta_lead_ads` |
 
-El formulario de diagnóstico pregunta más cosas que las siete que acepta
-`nuevo-lead`. El mapeo está documentado en `assets/js/veta.js`: la necesidad
-declarada viaja en `negocio` (es lo que titula la oportunidad en el CRM) y el
-resto de las respuestas —Instagram, canales de venta, presupuesto— se pliegan
-dentro de `mensaje`, que es texto libre y llega completo al correo y al CRM.
-**No hubo que tocar la Edge Function.**
+Cada pregunta del formulario de diagnóstico tiene su propia columna en `leads`,
+así que en el CRM se puede filtrar y ordenar por ellas:
+
+| Pregunta del formulario | Campo que viaja | Columna en `leads` |
+|---|---|---|
+| ¿Qué necesitas? | `negocio` y `necesidad` | `necesidad` (y titula la oportunidad) |
+| Instagram o sitio web | `sitio` | `sitio` (y `empresas.sitio_web` si la empresa es nueva) |
+| ¿Dónde vendes hoy? | `canales` (arreglo) | `canales` (`text[]`) |
+| Presupuesto aproximado | `presupuesto` | `presupuesto` |
+| ¿Algo más que debamos saber? | `mensaje` | `notas` |
+
+Antes iban todas plegadas dentro de `mensaje` como texto libre: se leían bien en
+el correo, pero en el CRM no se podía consultar nada. La migración que las separa
+es `supabase/migrations/20260824210000_leads_campos_formulario.sql`.
+
+`nuevo-lead` sigue aceptando el formato anterior (todo dentro de `mensaje`, sin
+los campos nuevos): son opcionales a propósito, para que el sitio publicado pueda
+ir una versión atrás sin que se caiga la entrada de leads.
 
 `api/lead-form.js` hace lo mismo por otra vía y quedó sin conectar: si se
 activa, hay que apagar uno de los dos o cada lead entra duplicado.
@@ -127,8 +139,8 @@ app, pero requiere **revisión de Meta** para operar en producción.
 
 ### Código de las Edge Functions
 
-`supabase/functions/meta-lead/` es la única función cuyo código está versionado
-acá. Las demás (`nuevo-lead`, `email-evento`, `recordatorio-diario`,
+`supabase/functions/meta-lead/` y `supabase/functions/nuevo-lead/` están
+versionadas acá. Las demás (`email-evento`, `recordatorio-diario`,
 `importar-empresas`) viven **solo** en Supabase.
 
 Pruebas, lint y typecheck de las funciones (necesita [Deno](https://deno.com)):
