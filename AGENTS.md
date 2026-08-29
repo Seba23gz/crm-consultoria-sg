@@ -21,7 +21,16 @@ representa al cliente que buscamos, y el único con capturas de todo el recorrid
 ## Posicionamiento (esto manda sobre todo el copy)
 
 Veta Labs es una **agencia de e-commerce y crecimiento digital**, no un estudio
-que "hace páginas web". El producto estrella son **tiendas online en Shopify**.
+que "hace páginas web". El producto estrella son **tiendas online**, y la
+plataforma recomendada por defecto es **Shopify**.
+
+**Plataformas**: también se construye en **Tiendanube** y **WooCommerce**, al
+mismo precio publicado. No son iguales en el copy: Shopify es lo que se propone
+salvo que el caso pida otra cosa, y si al cliente le da lo mismo, se le
+recomienda Shopify porque es la que menos trabajo técnico le deja después.
+WooCommerce corre sobre WordPress propio y necesita mantención de alguien: eso
+se dice, no se esconde, porque choca con la promesa de "sin mantención
+obligatoria".
 
 - **Cliente ideal**: negocios que **ya venden** por Instagram y WhatsApp, con
   producto, clientes y volumen creciente, que dependen demasiado de responder
