@@ -102,13 +102,29 @@ Todo lo que hay que encender vive en el bloque `CONFIG` al principio de
 
 | Constante | Para qué | Estado |
 |---|---|---|
-| `META_PIXEL_ID` | Píxel de Meta | vacío = no se carga nada |
-| `GA_MEASUREMENT_ID` | Google Analytics 4 | vacío = no se carga nada |
+| `META_PIXEL_ID` | Píxel de Meta, sin pasar por GTM | vacío, y así debe quedarse |
+| `GA_MEASUREMENT_ID` | Google Analytics 4, sin pasar por GTM | vacío, y así debe quedarse |
 | `WHATSAPP` | Número comercial, formato `569XXXXXXXX` | configurado |
 | `LEAD_ENDPOINT` | Edge Function `nuevo-lead` | ya apunta al proyecto de Supabase |
 
-> Si se activa el píxel o Analytics hay que actualizar el párrafo de cookies de
-> `privacidad.html` **antes** de publicar: hoy declara que no se carga ninguno.
+### Medición
+
+El sitio carga **Google Tag Manager** (contenedor `GTM-TS67GQTV`) en el `<head>`
+de las dieciséis páginas públicas, con el `<noscript>` justo después de
+`<body>`. **El CRM queda fuera a propósito**: es interno, lleva `noindex` y medir
+las visitas del propio dueño ensucia los datos del sitio comercial.
+
+Analytics y el píxel de Meta se configuran **dentro de GTM**, no en `veta.js`.
+Las dos constantes de la tabla son la vía alternativa —cargar cada herramienta
+directamente— y tienen que quedarse vacías mientras GTM esté puesto: si se llena
+una y esa misma herramienta ya está en el contenedor, cada visita se cuenta dos
+veces y nada avisa.
+
+> **Antes de sumar o quitar una herramienta dentro del contenedor**, actualizar
+> la sección «Medición y cookies» de `privacidad.html`, que describe lo que el
+> sitio carga de verdad. Con el píxel de Meta hay además una frase que corregir:
+> la página declara hoy que no hacemos publicidad dirigida, y el píxel la
+> habilita.
 
 ### Eventos de medición
 
