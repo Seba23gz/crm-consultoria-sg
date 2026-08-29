@@ -3,8 +3,9 @@
 Sitio público de la agencia y su CRM interno, en un mismo proyecto de Vercel.
 
 Veta Labs es una **agencia de e-commerce y crecimiento digital**: su producto
-principal son tiendas online en Shopify para negocios que ya venden por
-Instagram y WhatsApp. El sitio está construido alrededor de un solo objetivo de
+principal son tiendas online para negocios que ya venden por Instagram y
+WhatsApp. **Shopify es la plataforma recomendada por defecto**; también se
+construye en Tiendanube y WooCommerce, al mismo precio, cuando el caso lo pide. El sitio está construido alrededor de un solo objetivo de
 conversión: **solicitar un diagnóstico gratuito**.
 
 ## Estructura del sitio
@@ -15,7 +16,7 @@ HTML plano, sin build. Vercel sirve la raíz tal cual, con `cleanUrls: true`
 | Ruta | Archivo | Qué es |
 |---|---|---|
 | `/` | `index.html` | Home: problema → solución → Shopify → método → proyectos → proceso → precios → FAQ → formulario |
-| `/tiendas-online` | `tiendas-online.html` | Servicio principal (Shopify) |
+| `/tiendas-online` | `tiendas-online.html` | Servicio principal: Shopify (recomendado), Tiendanube y WooCommerce |
 | `/paginas-web` | `paginas-web.html` | Landing pages, web corporativa y proyectos a medida |
 | `/cro` | `cro.html` | Optimización de conversión, también para tiendas de terceros |
 | `/precios#servicios-aparte` | dentro de `precios.html` | Servicios que se cotizan aparte: identidad de marca, Meta Ads, CRO y consultoría |
