@@ -83,8 +83,13 @@ tocar el sitio.
 
 ## Pendientes conocidos
 
-1. **Medición**: `META_PIXEL_ID` y `GA_MEASUREMENT_ID` vacíos. Al activarlos hay
-   que actualizar el párrafo de cookies de `privacidad.html`.
+1. **Medición**: Google Tag Manager (`GTM-TS67GQTV`) instalado en las dieciséis
+   páginas públicas; el CRM queda fuera a propósito. Falta configurar las
+   herramientas **dentro** del contenedor. `META_PIXEL_ID` y `GA_MEASUREMENT_ID`
+   de `veta.js` se quedan vacíos: llenarlos con GTM puesto duplica el conteo.
+   Al sumar una herramienta hay que actualizar «Medición y cookies» de
+   `privacidad.html`, y con el píxel de Meta además la frase sobre publicidad
+   dirigida.
 2. **Blog**: publicado con dos artículos. Los temas que faltan están listados
    en `blog/_plantilla-articulo.html`, junto con la plantilla. Regla: un
    artículo por consulta y nunca uno que compita con una página de servicio

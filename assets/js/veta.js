@@ -10,12 +10,31 @@
   /* ------------------------------------------------------------------ */
   /* CONFIGURACIÓN — lo único que hay que tocar para encender cada cosa. */
   /* ------------------------------------------------------------------ */
+  //
+  // MEDICIÓN: el sitio carga Google Tag Manager (contenedor GTM-TS67GQTV) desde
+  // el <head> de cada página. Analytics y el píxel de Meta se configuran DENTRO
+  // de GTM, no acá.
+  //
+  // Las dos constantes de abajo son la vía alternativa, para cargar cada
+  // herramienta directamente sin pasar por GTM. Deben quedarse vacías mientras
+  // GTM esté puesto: si se llena una y además esa misma herramienta está
+  // configurada dentro del contenedor, cada visita y cada evento se cuentan dos
+  // veces y los informes quedan inflados sin que nada avise.
+  //
+  // Todos los eventos del sitio se empujan a `window.dataLayer` (ver `track`
+  // más abajo), así que en GTM se usan como activadores de evento
+  // personalizado con su mismo nombre: click_diagnostico, form_start,
+  // form_submit, click_whatsapp, view_pricing, view_project, click_shopify,
+  // click_meta_ads y click_identidad.
   var CONFIG = {
     // Meta Pixel: Administrador de eventos → Orígenes de datos. Vacío = no se
-    // carga nada y no se envía ningún dato a Meta.
+    // carga nada y no se envía ningún dato a Meta. Ver el aviso de arriba antes
+    // de llenarlo: el píxel además habilita publicidad dirigida, y eso obliga a
+    // corregir /privacidad, que hoy declara que no la hacemos.
     META_PIXEL_ID: '',
 
     // Google Analytics 4 (formato G-XXXXXXX). Vacío = no se carga nada.
+    // Con GTM puesto, GA4 va dentro del contenedor y esto se queda vacío.
     GA_MEASUREMENT_ID: '',
 
     // WhatsApp comercial, en formato internacional y sin signos ni espacios
