@@ -120,6 +120,21 @@ for (const ruta of RUTAS) {
   for (const m of mal) console.log(`    · ${m}`);
 }
 
+// Assets con ruta absoluta. Con rutas relativas, /blog/ pedía
+// /blog/assets/css/veta.css y la página se servía sin estilos: pasó en
+// producción. `trailingSlash: false` en vercel.json redirige esa URL, pero la
+// ruta absoluta es lo que hace que no dependa de la configuración.
+const relativos = RUTAS.flatMap((ruta) => {
+  const html = fs.readFileSync(
+    path.join(RAIZ, ruta === '/' ? 'index.html' : (fs.existsSync(path.join(RAIZ, ruta + '.html')) ? ruta + '.html' : path.join(ruta, 'index.html'))), 'utf8');
+  return [...html.matchAll(/(?:href|src)="((?:\.\.\/)?assets\/[^"]*)"/g)].map((m) => `${ruta} → ${m[1]}`);
+});
+if (relativos.length) {
+  fallas++;
+  console.log('\n✗ Assets con ruta relativa (se rompen si la URL trae barra final):');
+  relativos.forEach((r) => console.log('    · ' + r));
+}
+
 console.log(`\nEnlaces internos (${internos.size}):`);
 for (const enlace of [...internos].sort()) {
   const res = await pagina.goto(`http://localhost:${PUERTO}${enlace}`, { waitUntil: 'commit' });

@@ -1,27 +1,48 @@
 {
   "cleanUrls": true,
+  "trailingSlash": false,
   "redirects": [
     {
       "source": "/(.*)",
-      "has": [{ "type": "host", "value": "www.vetalabs.cl" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "www.vetalabs.cl"
+        }
+      ],
       "destination": "https://vetalabs.cl/$1",
       "permanent": true
     },
     {
       "source": "/(.*)",
-      "has": [{ "type": "host", "value": "vetalabs.vercel.app" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "vetalabs.vercel.app"
+        }
+      ],
       "destination": "https://vetalabs.cl/$1",
       "permanent": true
     },
     {
       "source": "/(.*)",
-      "has": [{ "type": "host", "value": "crm-consultoria-sg.vercel.app" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "crm-consultoria-sg.vercel.app"
+        }
+      ],
       "destination": "https://vetalabs.cl/$1",
       "permanent": true
     },
     {
       "source": "/(.*)",
-      "has": [{ "type": "host", "value": "vetalabs-check-your-cars.vercel.app" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "vetalabs-check-your-cars.vercel.app"
+        }
+      ],
       "destination": "https://vetalabs.cl/$1",
       "permanent": true
     }
