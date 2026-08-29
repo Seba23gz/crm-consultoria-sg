@@ -22,6 +22,8 @@ HTML plano, sin build. Vercel sirve la raíz tal cual, con `cleanUrls: true`
 | `/proyectos` | `proyectos/index.html` | Índice de casos |
 | `/proyectos/<slug>` | `proyectos/<slug>.html` | Caso: contexto / problema / solución / resultado |
 | `/precios` | `precios.html` | Planes, tabla comparativa, servicios aparte y FAQ completo |
+| `/blog` | `blog/index.html` | Índice de artículos |
+| `/blog/<slug>` | `blog/<slug>.html` | Artículo |
 | `/nosotros` | `nosotros.html` | Quién está detrás y cómo trabajamos |
 | `/contacto` | `contacto.html` | Formulario de diagnóstico (destino del CTA) |
 | `/privacidad` | `privacidad.html` | Política de privacidad (la exige Meta para los formularios) |
@@ -61,6 +63,36 @@ en L y rótulos en `Space Mono`.
 3. Rellenar `<title>`, `meta description` (≤ 175 caracteres), `canonical` y
    Open Graph.
 4. Sumar la URL a `sitemap.xml`.
+
+## SEO
+
+Cada página persigue una consulta concreta, y una sola: el `<title>` empieza por
+lo que la persona escribe en Google, no por el nombre de la sección.
+
+| Ruta | Consulta principal |
+|---|---|
+| `/` | agencia Shopify Chile |
+| `/tiendas-online` | crear una tienda online en Shopify |
+| `/paginas-web` | páginas web y landing pages Chile |
+| `/cro` | mi tienda tiene visitas y no vende |
+| `/precios` | cuánto cuesta una tienda online en Chile |
+| `/proyectos` | proyectos de tiendas online en Shopify |
+
+Lo que hay que respetar al tocar una página:
+
+- **Un `<h1>` por página** y sin saltos de nivel (`h2` no puede seguir a un `h4`).
+- **`<title>` ≤ 62 caracteres** y **`meta description` entre 70 y 175**: más largo
+  y Google lo corta, más corto y lo reescribe.
+- `canonical`, `og:url` y la entrada del `sitemap.xml` apuntan al mismo `https://vetalabs.cl/…`.
+- `lang="es-CL"` y `og:locale` `es_CL`. El sitio es para Chile y lo declara.
+- Cada `<img>` con `alt` que describa lo que se ve, `width`, `height` y `loading="lazy"`.
+- JSON-LD por página: `Service` + `FAQPage` en servicios, `CreativeWork` en casos,
+  `Article` en artículos, `BreadcrumbList` en todo lo que no sea la home.
+- Al agregar una página: sumarla al `sitemap.xml` **con su `lastmod`**.
+
+Nada de esto es opcional para páginas nuevas, y hay un script que lo comprueba
+—títulos, descripciones, encabezados, JSON-LD válido, enlaces internos rotos y
+desbordes horizontales— descrito más abajo en «Comprobar antes de publicar».
 
 ## Configuración rápida
 
@@ -192,11 +224,24 @@ Chromium de Playwright no decodifica H.264 ni HEVC.
 
 ## Blog
 
-Todavía no hay artículos y no se inventaron. Lo que queda listo es la
-arquitectura: `blog/_plantilla-articulo.html` es una plantilla con el `<head>`,
-el JSON-LD de `Article` y la estructura de contenido resueltos, más la lista de
-temas planificados. No se publica (está en `.vercelignore`); las instrucciones
-para estrenar el blog están dentro del propio archivo.
+Existe para captar búsquedas que las páginas de servicio no atienden: dudas que
+se resuelven antes de contratar. Cada artículo enlaza a la página de servicio
+que le corresponde, y esa página enlaza de vuelta.
+
+| Ruta | Consulta que persigue |
+|---|---|
+| `/blog/dejar-de-vender-solo-por-instagram` | «cómo dejar de vender por Instagram», «pasar de Instagram a tienda online» |
+| `/blog/que-necesitas-para-abrir-una-tienda-online` | «qué necesito para abrir una tienda online», «abrir tienda online Chile» |
+
+`blog/_plantilla-articulo.html` es la plantilla —`<head>`, JSON-LD de `Article`
+y estructura resueltos— y **no se publica** (está en `.vercelignore` y
+`robots.txt` bloquea `/blog/_`). Las instrucciones para estrenar un artículo
+están dentro del propio archivo, junto con los temas que quedan pendientes.
+
+**Regla al escribir**: un artículo por consulta, sin refritos. Si un tema ya lo
+cubre una página de servicio, se enlaza y no se reescribe: dos páginas
+persiguiendo la misma búsqueda compiten entre ellas. Por eso «cuánto cuesta una
+tienda online» vive en `/precios` y no en un artículo.
 
 ## Dominio
 
@@ -214,6 +259,28 @@ lleva `noindex` en su `<head>`.
 - Frontend: HTML/CSS/JS puro, sin build ni dependencias
 - Backend: Supabase (Postgres + Auth + RLS) + una función serverless en `api/`
 - Deploy: Vercel, automático en cada push a `main`
+
+## Comprobar antes de publicar
+
+```bash
+npx playwright install chromium   # una sola vez
+node scripts/seo-check.mjs
+```
+
+Levanta un servidor que imita el `cleanUrls` de Vercel, abre las quince páginas
+en Chromium a 390&nbsp;px y falla —código 1— si encuentra algo de esto:
+
+- un `<title>` que Google va a cortar o una `meta description` fuera de rango;
+- más de un `<h1>`, o un salto de nivel de encabezado;
+- `canonical` fuera del dominio, `og:url` que no coincide, o una página que no
+  está en el `sitemap.xml`;
+- JSON-LD que no parsea, o una página sin ningún JSON-LD;
+- imágenes sin `alt` o sin `width`/`height`;
+- desborde horizontal en móvil;
+- un enlace interno que ya no resuelve.
+
+Al agregar una página hay que sumarla al arreglo `RUTAS` del script. Si el
+entorno ya tiene un Chromium, se le pasa con `CHROMIUM_PATH=/ruta/al/chromium`.
 
 ## Uso local
 

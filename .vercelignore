@@ -16,5 +16,8 @@ AGENTS.md
 CLAUDE.md
 .claude/
 
-# Plantilla de artículo: se publica recién cuando haya blog de verdad.
+# Plantilla de artículo: es andamiaje para escribir los siguientes, no una página.
 blog/_plantilla-articulo.html
+
+# Comprobaciones: se corren antes de publicar, no se publican.
+scripts/

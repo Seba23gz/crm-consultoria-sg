@@ -65,6 +65,8 @@ que "hace páginas web". El producto estrella son **tiendas online en Shopify**.
 - **CRM funcionando** en `/crm` con Supabase Auth + RLS.
 - **Meta Lead Ads integrado** por Edge Function (`supabase/functions/meta-lead`).
 - **Sin placeholders de contenido**: los casos tienen capturas reales.
+- **SEO**: cada página persigue una consulta y una sola; el mapa está en el
+  README. `node scripts/seo-check.mjs` lo comprueba y falla si algo se rompe.
 
 La estructura del sitio, el sistema visual, los eventos de medición y el mapeo
 del formulario están documentados en **[README.md](README.md)**. Leerlo antes de
@@ -74,8 +76,10 @@ tocar el sitio.
 
 1. **Medición**: `META_PIXEL_ID` y `GA_MEASUREMENT_ID` vacíos. Al activarlos hay
    que actualizar el párrafo de cookies de `privacidad.html`.
-2. **Blog**: sin contenido. La plantilla y los temas están en
-   `blog/_plantilla-articulo.html` (no publicado).
+2. **Blog**: publicado con dos artículos. Los temas que faltan están listados
+   en `blog/_plantilla-articulo.html`, junto con la plantilla. Regla: un
+   artículo por consulta y nunca uno que compita con una página de servicio
+   (por eso «cuánto cuesta una tienda online» vive en `/precios`).
 3. Mover las credenciales de Supabase de `crm/index.html` a variables de entorno.
    La clave anon es pública por diseño y RLS protege los datos, así que no es
    urgente.
