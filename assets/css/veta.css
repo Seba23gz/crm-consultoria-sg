@@ -538,8 +538,14 @@ strong{font-weight:600;color:var(--ink)}
 /* Sellos como logo oficial: alto fijo por marca para que se vean equilibrados
    (Shopify es una línea; Tiendanube apila dos). width:auto conserva el ratio. */
 .sello-logo{display:block;width:auto;flex:none}
-.sello-logo--sf{height:26px}
-.sello-logo--tn{height:42px}
+.sello-logo--sf{height:34px}
+.sello-logo--tn{height:54px}
+/* Sello de confianza grande en el hero de Shopify. */
+.hero__partner{display:flex;align-items:center;gap:16px;margin-top:30px;
+  padding-top:26px;border-top:1px solid var(--line)}
+.hero__partner img{height:52px;width:auto;display:block;flex:none}
+.hero__partner span{font:600 13px var(--font-mono);letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-faint);max-width:16ch;line-height:1.4}
 
 /* ====================== 10. ANIMACIÓN DE ENTRADA ========================= */
 /* Sutil y barata: opacidad + 18px. La añade el JS solo si hay IntersectionObserver
