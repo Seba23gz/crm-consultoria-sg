@@ -1,0 +1,1031 @@
+{
+  "exportFormatVersion": 2,
+  "exportTime": "2026-08-31 21:30:00",
+  "containerVersion": {
+    "path": "accounts/6000000000/containers/200000000/versions/0",
+    "accountId": "6000000000",
+    "containerId": "200000000",
+    "containerVersionId": "0",
+    "name": "Veta Labs - GA4 y eventos del sitio",
+    "description": "GA4 mas los nueve eventos que vetalabs.cl ya empuja a dataLayer. Reemplazar la variable 'GA4 - Measurement ID' por el ID real antes de publicar. Importar con la opcion MERGE, nunca OVERWRITE.",
+    "container": {
+      "path": "accounts/6000000000/containers/200000000",
+      "accountId": "6000000000",
+      "containerId": "200000000",
+      "name": "vetalabs.cl",
+      "publicId": "GTM-TS67GQTV",
+      "usageContext": [
+        "WEB"
+      ],
+      "fingerprint": "1700000000000"
+    },
+    "tag": [
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "tagId": "1",
+        "name": "Google tag - GA4",
+        "type": "googtag",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "tagId",
+            "value": "{{GA4 — Measurement ID}}"
+          },
+          {
+            "type": "LIST",
+            "key": "configSettingsTable",
+            "list": []
+          }
+        ],
+        "firingTriggerId": [
+          "2147479553"
+        ],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": {
+          "type": "MAP"
+        },
+        "fingerprint": "1700000000016",
+        "notes": "Carga GA4 en todas las paginas. No necesita configuracion de consentimiento: las etiquetas de Google leen analytics_storage, que el sitio deja en denied hasta que la persona acepta.",
+        "path": "accounts/6000000000/containers/200000000/tags/1"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "tagId": "2",
+        "name": "GA4 - click_diagnostico",
+        "type": "gaawe",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "eventName",
+            "value": "click_diagnostico"
+          },
+          {
+            "type": "LIST",
+            "key": "eventSettingsTable",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "origen"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{dlv - origen}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "destino"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{dlv - destino}}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "TAG_REFERENCE",
+            "key": "measurementId",
+            "value": "Google tag - GA4"
+          }
+        ],
+        "firingTriggerId": [
+          "1"
+        ],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": {
+          "type": "MAP"
+        },
+        "fingerprint": "1700000000017",
+        "notes": "Clic en cualquier CTA de diagnóstico. `origen` dice desde qué parte de la página.",
+        "path": "accounts/6000000000/containers/200000000/tags/2"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "tagId": "3",
+        "name": "GA4 - form_start",
+        "type": "gaawe",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "eventName",
+            "value": "form_start"
+          },
+          {
+            "type": "LIST",
+            "key": "eventSettingsTable",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "formulario"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{dlv - formulario}}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "TAG_REFERENCE",
+            "key": "measurementId",
+            "value": "Google tag - GA4"
+          }
+        ],
+        "firingTriggerId": [
+          "2"
+        ],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": {
+          "type": "MAP"
+        },
+        "fingerprint": "1700000000018",
+        "notes": "La persona escribió algo en el formulario. Se dispara una sola vez.",
+        "path": "accounts/6000000000/containers/200000000/tags/3"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "tagId": "4",
+        "name": "GA4 - form_submit",
+        "type": "gaawe",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "eventName",
+            "value": "form_submit"
+          },
+          {
+            "type": "LIST",
+            "key": "eventSettingsTable",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "formulario"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{dlv - formulario}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "necesidad"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{dlv - necesidad}}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "TAG_REFERENCE",
+            "key": "measurementId",
+            "value": "Google tag - GA4"
+          }
+        ],
+        "firingTriggerId": [
+          "3"
+        ],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": {
+          "type": "MAP"
+        },
+        "fingerprint": "1700000000019",
+        "notes": "Formulario enviado con éxito. ES LA CONVERSIÓN: marcar como evento clave en GA4.",
+        "path": "accounts/6000000000/containers/200000000/tags/4"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "tagId": "5",
+        "name": "GA4 - click_whatsapp",
+        "type": "gaawe",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "eventName",
+            "value": "click_whatsapp"
+          },
+          {
+            "type": "LIST",
+            "key": "eventSettingsTable",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "origen"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{dlv - origen}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "destino"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{dlv - destino}}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "TAG_REFERENCE",
+            "key": "measurementId",
+            "value": "Google tag - GA4"
+          }
+        ],
+        "firingTriggerId": [
+          "4"
+        ],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": {
+          "type": "MAP"
+        },
+        "fingerprint": "1700000000020",
+        "notes": "Clic en cualquier enlace de WhatsApp.",
+        "path": "accounts/6000000000/containers/200000000/tags/5"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "tagId": "6",
+        "name": "GA4 - view_pricing",
+        "type": "gaawe",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "eventName",
+            "value": "view_pricing"
+          },
+          {
+            "type": "LIST",
+            "key": "eventSettingsTable",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "id"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{dlv - id}}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "TAG_REFERENCE",
+            "key": "measurementId",
+            "value": "Google tag - GA4"
+          }
+        ],
+        "firingTriggerId": [
+          "5"
+        ],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": {
+          "type": "MAP"
+        },
+        "fingerprint": "1700000000021",
+        "notes": "La sección de precios entró en pantalla.",
+        "path": "accounts/6000000000/containers/200000000/tags/6"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "tagId": "7",
+        "name": "GA4 - view_project",
+        "type": "gaawe",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "eventName",
+            "value": "view_project"
+          },
+          {
+            "type": "LIST",
+            "key": "eventSettingsTable",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "id"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{dlv - id}}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "TAG_REFERENCE",
+            "key": "measurementId",
+            "value": "Google tag - GA4"
+          }
+        ],
+        "firingTriggerId": [
+          "6"
+        ],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": {
+          "type": "MAP"
+        },
+        "fingerprint": "1700000000022",
+        "notes": "Un caso entró en pantalla.",
+        "path": "accounts/6000000000/containers/200000000/tags/7"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "tagId": "8",
+        "name": "GA4 - click_shopify",
+        "type": "gaawe",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "eventName",
+            "value": "click_shopify"
+          },
+          {
+            "type": "LIST",
+            "key": "eventSettingsTable",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "origen"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{dlv - origen}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "destino"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{dlv - destino}}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "TAG_REFERENCE",
+            "key": "measurementId",
+            "value": "Google tag - GA4"
+          }
+        ],
+        "firingTriggerId": [
+          "7"
+        ],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": {
+          "type": "MAP"
+        },
+        "fingerprint": "1700000000023",
+        "notes": "Clic en un enlace a una tienda Shopify de un caso.",
+        "path": "accounts/6000000000/containers/200000000/tags/8"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "tagId": "9",
+        "name": "GA4 - click_meta_ads",
+        "type": "gaawe",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "eventName",
+            "value": "click_meta_ads"
+          },
+          {
+            "type": "LIST",
+            "key": "eventSettingsTable",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "origen"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{dlv - origen}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "destino"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{dlv - destino}}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "TAG_REFERENCE",
+            "key": "measurementId",
+            "value": "Google tag - GA4"
+          }
+        ],
+        "firingTriggerId": [
+          "8"
+        ],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": {
+          "type": "MAP"
+        },
+        "fingerprint": "1700000000024",
+        "notes": "Clic en el servicio de Meta Ads.",
+        "path": "accounts/6000000000/containers/200000000/tags/9"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "tagId": "10",
+        "name": "GA4 - click_identidad",
+        "type": "gaawe",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "eventName",
+            "value": "click_identidad"
+          },
+          {
+            "type": "LIST",
+            "key": "eventSettingsTable",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "origen"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{dlv - origen}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "destino"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{dlv - destino}}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "TAG_REFERENCE",
+            "key": "measurementId",
+            "value": "Google tag - GA4"
+          }
+        ],
+        "firingTriggerId": [
+          "9"
+        ],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": {
+          "type": "MAP"
+        },
+        "fingerprint": "1700000000025",
+        "notes": "Clic en el servicio de identidad de marca.",
+        "path": "accounts/6000000000/containers/200000000/tags/10"
+      }
+    ],
+    "trigger": [
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "triggerId": "1",
+        "name": "Evento - click_diagnostico",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "EQUALS",
+            "parameter": [
+              {
+                "type": "TEMPLATE",
+                "key": "arg0",
+                "value": "{{_event}}"
+              },
+              {
+                "type": "TEMPLATE",
+                "key": "arg1",
+                "value": "click_diagnostico"
+              }
+            ]
+          }
+        ],
+        "fingerprint": "1700000000007",
+        "path": "accounts/6000000000/containers/200000000/triggers/1"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "triggerId": "2",
+        "name": "Evento - form_start",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "EQUALS",
+            "parameter": [
+              {
+                "type": "TEMPLATE",
+                "key": "arg0",
+                "value": "{{_event}}"
+              },
+              {
+                "type": "TEMPLATE",
+                "key": "arg1",
+                "value": "form_start"
+              }
+            ]
+          }
+        ],
+        "fingerprint": "1700000000008",
+        "path": "accounts/6000000000/containers/200000000/triggers/2"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "triggerId": "3",
+        "name": "Evento - form_submit",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "EQUALS",
+            "parameter": [
+              {
+                "type": "TEMPLATE",
+                "key": "arg0",
+                "value": "{{_event}}"
+              },
+              {
+                "type": "TEMPLATE",
+                "key": "arg1",
+                "value": "form_submit"
+              }
+            ]
+          }
+        ],
+        "fingerprint": "1700000000009",
+        "path": "accounts/6000000000/containers/200000000/triggers/3"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "triggerId": "4",
+        "name": "Evento - click_whatsapp",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "EQUALS",
+            "parameter": [
+              {
+                "type": "TEMPLATE",
+                "key": "arg0",
+                "value": "{{_event}}"
+              },
+              {
+                "type": "TEMPLATE",
+                "key": "arg1",
+                "value": "click_whatsapp"
+              }
+            ]
+          }
+        ],
+        "fingerprint": "1700000000010",
+        "path": "accounts/6000000000/containers/200000000/triggers/4"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "triggerId": "5",
+        "name": "Evento - view_pricing",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "EQUALS",
+            "parameter": [
+              {
+                "type": "TEMPLATE",
+                "key": "arg0",
+                "value": "{{_event}}"
+              },
+              {
+                "type": "TEMPLATE",
+                "key": "arg1",
+                "value": "view_pricing"
+              }
+            ]
+          }
+        ],
+        "fingerprint": "1700000000011",
+        "path": "accounts/6000000000/containers/200000000/triggers/5"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "triggerId": "6",
+        "name": "Evento - view_project",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "EQUALS",
+            "parameter": [
+              {
+                "type": "TEMPLATE",
+                "key": "arg0",
+                "value": "{{_event}}"
+              },
+              {
+                "type": "TEMPLATE",
+                "key": "arg1",
+                "value": "view_project"
+              }
+            ]
+          }
+        ],
+        "fingerprint": "1700000000012",
+        "path": "accounts/6000000000/containers/200000000/triggers/6"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "triggerId": "7",
+        "name": "Evento - click_shopify",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "EQUALS",
+            "parameter": [
+              {
+                "type": "TEMPLATE",
+                "key": "arg0",
+                "value": "{{_event}}"
+              },
+              {
+                "type": "TEMPLATE",
+                "key": "arg1",
+                "value": "click_shopify"
+              }
+            ]
+          }
+        ],
+        "fingerprint": "1700000000013",
+        "path": "accounts/6000000000/containers/200000000/triggers/7"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "triggerId": "8",
+        "name": "Evento - click_meta_ads",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "EQUALS",
+            "parameter": [
+              {
+                "type": "TEMPLATE",
+                "key": "arg0",
+                "value": "{{_event}}"
+              },
+              {
+                "type": "TEMPLATE",
+                "key": "arg1",
+                "value": "click_meta_ads"
+              }
+            ]
+          }
+        ],
+        "fingerprint": "1700000000014",
+        "path": "accounts/6000000000/containers/200000000/triggers/8"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "triggerId": "9",
+        "name": "Evento - click_identidad",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "EQUALS",
+            "parameter": [
+              {
+                "type": "TEMPLATE",
+                "key": "arg0",
+                "value": "{{_event}}"
+              },
+              {
+                "type": "TEMPLATE",
+                "key": "arg1",
+                "value": "click_identidad"
+              }
+            ]
+          }
+        ],
+        "fingerprint": "1700000000015",
+        "path": "accounts/6000000000/containers/200000000/triggers/9"
+      }
+    ],
+    "variable": [
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "variableId": "1",
+        "name": "GA4 — Measurement ID",
+        "type": "c",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "value",
+            "value": "G-XXXXXXXXXX"
+          }
+        ],
+        "fingerprint": "1700000000001",
+        "notes": "REEMPLAZAR por el ID de la propiedad GA4 (Administrar > Flujos de datos). Es el unico lugar donde hay que cambiarlo.",
+        "path": "accounts/6000000000/containers/200000000/variables/1"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "variableId": "2",
+        "name": "dlv - origen",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "origen"
+          }
+        ],
+        "fingerprint": "1700000000002",
+        "path": "accounts/6000000000/containers/200000000/variables/2"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "variableId": "3",
+        "name": "dlv - destino",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "destino"
+          }
+        ],
+        "fingerprint": "1700000000003",
+        "path": "accounts/6000000000/containers/200000000/variables/3"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "variableId": "4",
+        "name": "dlv - formulario",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "formulario"
+          }
+        ],
+        "fingerprint": "1700000000004",
+        "path": "accounts/6000000000/containers/200000000/variables/4"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "variableId": "5",
+        "name": "dlv - necesidad",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "necesidad"
+          }
+        ],
+        "fingerprint": "1700000000005",
+        "path": "accounts/6000000000/containers/200000000/variables/5"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "variableId": "6",
+        "name": "dlv - id",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          },
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "id"
+          }
+        ],
+        "fingerprint": "1700000000006",
+        "path": "accounts/6000000000/containers/200000000/variables/6"
+      }
+    ],
+    "builtInVariable": [
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "type": "EVENT",
+        "name": "Event",
+        "path": "accounts/6000000000/containers/200000000/built_in_variables"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "type": "PAGE_URL",
+        "name": "Page Url",
+        "path": "accounts/6000000000/containers/200000000/built_in_variables"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "type": "PAGE_PATH",
+        "name": "Page Path",
+        "path": "accounts/6000000000/containers/200000000/built_in_variables"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "type": "PAGE_HOSTNAME",
+        "name": "Page Hostname",
+        "path": "accounts/6000000000/containers/200000000/built_in_variables"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "type": "REFERRER",
+        "name": "Referrer",
+        "path": "accounts/6000000000/containers/200000000/built_in_variables"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "type": "CLICK_URL",
+        "name": "Click Url",
+        "path": "accounts/6000000000/containers/200000000/built_in_variables"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "type": "CLICK_TEXT",
+        "name": "Click Text",
+        "path": "accounts/6000000000/containers/200000000/built_in_variables"
+      }
+    ],
+    "fingerprint": "1700000000999"
+  }
+}
