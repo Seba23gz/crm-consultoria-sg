@@ -520,6 +520,22 @@ strong{font-weight:600;color:var(--ink)}
   text-decoration:underline;text-underline-offset:3px}
 .link-boton:hover{color:var(--paper)}
 
+/* ==================== SELLOS DE PARTNER ================================== */
+/* Texto, no el logo oficial: es una afirmación de hecho —somos Partner de esa
+   plataforma— dicha en el sistema visual del propio sitio. Si más adelante se
+   suma el sello oficial descargado del panel de cada plataforma, reemplaza al
+   nombre sin cambiar la caja. Rótulo mono como los .eyebrow, esquinas rectas. */
+.sellos{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch}
+.sello{display:flex;flex-direction:column;gap:2px;padding:11px 15px;
+  border:1px solid var(--line);background:var(--card);min-width:120px}
+.sello__k{display:inline-flex;align-items:center;gap:7px;
+  font:700 10px var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint)}
+.sello__k::before{content:'';width:5px;height:5px;background:currentColor;flex:none}
+.sello__n{font:600 15px var(--font-display);letter-spacing:-.01em;color:var(--ink)}
+/* En fondo oscuro (pie y secciones sec--dark): la caja se vuelve contorno. */
+.site-footer .sello,.sec--dark .sello{background:transparent;border-color:var(--ink-3)}
+.site-footer .sello__n,.sec--dark .sello__n{color:var(--paper)}
+
 /* ====================== 10. ANIMACIÓN DE ENTRADA ========================= */
 /* Sutil y barata: opacidad + 18px. La añade el JS solo si hay IntersectionObserver
    y si la persona no pidió menos movimiento, así nunca deja contenido invisible. */
