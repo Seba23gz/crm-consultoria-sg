@@ -525,7 +525,7 @@ strong{font-weight:600;color:var(--ink)}
    plataforma— dicha en el sistema visual del propio sitio. Si más adelante se
    suma el sello oficial descargado del panel de cada plataforma, reemplaza al
    nombre sin cambiar la caja. Rótulo mono como los .eyebrow, esquinas rectas. */
-.sellos{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch}
+.sellos{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center}
 .sello{display:flex;flex-direction:column;gap:2px;padding:11px 15px;
   border:1px solid var(--line);background:var(--card);min-width:120px}
 .sello__k{display:inline-flex;align-items:center;gap:7px;
@@ -535,6 +535,11 @@ strong{font-weight:600;color:var(--ink)}
 /* En fondo oscuro (pie y secciones sec--dark): la caja se vuelve contorno. */
 .site-footer .sello,.sec--dark .sello{background:transparent;border-color:var(--ink-3)}
 .site-footer .sello__n,.sec--dark .sello__n{color:var(--paper)}
+/* Sellos como logo oficial: alto fijo por marca para que se vean equilibrados
+   (Shopify es una línea; Tiendanube apila dos). width:auto conserva el ratio. */
+.sello-logo{display:block;width:auto;flex:none}
+.sello-logo--sf{height:26px}
+.sello-logo--tn{height:42px}
 
 /* ====================== 10. ANIMACIÓN DE ENTRADA ========================= */
 /* Sutil y barata: opacidad + 18px. La añade el JS solo si hay IntersectionObserver
