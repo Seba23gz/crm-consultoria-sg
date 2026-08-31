@@ -87,6 +87,13 @@ Lo que hay que respetar al tocar una página:
 - `canonical`, `og:url` y la entrada del `sitemap.xml` apuntan al mismo `https://vetalabs.cl/…`.
 - `lang="es-CL"` y `og:locale` `es_CL`. El sitio es para Chile y lo declara.
 - Cada `<img>` con `alt` que describa lo que se ve, `width`, `height` y `loading="lazy"`.
+- **El favicon va como archivo, nunca como `data:` URI.** Google no rastrea un
+  `data:` URI y muestra el globo genérico en el resultado, que es como se veía
+  el sitio hasta ahora. Viven en la raíz: `favicon.ico` (el que Google busca por
+  defecto), `icon.svg` y `icon-180.png` para iOS. El isotipo fuente es
+  `icon.svg`; los PNG se generan de ahí.
+- `Organization.logo` del JSON-LD apunta a `icon-512.png`, el isotipo cuadrado.
+  Un banner apaisado no sirve como logo de marca.
 - JSON-LD por página: `Service` + `FAQPage` en servicios, `CreativeWork` en casos,
   `Article` en artículos, `BreadcrumbList` en todo lo que no sea la home.
 - Al agregar una página: sumarla al `sitemap.xml` **con su `lastmod`**.
