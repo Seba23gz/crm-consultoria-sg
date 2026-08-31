@@ -313,6 +313,7 @@ lleva `noindex` en su `<head>`.
 npx playwright install chromium   # una sola vez
 node scripts/seo-check.mjs        # SEO y estructura
 node scripts/consent-check.mjs    # consentimiento de cookies
+node scripts/gtm-check.mjs        # contenedor de GTM (no necesita navegador)
 ```
 
 Levanta un servidor que imita el `cleanUrls` de Vercel, abre las quince páginas
@@ -335,7 +336,15 @@ entra al `dataLayer`; que rechazar deje todo denegado y aceptar lo conceda; que
 la decisión persista al navegar; que el pie reabra el banner; y que se pueda
 decidir con el teclado, sin desbordes en móvil.
 
-Los dos scripts salen con código 1 si algo falla. Si el entorno ya tiene un
+`gtm-check.mjs` revisa `docs/gtm-vetalabs-ga4.json`, el contenedor de GTM listo
+para importar: que siga siendo importable y —lo que de verdad se desalinea con el
+tiempo— que sus eventos sigan siendo los que el sitio empuja. Si alguien suma un
+`data-ev` al HTML y no lo declara ahí, el evento llega al `dataLayer` y GA4 nunca
+lo ve; al revés, una etiqueta espera algo que ya nadie dispara. Las dos cosas
+pasan calladas. Los pasos para importarlo están en
+[docs/gtm-ga4-setup.md](docs/gtm-ga4-setup.md).
+
+Los tres scripts salen con código 1 si algo falla. Si el entorno ya tiene un
 Chromium, se le pasa con `CHROMIUM_PATH=/ruta/al/chromium`.
 
 ## Uso local
