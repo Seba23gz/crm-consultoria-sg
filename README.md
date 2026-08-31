@@ -124,7 +124,37 @@ veces y nada avisa.
 > la sección «Medición y cookies» de `privacidad.html`, que describe lo que el
 > sitio carga de verdad. Con el píxel de Meta hay además una frase que corregir:
 > la página declara hoy que no hacemos publicidad dirigida, y el píxel la
-> habilita.
+> habilita. Y hay que **subir la versión del consentimiento** (ver abajo): lo que
+> la gente aceptó no se extiende a una herramienta que entonces no existía.
+
+### Consentimiento (Ley 21.719)
+
+La ley chilena de datos personales entra en vigencia el **1 de diciembre de
+2026** y exige consentimiento **previo, informado y revocable** para la
+medición. El sitio lo resuelve con Google Consent Mode v2:
+
+1. Un script inline en el `<head>`, **antes** del snippet de GTM, declara
+   `consent default` con todo **denegado** (`analytics_storage`, `ad_storage`,
+   `ad_user_data`, `ad_personalization`, `personalization_storage`).
+   GTM carga igual —necesita las señales— pero sus etiquetas quedan bloqueadas.
+2. El banner `[data-consent]` pregunta. **Rechazar es un botón del mismo tamaño
+   que Aceptar**, en el mismo lugar: si rechazar cuesta más que aceptar, el
+   consentimiento no es libre y la ley no lo reconoce.
+3. La respuesta se guarda en `localStorage` bajo `veta_consent_v1`, con su fecha,
+   y se manda un `consent update` en el momento: si aceptó, las etiquetas se
+   activan sin recargar.
+4. «Preferencias de cookies», en el pie de todas las páginas, reabre el banner.
+   Retirar el permiso tiene que ser tan fácil como darlo.
+
+**Al sumar una herramienta al contenedor, subir la clave a `veta_consent_v2`**
+(en `assets/js/veta.js` y en el script del `<head>` de las dieciséis páginas).
+Eso invalida los consentimientos anteriores y vuelve a preguntar, que es lo
+correcto: la persona aceptó otra cosa.
+
+El orden del `<head>` no es decorativo: si el `consent default` corriera después
+del snippet de GTM, el contenedor ya habría disparado sus etiquetas sin permiso.
+`scripts/seo-check.mjs` no cubre esto; lo cubre la prueba de consentimiento
+descrita en «Comprobar antes de publicar».
 
 ### Eventos de medición
 
@@ -281,7 +311,8 @@ lleva `noindex` en su `<head>`.
 
 ```bash
 npx playwright install chromium   # una sola vez
-node scripts/seo-check.mjs
+node scripts/seo-check.mjs        # SEO y estructura
+node scripts/consent-check.mjs    # consentimiento de cookies
 ```
 
 Levanta un servidor que imita el `cleanUrls` de Vercel, abre las quince páginas
@@ -296,8 +327,16 @@ en Chromium a 390&nbsp;px y falla —código 1— si encuentra algo de esto:
 - desborde horizontal en móvil;
 - un enlace interno que ya no resuelve.
 
-Al agregar una página hay que sumarla al arreglo `RUTAS` del script. Si el
-entorno ya tiene un Chromium, se le pasa con `CHROMIUM_PATH=/ruta/al/chromium`.
+Al agregar una página hay que sumarla al arreglo `RUTAS` del script.
+
+`consent-check.mjs` recorre el flujo completo del banner en un navegador real:
+que la medición arranque denegada y que el `consent default` sea lo primero que
+entra al `dataLayer`; que rechazar deje todo denegado y aceptar lo conceda; que
+la decisión persista al navegar; que el pie reabra el banner; y que se pueda
+decidir con el teclado, sin desbordes en móvil.
+
+Los dos scripts salen con código 1 si algo falla. Si el entorno ya tiene un
+Chromium, se le pasa con `CHROMIUM_PATH=/ruta/al/chromium`.
 
 ## Uso local
 

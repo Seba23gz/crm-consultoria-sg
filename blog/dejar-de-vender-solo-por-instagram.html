@@ -3,6 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Consentimiento (Ley 21.719): medición y publicidad arrancan DENEGADAS.
+     Este bloque va antes de GTM a propósito; si fuera después, el contenedor ya
+     habría disparado sus etiquetas sin permiso. -->
+<script>
+(function(w){w.dataLayer=w.dataLayer||[];function g(){w.dataLayer.push(arguments)}w.gtag=w.gtag||g;
+g('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',
+analytics_storage:'denied',personalization_storage:'denied',functionality_storage:'granted',
+security_storage:'granted',wait_for_update:500});
+try{var c=JSON.parse(w.localStorage.getItem('veta_consent_v1')||'null');
+if(c&&c.estado==='aceptado'){g('consent','update',{ad_storage:'granted',ad_user_data:'granted',
+ad_personalization:'granted',analytics_storage:'granted',personalization_storage:'granted'})}}catch(e){}
+})(window);
+</script>
 <!-- Google Tag Manager -->
 <link rel="preconnect" href="https://www.googletagmanager.com">
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -46,6 +59,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 <a class="skip" href="#main">Saltar al contenido</a>
+
+<!-- Consentimiento de cookies. Oculto hasta que el JS confirme que no hay
+     decisión guardada. Rechazar pesa lo mismo que aceptar, a propósito. -->
+<div class="consent" data-consent hidden role="region" aria-label="Consentimiento de cookies">
+  <div class="wrap consent__box">
+    <div class="consent__texto">
+      <p class="consent__title">Cookies de medición</p>
+      <p>Medimos qué partes del sitio funcionan. <strong>No activamos nada hasta que nos digas que sí</strong>, y puedes cambiar de opinión cuando quieras desde el pie de página. <a href="/privacidad">Cómo tratamos tus datos</a>.</p>
+    </div>
+    <div class="consent__acciones">
+      <button class="btn btn--sm btn--ghost" type="button" data-consent-no>Rechazar</button>
+      <button class="btn btn--sm btn--primary" type="button" data-consent-si>Aceptar</button>
+    </div>
+  </div>
+</div>
 
 <header class="site-header">
   <div class="wrap site-header__bar">
@@ -166,7 +194,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="wrap">
     <div class="site-footer__base">
       <span>© 2026 Veta Labs · E-commerce y crecimiento digital · Chile</span>
-      <span><a href="/privacidad">Política de privacidad</a></span>
+      <span><a href="/privacidad">Política de privacidad</a> · <button class="link-boton" type="button" data-consent-abrir>Preferencias de cookies</button></span>
     </div>
   </div>
 </footer>

@@ -87,9 +87,11 @@ tocar el sitio.
    páginas públicas; el CRM queda fuera a propósito. Falta configurar las
    herramientas **dentro** del contenedor. `META_PIXEL_ID` y `GA_MEASUREMENT_ID`
    de `veta.js` se quedan vacíos: llenarlos con GTM puesto duplica el conteo.
-   Al sumar una herramienta hay que actualizar «Medición y cookies» de
-   `privacidad.html`, y con el píxel de Meta además la frase sobre publicidad
-   dirigida.
+   Todo arranca **denegado** por Consent Mode v2 hasta que la persona acepta en
+   el banner. Al sumar una herramienta hay que: actualizar «Medición y cookies»
+   de `privacidad.html`, subir la clave `veta_consent_v1` a la siguiente versión
+   para volver a preguntar, y —con el píxel de Meta— corregir además la frase
+   sobre publicidad dirigida. El detalle está en el README.
 2. **Blog**: publicado con dos artículos. Los temas que faltan están listados
    en `blog/_plantilla-articulo.html`, junto con la plantilla. Regla: un
    artículo por consulta y nunca uno que compita con una página de servicio
