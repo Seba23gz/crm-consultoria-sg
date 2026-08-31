@@ -50,8 +50,8 @@ obligatoria".
   porque el caso de Pecadoras ya lo mostraba: o se vendía o se sacaba del caso.
   **No ofrecemos Google Ads.** No ofrecemos fotografía ni nada presencial:
   Veta Labs opera 100% online.
-- **Precios públicos**: Landing desde $150.000 · Shopify desde $390.000 ·
-  Shopify Growth desde $690.000 CLP. Siempre "desde".
+- **Precios públicos**: Landing desde $120.000 · Shopify desde $300.000 ·
+  Shopify Growth desde $600.000 CLP. Siempre "desde".
 - **Ley 21.719** (datos personales, vigente el 1-12-2026): es argumento
   comercial y vive en `/tiendas-online`. Se dice lo que construimos nosotros
   —consentimiento previo, política escrita sobre el negocio del cliente, canal
