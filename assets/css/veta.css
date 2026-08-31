@@ -125,6 +125,10 @@ strong{font-weight:600;color:var(--ink)}
 .grid--2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
 .grid--3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
 .grid--4{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+/* Exactamente dos columnas. Para bloques de cuatro tarjetas, donde `auto-fit`
+   mete tres y deja la cuarta huérfana en la fila de abajo. */
+.grid--pares{grid-template-columns:1fr}
+@media (min-width:760px){ .grid--pares{grid-template-columns:1fr 1fr} }
 .stack{display:flex;flex-direction:column;gap:var(--gap)}
 .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 
