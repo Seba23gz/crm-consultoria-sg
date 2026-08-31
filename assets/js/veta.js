@@ -48,6 +48,7 @@
   };
 
   var doc = document;
+  function on(el, ev, fn) { if (el) el.addEventListener(ev, fn); }
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* =================================================================== */
@@ -64,7 +65,9 @@
   function track(name, params) {
     var data = params || {};
     window.dataLayer.push(Object.assign({ event: name }, data));
-    if (typeof window.gtag === 'function') window.gtag('event', name, data);
+    // Solo si GA lo cargó este archivo. Con GTM puesto, `window.gtag` existe
+    // desde el <head> para el consentimiento, y llamarlo acá duplicaría el evento.
+    if (CONFIG.GA_MEASUREMENT_ID && typeof window.gtag === 'function') window.gtag('event', name, data);
     if (typeof window.fbq === 'function') {
       if (META_EVENTS[name]) fbq('track', META_EVENTS[name], data);
       else fbq('trackCustom', name, data);
@@ -160,14 +163,27 @@
   /* =================================================================== */
   var dock = doc.querySelector('[data-dock]');
   var dockAnchor = doc.querySelector('[data-dock-after]');
+  var dockFuera = false;   // el hero todavía en pantalla
+  var dockCedido = false;  // el banner de cookies ocupa el lugar
+
+  // Las dos barras viven fijas abajo. Mientras haya una decisión de cookies
+  // pendiente, manda el banner: pedir el diagnóstico puede esperar treinta
+  // segundos, y dos barras superpuestas no se leen.
+  function pintarDock() {
+    if (dock) dock.dataset.show = String(dockFuera && !dockCedido);
+  }
+  function cederDock(v) { dockCedido = v; pintarDock(); }
+
   if (dock && 'IntersectionObserver' in window) {
     if (dockAnchor) {
       new IntersectionObserver(function (entries) {
         // Aparece recién cuando el hero salió de pantalla: arriba el CTA ya está.
-        dock.dataset.show = String(!entries[0].isIntersecting);
+        dockFuera = !entries[0].isIntersecting;
+        pintarDock();
       }, { threshold: 0 }).observe(dockAnchor);
     } else {
-      dock.dataset.show = 'true';
+      dockFuera = true;
+      pintarDock();
     }
   }
 
@@ -188,6 +204,73 @@
     reveal.forEach(function (el) { revObs.observe(el); });
     // Red de seguridad: pase lo que pase, a los 3 s todo está visible.
     setTimeout(function () { reveal.forEach(function (el) { if (!el.classList.contains('is-in')) show(el); }); }, 3000);
+  }
+
+  /* =================================================================== */
+  /* CONSENTIMIENTO DE COOKIES (Ley 21.719)                              */
+  /* =================================================================== */
+  /* El <head> ya dejó la medición en `denied` antes de que GTM cargue. Acá
+     solo se pregunta y se guarda la respuesta.
+
+     Lo que exige la ley y por qué está resuelto así:
+     - Previo: nada se activa antes de la respuesta; el default es denegado.
+     - Libre: rechazar es un botón del mismo tamaño y en el mismo lugar.
+     - Informado: el banner dice qué se mide y enlaza a /privacidad.
+     - Revocable: el pie de todas las páginas reabre el banner.
+     - Demostrable: se guarda la decisión con su fecha y la versión del texto.
+
+     La versión importa: si mañana se suma una herramienta al contenedor, subirla
+     invalida los consentimientos viejos y vuelve a preguntar, que es lo correcto
+     —la persona aceptó otra cosa—. */
+  var CONSENT_CLAVE = 'veta_consent_v1';
+
+  var consent = doc.querySelector('[data-consent]');
+  if (consent) {
+    var abrir = doc.querySelectorAll('[data-consent-abrir]');
+
+    function leerConsent() {
+      try { return JSON.parse(window.localStorage.getItem(CONSENT_CLAVE) || 'null'); }
+      catch (e) { return null; }  // modo privado o almacenamiento bloqueado
+    }
+
+    function mostrarConsent(v) {
+      consent.hidden = !v;
+      cederDock(v);
+    }
+
+    function decidir(acepta) {
+      var permiso = acepta ? 'granted' : 'denied';
+      // Se avisa a Google en el momento: si aceptó, las etiquetas que estaban
+      // esperando se activan sin recargar la página.
+      if (typeof window.gtag === 'function') {
+        window.gtag('consent', 'update', {
+          ad_storage: permiso, ad_user_data: permiso, ad_personalization: permiso,
+          analytics_storage: permiso, personalization_storage: permiso
+        });
+      }
+      try {
+        window.localStorage.setItem(CONSENT_CLAVE, JSON.stringify({
+          estado: acepta ? 'aceptado' : 'rechazado',
+          fecha: new Date().toISOString()
+        }));
+      } catch (e) { /* sin almacenamiento: vale para esta visita y se vuelve a preguntar */ }
+      mostrarConsent(false);
+      // Que el foco no quede en un botón que acaba de desaparecer.
+      var volver = doc.querySelector('[data-consent-abrir]');
+      if (volver && doc.activeElement && consent.contains(doc.activeElement)) volver.focus();
+    }
+
+    on(consent.querySelector('[data-consent-si]'), 'click', function () { decidir(true); });
+    on(consent.querySelector('[data-consent-no]'), 'click', function () { decidir(false); });
+    for (var i = 0; i < abrir.length; i++) {
+      on(abrir[i], 'click', function () {
+        mostrarConsent(true);
+        consent.querySelector('[data-consent-si]').focus();
+      });
+    }
+
+    // Solo se pregunta si no hay una decisión guardada.
+    if (!leerConsent()) mostrarConsent(true);
   }
 
   /* =================================================================== */

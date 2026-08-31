@@ -483,6 +483,39 @@ strong{font-weight:600;color:var(--ink)}
   .site-footer__base{padding-bottom:84px}
 }
 
+/* ================== CONSENTIMIENTO DE COOKIES ============================ */
+/* Fijo abajo y por encima de la barra del CTA (z-index 55): mientras haya una
+   decisión pendiente, es lo único que se ofrece. `position:fixed` significa que
+   no empuja nada, así que no provoca salto de maqueta al aparecer. */
+.consent{position:fixed;left:0;right:0;bottom:0;z-index:70;
+  background:var(--ink);color:var(--ink-faint);border-top:1px solid var(--ink-3);
+  padding-block:clamp(14px,2vw,18px);
+  padding-bottom:calc(clamp(14px,2vw,18px) + env(safe-area-inset-bottom))}
+.consent__box{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
+  gap:14px clamp(20px,3vw,36px)}
+.consent__texto{flex:1 1 min(100%,42ch)}
+.consent__title{font:600 15px var(--font-display);color:var(--paper);margin-bottom:4px}
+.consent__texto p{font-size:14px;line-height:1.55}
+.consent__texto strong{color:var(--paper)}
+.consent__texto a{border-bottom:1px solid currentColor}
+.consent__texto a:hover{color:var(--paper)}
+/* Los dos botones pesan igual: rechazar tiene que costar lo mismo que aceptar. */
+.consent__acciones{display:flex;gap:10px;flex:0 0 auto}
+.consent__acciones .btn{flex:1 1 auto;white-space:nowrap}
+.consent__acciones .btn--ghost{border-color:var(--ink-3);color:var(--paper)}
+.consent__acciones .btn--ghost:hover{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.consent__acciones .btn--primary{background:var(--paper);color:var(--ink)}
+.consent__acciones .btn--primary:hover{background:#fff}
+@media (max-width:560px){
+  .consent__acciones{width:100%}
+}
+
+/* Botón que se lee como enlace: para acciones que no navegan a ninguna parte,
+   como reabrir el banner. Un <a href="#"> mentiría sobre lo que hace. */
+.link-boton{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;
+  text-decoration:underline;text-underline-offset:3px}
+.link-boton:hover{color:var(--paper)}
+
 /* ====================== 10. ANIMACIÓN DE ENTRADA ========================= */
 /* Sutil y barata: opacidad + 18px. La añade el JS solo si hay IntersectionObserver
    y si la persona no pidió menos movimiento, así nunca deja contenido invisible. */

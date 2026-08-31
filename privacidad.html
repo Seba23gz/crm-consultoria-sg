@@ -3,6 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Consentimiento (Ley 21.719): medición y publicidad arrancan DENEGADAS.
+     Este bloque va antes de GTM a propósito; si fuera después, el contenedor ya
+     habría disparado sus etiquetas sin permiso. -->
+<script>
+(function(w){w.dataLayer=w.dataLayer||[];function g(){w.dataLayer.push(arguments)}w.gtag=w.gtag||g;
+g('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',
+analytics_storage:'denied',personalization_storage:'denied',functionality_storage:'granted',
+security_storage:'granted',wait_for_update:500});
+try{var c=JSON.parse(w.localStorage.getItem('veta_consent_v1')||'null');
+if(c&&c.estado==='aceptado'){g('consent','update',{ad_storage:'granted',ad_user_data:'granted',
+ad_personalization:'granted',analytics_storage:'granted',personalization_storage:'granted'})}}catch(e){}
+})(window);
+</script>
 <!-- Google Tag Manager -->
 <link rel="preconnect" href="https://www.googletagmanager.com">
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -45,6 +58,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 <a class="skip" href="#main">Saltar al contenido</a>
+
+<!-- Consentimiento de cookies. Oculto hasta que el JS confirme que no hay
+     decisión guardada. Rechazar pesa lo mismo que aceptar, a propósito. -->
+<div class="consent" data-consent hidden role="region" aria-label="Consentimiento de cookies">
+  <div class="wrap consent__box">
+    <div class="consent__texto">
+      <p class="consent__title">Cookies de medición</p>
+      <p>Medimos qué partes del sitio funcionan. <strong>No activamos nada hasta que nos digas que sí</strong>, y puedes cambiar de opinión cuando quieras desde el pie de página. <a href="/privacidad">Cómo tratamos tus datos</a>.</p>
+    </div>
+    <div class="consent__acciones">
+      <button class="btn btn--sm btn--ghost" type="button" data-consent-no>Rechazar</button>
+      <button class="btn btn--sm btn--primary" type="button" data-consent-si>Aceptar</button>
+    </div>
+  </div>
+</div>
 
 <header class="site-header">
   <div class="wrap site-header__bar">
@@ -112,7 +140,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <p>Este sitio carga <strong>Google Tag Manager</strong>, un contenedor de Google desde el que activamos nuestras herramientas de medición. El contenedor por sí solo no guarda cookies; sí lo hacen las herramientas que se cargan desde él, con cookies propias de Google que quedan en tu navegador.</p>
       <p>Lo que medimos son <strong>páginas vistas y algunas acciones</strong>: clics en el botón de diagnóstico, si empezaste el formulario y si lo enviaste, clics en el enlace de WhatsApp, y si llegaste a ver la sección de precios o un proyecto. Nos sirve para saber qué parte del sitio funciona y cuál no.</p>
       <p><strong>A la medición no viaja nada de lo que escribes en el formulario</strong>: ni tu nombre, ni tu correo, ni tu teléfono, ni tu mensaje. De un envío solo se registra que ocurrió y qué servicio elegiste en la lista desplegable, que es una de las opciones fijas y no dice nada de ti.</p>
-      <p>Si no quieres que se te mida, puedes bloquear estas cookies desde la configuración de tu navegador o con una extensión de bloqueo; el sitio funciona igual y el formulario también.</p>
+      <p><strong>Nada de esto se activa hasta que lo aceptas.</strong> Al entrar por primera vez verás un aviso abajo con dos botones del mismo tamaño, Aceptar y Rechazar. Mientras no elijas, la medición queda desactivada; si rechazas, se queda desactivada. Guardamos tu decisión y su fecha en tu propio navegador, para no volver a preguntarte y para poder acreditar qué elegiste.</p>
+      <p>Puedes <strong>cambiar de opinión cuando quieras</strong> desde «Preferencias de cookies», al final de cualquier página. Retirar el permiso es tan fácil como darlo, y no cambia nada de lo demás: el sitio funciona igual y el formulario también. También puedes bloquear las cookies desde la configuración de tu navegador o con una extensión.</p>
+      <p>Si más adelante sumamos una herramienta de medición nueva, volveremos a preguntarte: lo que aceptaste no se extiende a algo que todavía no existía.</p>
 
       <h2>Para qué los usamos</h2>
       <ul>
@@ -120,7 +150,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <li><strong>Preparar una propuesta</strong> ajustada a tu negocio.</li>
         <li><strong>Llevar el seguimiento comercial</strong> en nuestro CRM interno: en qué etapa va la conversación y cuándo corresponde retomarla.</li>
       </ul>
-      <p>La base de este tratamiento es tu propio consentimiento al enviarnos el formulario, y el interés legítimo de responder a quien nos contacta por un servicio.</p>
+      <p>Cada tratamiento se apoya en una base distinta, y conviene que sepas cuál:</p>
+      <table>
+        <tr><th>Qué</th><th>Base legal</th></tr>
+        <tr><td>Responder tu consulta y preparar una propuesta</td><td>Tu <strong>consentimiento</strong> al enviarnos el formulario, y las <strong>medidas precontractuales</strong> que pides al solicitar un diagnóstico.</td></tr>
+        <tr><td>Seguimiento comercial en el CRM</td><td><strong>Interés legítimo</strong> en atender a quien nos contacta por un servicio. Puedes oponerte y dejamos de hacerlo.</td></tr>
+        <tr><td>Medición del sitio</td><td>Tu <strong>consentimiento</strong>, dado en el aviso de cookies. Sin él no se activa.</td></tr>
+        <tr><td>Documentación tributaria de un trabajo contratado</td><td><strong>Obligación legal</strong>. Es lo único que no podemos borrar antes de plazo.</td></tr>
+      </table>
       <p><strong>No vendemos, arrendamos ni cedemos tus datos a terceros</strong> con fines comerciales, y no los usamos para publicidad dirigida a ti.</p>
 
       <h2>Dónde se guardan y quién los ve</h2>
@@ -144,12 +181,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </ul>
 
       <h2 id="eliminacion">Tus derechos y cómo eliminar tus datos</h2>
-      <p>Puedes pedirnos en cualquier momento, y sin costo:</p>
+      <p>La ley chilena te reconoce seis derechos sobre tus datos. Son tuyos, no se pueden limitar por contrato, y ejercerlos con nosotros no tiene costo:</p>
       <ul>
-        <li><strong>Acceso</strong>: qué datos tuyos tenemos y de dónde salieron.</li>
-        <li><strong>Rectificación</strong>: corregir lo que esté equivocado o desactualizado.</li>
-        <li><strong>Eliminación</strong>: borrar tus datos de nuestro CRM.</li>
-        <li><strong>Oposición</strong>: que dejemos de contactarte.</li>
+        <li><strong>Acceso</strong>: qué datos tuyos tenemos, de dónde salieron, para qué los usamos y a quién se los entregamos.</li>
+        <li><strong>Rectificación</strong>: corregir lo que esté equivocado, incompleto o desactualizado.</li>
+        <li><strong>Supresión</strong>: borrar tus datos, salvo lo que la ley nos obligue a conservar.</li>
+        <li><strong>Oposición</strong>: que dejemos de tratarlos para un fin determinado, por ejemplo dejar de contactarte.</li>
+        <li><strong>Portabilidad</strong>: recibir los datos que nos diste en un archivo estándar, o que se los entreguemos a quien nos indiques.</li>
+        <li><strong>Bloqueo</strong>: que suspendamos el uso de tus datos mientras resolvemos una solicitud de rectificación, supresión u oposición.</li>
       </ul>
       <div class="caja">
         <p style="margin:0 0 12px"><strong>Para eliminar tus datos</strong></p>
@@ -165,7 +204,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <p>Nuestros servicios están dirigidos a empresas y personas mayores de 18 años. No recogemos datos de menores a sabiendas. Si detectamos que recibimos datos de un menor, los eliminamos.</p>
 
       <h2>Marco legal y cambios</h2>
-      <p>Esta política se rige por la legislación chilena sobre protección de la vida privada y tratamiento de datos personales (Ley N° 19.628 y la normativa que la reemplace o complemente). Si no quedas conforme con cómo tratamos tu solicitud, puedes recurrir a la autoridad competente en Chile.</p>
+      <p>Esta política se rige por la legislación chilena sobre protección de datos personales: la <strong>Ley N° 19.628</strong> y la <strong>Ley N° 21.719</strong>, que la reemplaza y entra en vigencia el <strong>1 de diciembre de 2026</strong>. Nos ajustamos a esta última desde ya, sin esperar a esa fecha.</p>
+      <p>El <strong>responsable del tratamiento</strong> es Veta Labs, y el canal para cualquier asunto de datos personales es <a href="mailto:contacto@vetalabs.cl">contacto@vetalabs.cl</a>.</p>
+      <p>Si no quedas conforme con cómo resolvemos tu solicitud, puedes reclamar ante la <strong>Agencia de Protección de Datos Personales</strong>, el organismo que la Ley 21.719 crea para fiscalizar estas materias en Chile.</p>
+      <p>Si detectáramos una <strong>brecha de seguridad</strong> que afecte tus datos, te lo comunicaríamos a ti y a la Agencia sin dilaciones indebidas, contándote qué pasó y qué hacer.</p>
       <p>Si cambiamos esta política, actualizamos la fecha del encabezado. Los cambios que afecten cómo usamos datos ya recogidos te los avisaremos por correo antes de aplicarlos.</p>
 
     </div>
@@ -212,7 +254,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="wrap">
     <div class="site-footer__base">
       <span>© 2026 Veta Labs · E-commerce y crecimiento digital · Chile</span>
-      <span><a href="/privacidad">Política de privacidad</a></span>
+      <span><a href="/privacidad">Política de privacidad</a> · <button class="link-boton" type="button" data-consent-abrir>Preferencias de cookies</button></span>
     </div>
   </div>
 </footer>
