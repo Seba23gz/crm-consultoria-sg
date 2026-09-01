@@ -642,3 +642,32 @@ table.cmp tr:last-child th,table.cmp tr:last-child td{border-bottom:0}
 .shots figure>b{font:700 11.5px var(--font-mono);letter-spacing:.12em;text-transform:uppercase;
   color:var(--ink);display:flex;align-items:center;gap:9px}
 .shots figure>b::before{content:'';width:6px;height:6px;background:currentColor;flex:none}
+
+/* ---- Casos "Concepto / Demo": mockups en HTML/CSS, sin capturas falsas ---- */
+/* Distintivo de que un caso es una demo propia y no un cliente real. */
+.chip--demo{border-style:dashed;border-color:var(--ink);color:var(--ink);
+  background:transparent;font-family:var(--font-mono);letter-spacing:.08em;
+  text-transform:uppercase;font-size:11px}
+.sec--dark .chip--demo{border-color:var(--paper);color:var(--paper)}
+/* Aviso honesto: esto es un concepto, no un cliente. */
+.demo-nota{display:flex;gap:11px;align-items:flex-start;padding:15px 17px;
+  border:1px dashed var(--line);background:var(--paper-2);font-size:14.5px;
+  line-height:1.55;color:var(--ink-soft);margin-top:24px;max-width:72ch}
+.demo-nota b{color:var(--ink)}
+.demo-nota::before{content:'';flex:none;width:7px;height:7px;margin-top:7px;background:var(--ink)}
+/* Fila de mockups (varios .phone o tarjetas). */
+.mocks{display:flex;flex-wrap:wrap;gap:clamp(20px,3vw,30px);justify-content:center;align-items:flex-start}
+.mocks figure{margin:0;display:flex;flex-direction:column;gap:12px;width:min(100%,300px)}
+.mocks figcaption{font-size:13.5px;line-height:1.5;color:var(--ink-soft)}
+/* Acento de marca opcional en el .phone: style="--acc:#xxx". */
+.phone--acc .phone__buy{background:var(--acc,var(--ink))}
+.phone--acc .phone__price{color:var(--acc,var(--ink))}
+.phone--acc .phone__sizes b:first-child{border-color:var(--acc,var(--ink));color:var(--acc,var(--ink))}
+/* Mini-catálogo: grilla de productos con nombre y precio a la vista. */
+.pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+.pcard{border:1px solid var(--line);background:var(--card);overflow:hidden}
+.pcard__img{aspect-ratio:4/5;background:var(--paper-2);position:relative}
+.pcard__img::after{content:'';position:absolute;inset:24% 26%;border:1px solid var(--ink-faint);opacity:.45}
+.pcard__b{padding:9px 11px}
+.pcard__t{font:600 12.5px var(--font-display);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard__p{font:700 13px var(--font-display);color:var(--ink);margin-top:3px}
