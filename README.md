@@ -15,7 +15,7 @@ HTML plano, sin build. Vercel sirve la raíz tal cual, con `cleanUrls: true`
 
 | Ruta | Archivo | Qué es |
 |---|---|---|
-| `/` | `index.html` | Home: problema → solución → Shopify → método → proyectos → proceso → precios → FAQ → formulario |
+| `/` | `index.html` | Home: problema → solución → Shopify → método → proyectos → proceso → precios → CTA a contacto |
 | `/tiendas-online` | `tiendas-online.html` | Servicio principal: Shopify (recomendado), Tiendanube y WooCommerce |
 | `/paginas-web` | `paginas-web.html` | Landing pages, web corporativa y proyectos a medida |
 | `/cro` | `cro.html` | Optimización de conversión, también para tiendas de terceros |
@@ -29,7 +29,7 @@ HTML plano, sin build. Vercel sirve la raíz tal cual, con `cleanUrls: true`
 | `/contacto` | `contacto.html` | Formulario de diagnóstico (destino del CTA) |
 | `/privacidad` | `privacidad.html` | Política de privacidad (la exige Meta para los formularios) |
 | `/crm` | `crm/index.html` | CRM interno: pipeline, campañas, empresas y seguimientos (login Supabase) |
-| `/api/lead-form` | `api/lead-form.js` | Endpoint alternativo para recibir leads (hoy sin uso) |
+| `/api/lead-form` | `api/lead-form.js` | Respaldo POST sin JavaScript; reenvía a `nuevo-lead` |
 
 El CRM no se enlaza desde el sitio a propósito: se entra por la URL directa y
 queda detrás del login de Supabase.
@@ -116,12 +116,14 @@ Todo lo que hay que encender vive en el bloque `CONFIG` al principio de
 
 ### Medición
 
-El sitio carga **Google Tag Manager** (contenedor `GTM-TS67GQTV`) en el `<head>`
-de las dieciséis páginas públicas, con el `<noscript>` justo después de
-`<body>`. **El CRM queda fuera a propósito**: es interno, lleva `noindex` y medir
-las visitas del propio dueño ensucia los datos del sitio comercial.
+Las dieciocho páginas públicas cargan primero `assets/js/consent.js`. Ese script
+solo descarga **Google Tag Manager** (contenedor `GTM-TS67GQTV`) cuando la
+persona acepta la medición. **El CRM queda fuera a propósito**: es interno,
+lleva `noindex` y medir las visitas del propio dueño ensucia los datos del sitio
+comercial.
 
-Analytics y el píxel de Meta se configuran **dentro de GTM**, no en `veta.js`.
+Google Analytics 4 está configurado **dentro de GTM**. El píxel de Meta no está
+activo. Ambos se administran en GTM, no en `veta.js`.
 Las dos constantes de la tabla son la vía alternativa —cargar cada herramienta
 directamente— y tienen que quedarse vacías mientras GTM esté puesto: si se llena
 una y esa misma herramienta ya está en el contenedor, cada visita se cuenta dos
@@ -137,29 +139,30 @@ veces y nada avisa.
 ### Consentimiento (Ley 21.719)
 
 La ley chilena de datos personales entra en vigencia el **1 de diciembre de
-2026** y exige consentimiento **previo, informado y revocable** para la
-medición. El sitio lo resuelve con Google Consent Mode v2:
+2026**. Para la medición, el sitio pide un consentimiento previo, informado y
+revocable, y usa Consent Mode v2 en modalidad básica:
 
-1. Un script inline en el `<head>`, **antes** del snippet de GTM, declara
+1. `assets/js/consent.js`, cargado de forma síncrona en el `<head>`, declara
    `consent default` con todo **denegado** (`analytics_storage`, `ad_storage`,
-   `ad_user_data`, `ad_personalization`, `personalization_storage`).
-   GTM carga igual —necesita las señales— pero sus etiquetas quedan bloqueadas.
+   `ad_user_data`, `ad_personalization`, `personalization_storage`). Antes de
+   aceptar no descarga GTM ni envía solicitudes a Analytics.
 2. El banner `[data-consent]` pregunta. **Rechazar es un botón del mismo tamaño
    que Aceptar**, en el mismo lugar: si rechazar cuesta más que aceptar, el
    consentimiento no es libre y la ley no lo reconoce.
-3. La respuesta se guarda en `localStorage` bajo `veta_consent_v1`, con su fecha,
-   y se manda un `consent update` en el momento: si aceptó, las etiquetas se
-   activan sin recargar.
+3. La respuesta se guarda en `localStorage` bajo `veta_consent_v2`, con su fecha,
+   y se manda un `consent update` en el momento. Si aceptó, se descarga GTM; los
+   permisos de publicidad siguen denegados.
 4. «Preferencias de cookies», en el pie de todas las páginas, reabre el banner.
-   Retirar el permiso tiene que ser tan fácil como darlo.
+   Si la persona retira el permiso, la página se recarga para quitar la
+   herramienta que ya se había descargado.
 
-**Al sumar una herramienta al contenedor, subir la clave a `veta_consent_v2`**
-(en `assets/js/veta.js` y en el script del `<head>` de las dieciséis páginas).
+**Al sumar una herramienta al contenedor, subir la clave a una nueva versión**
+(en `assets/js/consent.js` y `assets/js/veta.js`).
 Eso invalida los consentimientos anteriores y vuelve a preguntar, que es lo
 correcto: la persona aceptó otra cosa.
 
-El orden del `<head>` no es decorativo: si el `consent default` corriera después
-del snippet de GTM, el contenedor ya habría disparado sus etiquetas sin permiso.
+El orden del `<head>` no es decorativo: `consent.js` debe correr antes de
+`veta.js` y de cualquier herramienta de medición.
 `scripts/seo-check.mjs` no cubre esto; lo cubre la prueba de consentimiento
 descrita en «Comprobar antes de publicar».
 
@@ -200,8 +203,21 @@ es `supabase/migrations/20260824210000_leads_campos_formulario.sql`.
 los campos nuevos): son opcionales a propósito, para que el sitio publicado pueda
 ir una versión atrás sin que se caiga la entrada de leads.
 
-`api/lead-form.js` hace lo mismo por otra vía y quedó sin conectar: si se
-activa, hay que apagar uno de los dos o cada lead entra duplicado.
+`api/lead-form.js` es el respaldo sin JavaScript: recibe POST y reenvía a la
+misma Edge Function, sin escribir directamente en la base ni necesitar claves
+privadas en Vercel. Nombre y correo válido son obligatorios.
+
+Antes de desplegar `nuevo-lead`, aplicar
+`supabase/migrations/20260906230000_web_intake.sql`. La escritura de empresa,
+contacto y lead es atómica. `request_id` deduplica reintentos con los mismos
+datos; formularios antiguos sin identificador se deduplican por contenido y día UTC.
+Las cuotas son 5 solicitudes nuevas por correo/hora y 100 globales/hora; no
+sustituyen un CAPTCHA ante ataques distribuidos. El registro `web_intake` tiene
+RLS y solo es accesible por el servidor.
+
+El aviso usa una clave de idempotencia de Resend. `email_status = sent` significa
+aceptado por Resend, no entrega confirmada. Los estados `failed` y `pending`
+requieren revisión operativa: no hay un trabajador programado de reenvíos.
 
 ### Meta Lead Ads
 
@@ -323,7 +339,7 @@ node scripts/consent-check.mjs    # consentimiento de cookies
 node scripts/gtm-check.mjs        # contenedor de GTM (no necesita navegador)
 ```
 
-Levanta un servidor que imita el `cleanUrls` de Vercel, abre las quince páginas
+Levanta un servidor que imita el `cleanUrls` de Vercel, abre las dieciocho páginas
 en Chromium a 390&nbsp;px y falla —código 1— si encuentra algo de esto:
 
 - un `<title>` que Google va a cortar o una `meta description` fuera de rango;
@@ -338,10 +354,10 @@ en Chromium a 390&nbsp;px y falla —código 1— si encuentra algo de esto:
 Al agregar una página hay que sumarla al arreglo `RUTAS` del script.
 
 `consent-check.mjs` recorre el flujo completo del banner en un navegador real:
-que la medición arranque denegada y que el `consent default` sea lo primero que
-entra al `dataLayer`; que rechazar deje todo denegado y aceptar lo conceda; que
-la decisión persista al navegar; que el pie reabra el banner; y que se pueda
-decidir con el teclado, sin desbordes en móvil.
+que GTM no se descargue antes de decidir ni después de rechazar; que aceptar
+conceda solo la medición y cargue GTM; que la decisión persista al navegar; que
+retirar el permiso descargue la página limpia; que el pie reabra el banner; y
+que se pueda decidir con el teclado, sin desbordes en móvil.
 
 `gtm-check.mjs` revisa `docs/gtm-vetalabs-ga4.json`, el contenedor de GTM listo
 para importar: que siga siendo importable y —lo que de verdad se desalinea con el

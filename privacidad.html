@@ -3,27 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- Consentimiento (Ley 21.719): medición y publicidad arrancan DENEGADAS.
-     Este bloque va antes de GTM a propósito; si fuera después, el contenedor ya
-     habría disparado sus etiquetas sin permiso. -->
-<script>
-(function(w){w.dataLayer=w.dataLayer||[];function g(){w.dataLayer.push(arguments)}w.gtag=w.gtag||g;
-g('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',
-analytics_storage:'denied',personalization_storage:'denied',functionality_storage:'granted',
-security_storage:'granted',wait_for_update:500});
-try{var c=JSON.parse(w.localStorage.getItem('veta_consent_v1')||'null');
-if(c&&c.estado==='aceptado'){g('consent','update',{ad_storage:'granted',ad_user_data:'granted',
-ad_personalization:'granted',analytics_storage:'granted',personalization_storage:'granted'})}}catch(e){}
-})(window);
-</script>
-<!-- Google Tag Manager -->
-<link rel="preconnect" href="https://www.googletagmanager.com">
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-TS67GQTV');</script>
-<!-- End Google Tag Manager -->
+<!-- Consentimiento previo: este script bloquea GTM hasta que la persona acepta. -->
+<script src="/assets/js/consent.js"></script>
 <title>Política de privacidad — Veta Labs</title>
 <meta name="description" content="Qué datos personales recoge Veta Labs, para qué los usa, dónde los guarda y cómo pedir acceso o eliminación.">
 <meta name="author" content="Veta Labs">
@@ -55,10 +36,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://vetalabs.cl/"},{"@type":"ListItem","position":2,"name":"Privacidad","item":"https://vetalabs.cl/privacidad"}]}</script>
 </head>
 <body>
-<!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TS67GQTV"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
 <a class="skip" href="#main">Saltar al contenido</a>
 
 <!-- Consentimiento de cookies. Oculto hasta que el JS confirme que no hay
@@ -102,7 +79,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <p class="eyebrow">Política de privacidad</p>
       <h1>Cómo tratamos tus datos</h1>
       <p class="lead" style="margin-top:20px">Esta política explica qué datos personales recoge <strong>Veta Labs</strong>, para qué los usa, dónde se guardan y cómo puedes pedir acceso o eliminación. Está escrita para leerse, no para cubrirnos las espaldas.</p>
-      <p class="mono fine" style="margin-top:22px">Última actualización: 23 de agosto de 2026</p>
+      <p class="mono fine" style="margin-top:22px">Última actualización: 8 de septiembre de 2026</p>
     </div>
   </section>
 
@@ -114,7 +91,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <p>Para cualquier asunto relacionado con tus datos, incluida su eliminación, escríbenos a <a href="mailto:contacto@vetalabs.cl"><strong>contacto@vetalabs.cl</strong></a>.</p>
 
       <h2>Qué datos recogemos y de dónde</h2>
-      <p>Solo recogemos datos que tú nos entregas de forma voluntaria. No compramos bases de datos de personas ni hacemos perfilamiento.</p>
+      <p>Recogemos los datos que tú nos entregas de forma voluntaria y, solo si aceptas la medición, datos técnicos básicos sobre el uso del sitio. No compramos bases de datos de personas ni hacemos perfilamiento.</p>
       <table>
         <tr><th>Origen</th><th>Datos</th></tr>
         <tr>
@@ -129,6 +106,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <td><strong>Correo o mensajería</strong>, si nos escribes directamente</td>
           <td>Lo que incluyas en tu mensaje.</td>
         </tr>
+        <tr>
+          <td><strong>Medición del sitio</strong>, solo si la aceptas</td>
+          <td>Páginas y acciones vistas, tipo de navegador y dispositivo, y ubicación aproximada derivada de la conexión. No enviamos a la medición lo que escribes en el formulario.</td>
+        </tr>
       </table>
       <p>Junto a los datos de Meta guardamos también los identificadores técnicos del anuncio y del formulario que originaron el contacto. Sirven para saber de qué campaña vino cada consulta; no identifican a la persona por sí solos.</p>
       <p><strong>No recogemos datos sensibles</strong> —salud, origen étnico, afiliación política o sindical, creencias, vida sexual— y te pedimos que no los incluyas en los mensajes.</p>
@@ -139,11 +120,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            publicidad dirigida— hay que actualizarlo ANTES de publicar. Lo mismo
            si se activan META_PIXEL_ID o GA_MEASUREMENT_ID en assets/js/veta.js. -->
       <h2>Medición y cookies</h2>
-      <p>Este sitio carga <strong>Google Tag Manager</strong>, un contenedor de Google desde el que activamos nuestras herramientas de medición. El contenedor por sí solo no guarda cookies; sí lo hacen las herramientas que se cargan desde él, con cookies propias de Google que quedan en tu navegador.</p>
+      <p>Este sitio usa <strong>Google Tag Manager</strong> para cargar <strong>Google Analytics 4</strong>. Ambos se descargan únicamente después de que aceptas la medición. Analytics usa cookies propias, como <code>_ga</code> y <code>_ga_&lt;id&gt;</code>, para distinguir un navegador y sus sesiones.</p>
       <p>Lo que medimos son <strong>páginas vistas y algunas acciones</strong>: clics en el botón de diagnóstico, si empezaste el formulario y si lo enviaste, clics en el enlace de WhatsApp, y si llegaste a ver la sección de precios o un proyecto. Nos sirve para saber qué parte del sitio funciona y cuál no.</p>
       <p><strong>A la medición no viaja nada de lo que escribes en el formulario</strong>: ni tu nombre, ni tu correo, ni tu teléfono, ni tu mensaje. De un envío solo se registra que ocurrió y qué servicio elegiste en la lista desplegable, que es una de las opciones fijas y no dice nada de ti.</p>
-      <p><strong>Nada de esto se activa hasta que lo aceptas.</strong> Al entrar por primera vez verás un aviso abajo con dos botones del mismo tamaño, Aceptar y Rechazar. Mientras no elijas, la medición queda desactivada; si rechazas, se queda desactivada. Guardamos tu decisión y su fecha en tu propio navegador, para no volver a preguntarte y para poder acreditar qué elegiste.</p>
-      <p>Puedes <strong>cambiar de opinión cuando quieras</strong> desde «Preferencias de cookies», al final de cualquier página. Retirar el permiso es tan fácil como darlo, y no cambia nada de lo demás: el sitio funciona igual y el formulario también. También puedes bloquear las cookies desde la configuración de tu navegador o con una extensión.</p>
+      <p><strong>Nada de esto se descarga ni se activa hasta que lo aceptas.</strong> Al entrar por primera vez verás un aviso abajo con dos botones del mismo tamaño, Aceptar y Rechazar. Mientras no elijas, y también si rechazas, no hacemos solicitudes a Google Tag Manager ni a Google Analytics. Guardamos tu decisión y su fecha solo en tu navegador para no volver a preguntarte.</p>
+      <p>Puedes <strong>cambiar de opinión cuando quieras</strong> desde «Preferencias de cookies», al final de cualquier página. Si retiras el permiso, la página se recarga para quitar la herramienta de medición que ya se había descargado. El sitio y el formulario siguen funcionando igual. También puedes bloquear las cookies desde la configuración de tu navegador o con una extensión.</p>
       <p>Si más adelante sumamos una herramienta de medición nueva, volveremos a preguntarte: lo que aceptaste no se extiende a algo que todavía no existía.</p>
 
       <h2>Para qué los usamos</h2>
@@ -171,6 +152,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <tr><td>Vercel</td><td>Alojamiento de este sitio web</td></tr>
         <tr><td>Resend</td><td>Envío del aviso interno por correo cuando llega una consulta</td></tr>
         <tr><td>Meta Platforms</td><td>Origen de los leads captados por formularios de Facebook e Instagram</td></tr>
+        <tr><td>Google Tag Manager y Google Analytics 4</td><td>Medición de páginas y acciones del sitio, solo con tu consentimiento</td></tr>
         <tr><td>Google Fonts</td><td>Entrega de las tipografías del sitio</td></tr>
       </table>
       <p>Como estos proveedores operan fuera de Chile, tus datos se transfieren y procesan en el extranjero, principalmente en Estados Unidos.</p>
@@ -200,7 +182,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <p>Si el contacto vino de un formulario de Facebook o Instagram, además puedes revisar y retirar los permisos de la aplicación desde la configuración de tu propia cuenta de Meta. Eso corta la entrega de datos nuevos, pero no borra lo que ya recibimos: para eso escríbenos.</p>
 
       <h2>Seguridad</h2>
-      <p>Ciframos las comunicaciones (HTTPS), guardamos las credenciales fuera del código, restringimos el acceso a la base de datos con reglas por fila, y validamos criptográficamente el origen de los datos que recibimos desde Meta. Ningún sistema es infalible, pero no guardamos más de lo que necesitamos, que es la mejor protección que existe.</p>
+      <p>Ciframos las comunicaciones (HTTPS), no exponemos credenciales privadas en el sitio público, restringimos el acceso a la base de datos con reglas por fila y validamos criptográficamente el origen de los datos que recibimos desde Meta. Ningún sistema es infalible, por eso también limitamos los datos que guardamos.</p>
 
       <h2>Menores de edad</h2>
       <p>Nuestros servicios están dirigidos a empresas y personas mayores de 18 años. No recogemos datos de menores a sabiendas. Si detectamos que recibimos datos de un menor, los eliminamos.</p>

@@ -1,8 +1,8 @@
 // Comprobación del consentimiento de cookies (Ley 21.719), antes de publicar.
 //
 // Lo que verifica, que es lo que la ley mira:
-//   - que la medición arranque DENEGADA y el `consent default` sea lo primero
-//     que entra al dataLayer, antes de que GTM pueda disparar nada;
+//   - que la medición arranque DENEGADA, que el `consent default` sea lo primero
+//     que entra al dataLayer y que GTM ni siquiera se descargue antes de aceptar;
 //   - que rechazar deje todo denegado y que aceptar lo conceda;
 //   - que la decisión persista al navegar y no se vuelva a preguntar;
 //   - que el pie reabra el banner, porque retirar el permiso tiene que ser tan
@@ -61,14 +61,13 @@ let c=await consentimientos(p);
 ok(c.length===1 && c[0].modo==='default', 'arranca con un consent default', JSON.stringify(c));
 ok(c[0].analytics==='denied' && c[0].ads==='denied', 'analytics y ads DENEGADOS antes de decidir');
 ok(await p.locator('[data-consent]').isVisible(), 'el banner se ve en la primera visita');
-ok(await p.evaluate(()=>!!window.__gtm), 'GTM igual carga (necesita las señales de consentimiento)');
+ok(!(await p.evaluate(()=>!!window.__gtm)), 'GTM NO carga antes de decidir');
 
-// El orden importa: el default tiene que ir antes del snippet de GTM. Se mira
-// el archivo y no el DOM, porque el cargador de GTM inserta su <script> antes
-// del primer script del documento y en el DOM aparece delante aunque no lo esté.
+// El orden importa: el script de consentimiento tiene que ser síncrono y el
+// primero capaz de arrancar medición.
 const fuente = fs.readFileSync(path.join(R,'index.html'),'utf8');
-ok(fuente.indexOf("'consent','default'") < fuente.indexOf("googletagmanager.com/gtm.js"),
-   'el consent default va ANTES del snippet de GTM en el archivo');
+ok(fuente.indexOf('/assets/js/consent.js') < fuente.indexOf('/assets/js/veta.js'),
+   'consent.js carga ANTES que veta.js');
 ok(await p.evaluate(()=>{const d=window.dataLayer||[];return d[0]&&d[0][0]==='consent'&&d[0][1]==='default';}),
    'el default es lo PRIMERO que entra al dataLayer');
 
@@ -83,6 +82,13 @@ for (const w of [390,1280]) {
   });
   ok(desborde===0, `sin desborde horizontal a ${w}px`, 'desborde='+desborde);
   ok(!tapa, `la barra del CTA no compite con el banner a ${w}px`);
+  const medidas=await pw.evaluate(()=>{
+    const no=document.querySelector('[data-consent-no]').getBoundingClientRect();
+    const si=document.querySelector('[data-consent-si]').getBoundingClientRect();
+    return {no:[Math.round(no.width),Math.round(no.height)],si:[Math.round(si.width),Math.round(si.height)]};
+  });
+  ok(medidas.no[0]===medidas.si[0] && medidas.no[1]===medidas.si[1],
+     `aceptar y rechazar pesan igual a ${w}px`, JSON.stringify(medidas));
   await pw.context().close();
 }
 
@@ -92,12 +98,14 @@ c=await consentimientos(p);
 ok(c.length===2 && c[1].modo==='update', 'rechazar manda un consent update');
 ok(c[1].analytics==='denied' && c[1].ads==='denied', 'tras rechazar sigue DENEGADO');
 ok(!(await p.locator('[data-consent]').isVisible()), 'el banner se cierra al rechazar');
+ok(!(await p.evaluate(()=>!!window.__gtm)), 'rechazar no descarga GTM');
 
 // Persiste entre páginas: no vuelve a preguntar.
 await p.goto(B+'/precios',{waitUntil:'domcontentloaded'}); await p.waitForTimeout(400);
 ok(!(await p.locator('[data-consent]').isVisible()), 'no vuelve a preguntar al navegar');
 c=await consentimientos(p);
 ok(c.every(x=>x.analytics==='denied'), 'en la página siguiente sigue denegado', JSON.stringify(c));
+ok(!(await p.evaluate(()=>!!window.__gtm)), 'GTM sigue ausente después de navegar');
 ok(await p.locator('[data-consent-abrir]').count()>0, 'el pie ofrece "Preferencias de cookies"');
 
 // ---------- 4. Cambiar de opinión: reabrir y aceptar ----------
@@ -105,7 +113,9 @@ await p.click('[data-consent-abrir]'); await p.waitForTimeout(200);
 ok(await p.locator('[data-consent]').isVisible(), 'el pie reabre el banner');
 await p.click('[data-consent-si]'); await p.waitForTimeout(300);
 c=await consentimientos(p);
-ok(c[c.length-1].analytics==='granted' && c[c.length-1].ads==='granted', 'aceptar CONCEDE analytics y ads');
+ok(c[c.length-1].analytics==='granted' && c[c.length-1].ads==='denied',
+   'aceptar concede Analytics y mantiene publicidad DENEGADA');
+ok(await p.evaluate(()=>!!window.__gtm), 'aceptar descarga GTM');
 
 // Y persiste ya concedido en la carga siguiente, desde el <head>.
 await p.goto(B+'/contacto',{waitUntil:'domcontentloaded'}); await p.waitForTimeout(400);
@@ -113,6 +123,7 @@ c=await consentimientos(p);
 ok(c.length===2 && c[1].modo==='update' && c[1].analytics==='granted',
    'al recargar arranca denegado y concede de inmediato', JSON.stringify(c));
 ok(!(await p.locator('[data-consent]').isVisible()), 'ya no pregunta tras aceptar');
+ok(await p.evaluate(()=>!!window.__gtm), 'con permiso guardado, GTM carga en la página siguiente');
 
 // ---------- 5. Los eventos del sitio no se duplican ----------
 const cta=p.locator('[data-ev="click_diagnostico"]:visible').first();
@@ -120,6 +131,13 @@ await cta.evaluate(el=>el.removeAttribute('href'));
 await cta.click(); await p.waitForTimeout(200);
 const veces=await p.evaluate(()=>(window.dataLayer||[]).filter(x=>x&&x.event==='click_diagnostico').length);
 ok(veces===1, 'el evento del CTA se registra una sola vez', 'veces='+veces);
+
+// Retirar el permiso descarga la página actual para sacar las etiquetas que ya
+// estaban en memoria. La carga siguiente queda limpia y sin GTM.
+await p.click('[data-consent-abrir]');
+await Promise.all([p.waitForNavigation({waitUntil:'domcontentloaded'}), p.click('[data-consent-no]')]);
+await p.waitForTimeout(300);
+ok(!(await p.evaluate(()=>!!window.__gtm)), 'retirar el permiso recarga sin GTM');
 
 // ---------- 6. Teclado ----------
 const ctx2=await b.newContext({viewport:{width:1280,height:900}});

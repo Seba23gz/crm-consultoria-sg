@@ -27,6 +27,7 @@ const PUERTO = 4399;
 const RUTAS = [
   '/', '/tiendas-online', '/paginas-web', '/cro', '/precios',
   '/proyectos', '/proyectos/pecadoras-shoes', '/proyectos/checkyourcars', '/proyectos/checkyourweb',
+  '/proyectos/concepto-moda', '/proyectos/concepto-cafe', '/proyectos/concepto-inmobiliaria',
   '/blog', '/blog/dejar-de-vender-solo-por-instagram', '/blog/que-necesitas-para-abrir-una-tienda-online',
   '/nosotros', '/contacto', '/privacidad',
 ];

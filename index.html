@@ -3,27 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- Consentimiento (Ley 21.719): medición y publicidad arrancan DENEGADAS.
-     Este bloque va antes de GTM a propósito; si fuera después, el contenedor ya
-     habría disparado sus etiquetas sin permiso. -->
-<script>
-(function(w){w.dataLayer=w.dataLayer||[];function g(){w.dataLayer.push(arguments)}w.gtag=w.gtag||g;
-g('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',
-analytics_storage:'denied',personalization_storage:'denied',functionality_storage:'granted',
-security_storage:'granted',wait_for_update:500});
-try{var c=JSON.parse(w.localStorage.getItem('veta_consent_v1')||'null');
-if(c&&c.estado==='aceptado'){g('consent','update',{ad_storage:'granted',ad_user_data:'granted',
-ad_personalization:'granted',analytics_storage:'granted',personalization_storage:'granted'})}}catch(e){}
-})(window);
-</script>
-<!-- Google Tag Manager -->
-<link rel="preconnect" href="https://www.googletagmanager.com">
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-TS67GQTV');</script>
-<!-- End Google Tag Manager -->
+<!-- Consentimiento previo: este script bloquea GTM hasta que la persona acepta. -->
+<script src="/assets/js/consent.js"></script>
 <title>Veta Labs | Agencia Shopify y e-commerce en Chile</title>
 <meta name="description" content="Agencia chilena de e-commerce: creamos tu tienda online en Shopify si ya vendes por Instagram y WhatsApp. Desde $300.000 CLP. Diagnóstico gratuito.">
 <meta name="author" content="Veta Labs">
@@ -55,13 +36,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <script defer src="/assets/js/veta.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"ProfessionalService","@id":"https://vetalabs.cl/#organizacion","name":"Veta Labs","description":"Agencia chilena de e-commerce y crecimiento digital. Tiendas online en Shopify, Tiendanube y WooCommerce, páginas web y optimización de conversión (CRO).","url":"https://vetalabs.cl/","logo":"https://vetalabs.cl/icon-512.png","image":"https://vetalabs.cl/og-image.png","email":"contacto@vetalabs.cl","telephone":"+56963060767","priceRange":"$$","areaServed":{"@type":"Country","name":"Chile"},"address":{"@type":"PostalAddress","addressRegion":"Región de Coquimbo","addressCountry":"CL"},"sameAs":["https://www.instagram.com/vetalabs/","https://www.linkedin.com/in/sebasti%C3%A1n-gonzalo-g%C3%B3mez-past%C3%A9n/"],"founder":{"@type":"Person","name":"Sebastián Gómez Pastén"},"makesOffer":[{"@type":"Offer","name":"Tienda online en Shopify","priceCurrency":"CLP","price":"300000","priceSpecification":{"@type":"PriceSpecification","minPrice":"300000","priceCurrency":"CLP"}},{"@type":"Offer","name":"Landing page","priceCurrency":"CLP","price":"120000","priceSpecification":{"@type":"PriceSpecification","minPrice":"120000","priceCurrency":"CLP"}},{"@type":"Offer","name":"Shopify Growth","priceCurrency":"CLP","price":"600000","priceSpecification":{"@type":"PriceSpecification","minPrice":"600000","priceCurrency":"CLP"}}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Veta Labs","url":"https://vetalabs.cl/","inLanguage":"es-CL"}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"¿Trabajan solo con Shopify?","acceptedAnswer":{"@type":"Answer","text":"No. Shopify es lo que proponemos por defecto, porque es la que menos trabajo técnico te deja después. Pero también construimos en Tiendanube y en WooCommerce, al mismo precio. Cuál te conviene sale del diagnóstico: si da lo mismo, te vamos a recomendar Shopify."}},{"@type":"Question","name":"¿La tienda cumple con la nueva ley de datos personales?","acceptedAnswer":{"@type":"Answer","text":"La Ley 21.719 entra en vigencia el 1 de diciembre de 2026 y alcanza a cualquier negocio que trate datos de personas. Construimos tu tienda con lo que nos toca a nosotros: consentimiento antes de medir, política de privacidad escrita sobre tu negocio y un canal para que tus clientes ejerzan sus derechos. El cumplimiento también depende de cómo manejes los datos después, y el detalle legal lo tiene que ver un abogado: no somos abogados ni vendemos asesoría legal."}},{"@type":"Question","name":"¿Tengo que saber usar Shopify?","acceptedAnswer":{"@type":"Answer","text":"No. Te entregamos la tienda funcionando y te capacitamos para administrarla: subir productos, cambiar precios, gestionar stock y procesar pedidos. La sesión queda grabada para que la revises cuando quieras."}},{"@type":"Question","name":"¿Puedo administrar la tienda yo después?","acceptedAnswer":{"@type":"Answer","text":"Sí, y es el objetivo. La cuenta de Shopify queda a tu nombre, con tus accesos y tu medio de pago. No trabajamos con cuentas nuestras ni retenemos accesos: si mañana quieres seguir con otra agencia o solo, puedes hacerlo."}},{"@type":"Question","name":"¿Cuántos productos incluye?","acceptedAnswer":{"@type":"Answer","text":"Dejamos configurados entre 10 y 15 productos, construidos bien: variantes, categorías, fotos, descripciones y SEO. No es un límite de tu tienda, es el punto de partida. Con esa plantilla armada, cargar el resto de tu catálogo es repetir un proceso que ya te enseñamos."}},{"@type":"Question","name":"¿Qué pasa si tengo muchos más productos?","acceptedAnswer":{"@type":"Answer","text":"Lo vemos en el diagnóstico. Si tienes un catálogo grande, normalmente conviene el plan Growth o una carga masiva cotizada aparte, porque el trabajo deja de ser diseño y pasa a ser estructura de datos."}},{"@type":"Question","name":"¿Shopify tiene un costo mensual?","acceptedAnswer":{"@type":"Answer","text":"Sí. Shopify cobra su propia suscripción mensual, aparte de nuestro trabajo, y se paga directamente a Shopify con tu tarjeta. Tiendanube funciona igual. WooCommerce no cobra suscripción de plataforma, pero necesita un hosting que sí se paga. En el diagnóstico te decimos cuánto cuesta hoy la opción que te convenga, para que no haya sorpresas."}},{"@type":"Question","name":"¿Incluye el dominio?","acceptedAnswer":{"@type":"Answer","text":"Configuramos tu dominio y lo dejamos apuntando a la tienda. El dominio en sí se paga aparte (por ejemplo, un .cl se compra en NIC Chile) y queda registrado a tu nombre."}},{"@type":"Question","name":"¿Incluye los medios de pago?","acceptedAnswer":{"@type":"Answer","text":"Configuramos los medios de pago que puedas contratar en Chile y dejamos el checkout probado de punta a punta. Las cuentas con cada proveedor las abres tú, a nombre de tu negocio: es tu dinero y tiene que llegar directo a ti."}},{"@type":"Question","name":"¿Trabajan con negocios fuera de La Serena?","acceptedAnswer":{"@type":"Answer","text":"Sí. Trabajamos 100% online con negocios de cualquier ciudad de Chile. Las reuniones son por videollamada y la entrega es digital, así que la distancia no cambia nada del proceso."}},{"@type":"Question","name":"¿Necesito fotos profesionales?","acceptedAnswer":{"@type":"Answer","text":"Ayudan mucho, pero no siempre son imprescindibles. Trabajamos con el material que ya tienes y te decimos con franqueza qué fotos conviene rehacer y cómo. La producción fotográfica no la hacemos nosotros: si hace falta, te orientamos para contratarla o resolverla bien con tu celular."}},{"@type":"Question","name":"¿Hacen publicidad?","acceptedAnswer":{"@type":"Answer","text":"Configuramos y gestionamos Meta Ads (Instagram y Facebook) como servicio aparte, nunca incluido por defecto en el precio de la tienda. Hoy no trabajamos con Google Ads."}},{"@type":"Question","name":"¿Tengo que pagar una mantención mensual?","acceptedAnswer":{"@type":"Answer","text":"No. No vendemos contratos de mantención obligatoria. Terminado el proyecto, la tienda es tuya y no nos debes nada más. Si después quieres mejoras, CRO, automatizaciones o publicidad, se cotiza en ese momento."}},{"@type":"Question","name":"¿Cuánto demora un proyecto?","acceptedAnswer":{"@type":"Answer","text":"Depende del alcance y, sobre todo, de la rapidez con que recibamos tus fotos, textos y datos de productos: esa suele ser la parte que más se demora. En el diagnóstico te entregamos un plazo concreto por escrito antes de que decidas."}}]}</script>
 </head>
 <body>
-<!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TS67GQTV"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
 <a class="skip" href="#main">Saltar al contenido</a>
 
 <!-- Consentimiento de cookies. Oculto hasta que el JS confirme que no hay
@@ -108,7 +84,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <h1>Tu negocio ya vende.<br>Ahora haz que <span class="muted">venda mejor</span>.</h1>
         <p class="lead">Creamos tiendas online en Shopify pensadas para convertir: tu catálogo ordenado, la compra clara y tu negocio dejando de depender de responder mensajes uno por uno.</p>
         <div class="hero__cta">
-          <a class="btn btn--primary" href="#diagnostico" data-ev="click_diagnostico" data-ev-pos="hero">Diagnóstico gratuito</a>
+          <a class="btn btn--primary" href="/contacto" data-ev="click_diagnostico" data-ev-pos="hero">Diagnóstico gratuito</a>
           <a class="btn btn--ghost" href="#proyectos">Ver proyectos</a>
         </div>
         <p class="hero__price"><b>Tiendas online desde $300.000 CLP</b> <span aria-hidden="true">·</span> Landing desde $120.000 <span aria-hidden="true">·</span> sin mantención obligatoria</p>
@@ -118,24 +94,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
       </div>
 
-      <!-- Mockup en HTML/CSS: sin imagen, sin peso y nítido en cualquier pantalla. -->
-      <div aria-hidden="true">
+      <figure class="hero__proof">
         <div class="phone">
           <div class="phone__screen">
-            <div class="phone__bar"><span>TU MARCA</span><i><b></b><b></b><b></b></i></div>
-            <div class="phone__body">
-              <div class="phone__img"></div>
-              <div>
-                <p class="phone__title">Zapato Vera — Negro</p>
-                <p class="phone__price">$39.990</p>
-              </div>
-              <div class="phone__sizes"><b>37</b><b>38</b><b>39</b><b>40</b></div>
-              <div class="phone__buy">Agregar al carro</div>
-              <div class="phone__trust"><span>Despacho a todo Chile</span><span>Cambios en 30 días</span></div>
-            </div>
+            <img class="phone__real" src="/assets/img/pecadoras-tienda-portada.webp" width="760" height="1352" alt="Portada móvil de la tienda Shopify de Pecadoras Shoes" fetchpriority="high" decoding="async">
           </div>
         </div>
-      </div>
+        <figcaption><a href="/proyectos/pecadoras-shoes">Pecadoras Shoes · ver el caso real</a></figcaption>
+      </figure>
     </div>
   </section>
 
@@ -211,7 +177,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <p class="plan__price" style="margin-bottom:22px"><em>Desde</em> <b>$300.000</b> <i>CLP</i></p>
           <div class="row">
             <a class="btn btn--primary" href="/tiendas-online" data-ev="click_shopify" data-ev-pos="home_servicio">Ver qué incluye</a>
-            <a class="btn btn--ghost" href="#diagnostico" data-ev="click_diagnostico" data-ev-pos="home_servicio">Diagnóstico gratuito</a>
+            <a class="btn btn--ghost" href="/contacto" data-ev="click_diagnostico" data-ev-pos="home_servicio">Diagnóstico gratuito</a>
           </div>
         </div>
         <ul class="ticks" data-reveal="0">
@@ -236,7 +202,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <p class="lead">Una tienda bonita que no vende es un gasto. Construimos pensando en cómo compra realmente una persona, y eso se traduce en seis preguntas concretas que tienen que quedar resueltas.</p>
       </div>
       <ol class="method" data-reveal="0">
-        <li><h3>Que encuentre lo que busca</h3><p>Navegación, categorías y buscador que funcionan. Si el cliente no encuentra el producto en tres toques, no compra.</p></li>
+        <li><h3>Que encuentre lo que busca</h3><p>Navegación, categorías y buscador que funcionan. Si encontrar un producto cuesta demasiado, es más probable que el cliente abandone.</p></li>
         <li><h3>Que entienda el producto rápido</h3><p>Fotos, medidas, materiales y descripciones que responden las preguntas que hoy te llegan por privado.</p></li>
         <li><h3>Que confíe en la marca</h3><p>Quién está detrás, cómo contactar, política de cambios, reseñas. Comprar en internet es un acto de confianza.</p></li>
         <li><h3>Que las condiciones estén claras</h3><p>Costo y plazo de despacho, cambios y devoluciones. Visibles antes del carrito, no como sorpresa en el checkout.</p></li>
@@ -326,7 +292,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <article class="step" data-reveal="0.1"><span class="step__n" aria-hidden="true">03</span><span class="step__tag">Construcción</span><h3>Diseñamos y desarrollamos</h3><p>Levantamos la tienda o el sitio, con revisiones tuyas en el camino. Nada se construye a ciegas.</p></article>
         <article class="step" data-reveal="0.15"><span class="step__n" aria-hidden="true">04</span><span class="step__tag">Configuración</span><h3>Dejamos todo conectado</h3><p>Pagos, despachos, dominio, Analytics, Meta Pixel, productos iniciales y las automatizaciones que correspondan.</p></article>
         <article class="step" data-reveal="0.2"><span class="step__n" aria-hidden="true">05</span><span class="step__tag">Entrega</span><h3>Te enseñamos a usarla</h3><p>Accesos a tu nombre y capacitación grabada: productos, precios, stock, pedidos y colecciones. Después sigues tú.</p></article>
-        <article class="step marco" style="background:var(--ink);color:var(--paper)" data-reveal="0.25"><h3 style="color:var(--paper)">¿Empezamos por el diagnóstico?</h3><p style="color:var(--ink-faint);margin-bottom:16px">Es gratis, dura una videollamada y sales con un plan claro, lo trabajes con nosotros o no.</p><a class="link-arrow" style="color:var(--paper)" href="#diagnostico" data-ev="click_diagnostico" data-ev-pos="proceso">Solicitar diagnóstico <span aria-hidden="true">→</span></a></article>
+        <article class="step marco" style="background:var(--ink);color:var(--paper)" data-reveal="0.25"><h3 style="color:var(--paper)">¿Empezamos por el diagnóstico?</h3><p style="color:var(--ink-faint);margin-bottom:16px">Es gratis, dura una videollamada y sales con un plan claro, lo trabajes con nosotros o no.</p><a class="link-arrow" style="color:var(--paper)" href="/contacto" data-ev="click_diagnostico" data-ev-pos="proceso">Solicitar diagnóstico <span aria-hidden="true">→</span></a></article>
       </div>
     </div>
   </section>
@@ -414,167 +380,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </section>
 
-  <!-- ===================== FAQ ===================== -->
-  <section class="sec" id="faq">
-    <div class="wrap wrap--narrow">
-      <div class="sec__head">
-        <p class="eyebrow">09 · Dudas frecuentes</p>
-        <h2>Lo que todos preguntan antes de decidir</h2>
-      </div>
-      <div class="faq">
-        <details>
-          <summary>¿La tienda cumple con la nueva ley de datos personales?</summary>
-          <div class="faq__a"><p>La Ley 21.719 entra en vigencia el 1 de diciembre de 2026 y alcanza a cualquier negocio que trate datos de personas. Construimos tu tienda con lo que nos toca a nosotros: consentimiento antes de medir, política de privacidad escrita sobre tu negocio y un canal para que tus clientes ejerzan sus derechos. El cumplimiento también depende de cómo manejes los datos después, y el detalle legal lo tiene que ver un abogado: no somos abogados ni vendemos asesoría legal.</p></div>
-        </details>
-        <details>
-          <summary>¿Trabajan solo con Shopify?</summary>
-          <div class="faq__a"><p>No. Shopify es lo que proponemos por defecto, porque es la que menos trabajo técnico te deja después. Pero también construimos en Tiendanube y en WooCommerce, al mismo precio. Cuál te conviene sale del diagnóstico: si da lo mismo, te vamos a recomendar Shopify.</p></div>
-        </details>
-        <details>
-          <summary>¿Tengo que saber usar Shopify?</summary>
-          <div class="faq__a"><p>No. Te entregamos la tienda funcionando y te capacitamos para administrarla: subir productos, cambiar precios, gestionar stock y procesar pedidos. La sesión queda grabada para que la revises cuando quieras.</p></div>
-        </details>
-        <details>
-          <summary>¿Puedo administrar la tienda yo después?</summary>
-          <div class="faq__a"><p>Sí, y es el objetivo. La cuenta de Shopify queda a tu nombre, con tus accesos y tu medio de pago. No trabajamos con cuentas nuestras ni retenemos accesos: si mañana quieres seguir con otra agencia o solo, puedes hacerlo.</p></div>
-        </details>
-        <details>
-          <summary>¿Cuántos productos incluye?</summary>
-          <div class="faq__a"><p>Dejamos configurados entre 10 y 15 productos, construidos bien: variantes, categorías, fotos, descripciones y SEO. No es un límite de tu tienda, es el punto de partida. Con esa plantilla armada, cargar el resto de tu catálogo es repetir un proceso que ya te enseñamos.</p></div>
-        </details>
-        <details>
-          <summary>¿Qué pasa si tengo muchos más productos?</summary>
-          <div class="faq__a"><p>Lo vemos en el diagnóstico. Si tienes un catálogo grande, normalmente conviene el plan Growth o una carga masiva cotizada aparte, porque el trabajo deja de ser diseño y pasa a ser estructura de datos.</p></div>
-        </details>
-        <details>
-          <summary>¿Shopify tiene un costo mensual?</summary>
-          <div class="faq__a"><p>Sí. Shopify cobra su propia suscripción mensual, aparte de nuestro trabajo, y se paga directamente a Shopify con tu tarjeta. Tiendanube funciona igual. WooCommerce no cobra suscripción de plataforma, pero necesita un hosting que sí se paga. En el diagnóstico te decimos cuánto cuesta hoy la opción que te convenga, para que no haya sorpresas.</p></div>
-        </details>
-        <details>
-          <summary>¿Incluye el dominio?</summary>
-          <div class="faq__a"><p>Configuramos tu dominio y lo dejamos apuntando a la tienda. El dominio en sí se paga aparte (por ejemplo, un <code>.cl</code> se compra en NIC Chile) y queda registrado a tu nombre.</p></div>
-        </details>
-        <details>
-          <summary>¿Incluye los medios de pago?</summary>
-          <div class="faq__a"><p>Configuramos los medios de pago que puedas contratar en Chile y dejamos el checkout probado de punta a punta. Las cuentas con cada proveedor las abres tú, a nombre de tu negocio: es tu dinero y tiene que llegar directo a ti.</p></div>
-        </details>
-        <details>
-          <summary>¿Trabajan con negocios fuera de La Serena?</summary>
-          <div class="faq__a"><p>Sí. Trabajamos 100% online con negocios de cualquier ciudad de Chile. Las reuniones son por videollamada y la entrega es digital, así que la distancia no cambia nada del proceso.</p></div>
-        </details>
-        <details>
-          <summary>¿Necesito fotos profesionales?</summary>
-          <div class="faq__a"><p>Ayudan mucho, pero no siempre son imprescindibles. Trabajamos con el material que ya tienes y te decimos con franqueza qué fotos conviene rehacer y cómo. La producción fotográfica no la hacemos nosotros: si hace falta, te orientamos para contratarla o resolverla bien con tu celular.</p></div>
-        </details>
-        <details>
-          <summary>¿Hacen publicidad?</summary>
-          <div class="faq__a"><p>Configuramos y gestionamos Meta Ads (Instagram y Facebook) como servicio aparte, nunca incluido por defecto en el precio de la tienda. Hoy no trabajamos con Google Ads.</p></div>
-        </details>
-        <details>
-          <summary>¿Tengo que pagar una mantención mensual?</summary>
-          <div class="faq__a"><p>No. No vendemos contratos de mantención obligatoria. Terminado el proyecto, la tienda es tuya y no nos debes nada más. Si después quieres mejoras, CRO, automatizaciones o publicidad, se cotiza en ese momento.</p></div>
-        </details>
-        <details>
-          <summary>¿Cuánto demora un proyecto?</summary>
-          <div class="faq__a"><p>Depende del alcance y, sobre todo, de la rapidez con que recibamos tus fotos, textos y datos de productos: esa suele ser la parte que más se demora. En el diagnóstico te entregamos un plazo concreto por escrito antes de que decidas.</p></div>
-        </details>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== DIAGNÓSTICO ===================== -->
-  <section class="sec sec--dark grid-bg" id="diagnostico">
-    <div class="wrap grid grid--2" style="gap:clamp(36px,5vw,60px);align-items:start">
-      <div>
-        <p class="eyebrow">Diagnóstico gratuito</p>
-        <h2 style="margin-bottom:18px">Veamos qué le falta a tu negocio</h2>
-        <p class="lead" style="margin-bottom:28px">Cuéntanos cómo vendes hoy. Miramos tu Instagram o tu sitio, y en una videollamada corta te decimos qué haríamos, con qué prioridad y cuánto costaría. Sin costo y sin compromiso.</p>
-        <ul class="ticks">
-          <li>Te decimos qué mejorar aunque no trabajes con nosotros</li>
-          <li>Sin presentaciones de venta de 40 minutos</li>
-          <li>Si no somos lo que necesitas, te lo decimos</li>
-        </ul>
-        <div class="rule"><b></b><i></i><b></b></div>
-        <p class="fine">¿Prefieres escribir? <a class="link" href="mailto:contacto@vetalabs.cl">contacto@vetalabs.cl</a> <span aria-hidden="true">·</span> <a class="link" data-whatsapp data-ev="click_whatsapp" data-ev-pos="diagnostico" href="#" hidden target="_blank" rel="noopener">WhatsApp</a></p>
-      </div>
-      <div class="on-dark">
-        <form class="form" id="form-diagnostico" data-lead-form="diagnostico" data-done-target="form-listo" novalidate>
-          <div class="form__row">
-            <div class="field">
-              <label for="form-diagnostico-nombre">Nombre *</label>
-              <input id="form-diagnostico-nombre" name="nombre" required autocomplete="name" placeholder="Tu nombre" aria-describedby="form-diagnostico-nombre-err">
-              <p class="field__error" id="form-diagnostico-nombre-err" data-error-for="nombre" role="alert"></p>
-            </div>
-            <div class="field">
-              <label for="form-diagnostico-empresa">Marca o negocio</label>
-              <input id="form-diagnostico-empresa" name="empresa" autocomplete="organization" placeholder="Nombre de tu marca">
-            </div>
-          </div>
-          <div class="form__row">
-            <div class="field">
-              <label for="form-diagnostico-email">Email *</label>
-              <input id="form-diagnostico-email" name="email" type="email" required autocomplete="email" inputmode="email" placeholder="tucorreo@ejemplo.cl" aria-describedby="form-diagnostico-email-err">
-              <p class="field__error" id="form-diagnostico-email-err" data-error-for="email" role="alert"></p>
-            </div>
-            <div class="field">
-              <label for="form-diagnostico-telefono">WhatsApp</label>
-              <input id="form-diagnostico-telefono" name="telefono" type="tel" autocomplete="tel" inputmode="tel" placeholder="+56 9 1234 5678">
-            </div>
-          </div>
-          <div class="field">
-            <label for="form-diagnostico-sitio">Instagram o sitio web</label>
-            <input id="form-diagnostico-sitio" name="sitio" placeholder="@tumarca o tutienda.cl" aria-describedby="form-diagnostico-sitio-hint">
-            <p class="field__hint" id="form-diagnostico-sitio-hint">Lo miramos antes de escribirte: así el diagnóstico habla de tu negocio y no en general.</p>
-          </div>
-          <fieldset class="fieldset">
-            <legend class="fieldset__legend">¿Cómo vendes hoy?</legend>
-            <div class="opts">
-              <label class="opt"><input type="checkbox" name="canales" value="Instagram" id="form-diagnostico-c0"><span>Instagram</span></label>
-              <label class="opt"><input type="checkbox" name="canales" value="WhatsApp" id="form-diagnostico-c1"><span>WhatsApp</span></label>
-              <label class="opt"><input type="checkbox" name="canales" value="Tienda física" id="form-diagnostico-c2"><span>Tienda física</span></label>
-              <label class="opt"><input type="checkbox" name="canales" value="Web propia" id="form-diagnostico-c3"><span>Web propia</span></label>
-              <label class="opt"><input type="checkbox" name="canales" value="Shopify" id="form-diagnostico-c4"><span>Shopify</span></label>
-              <label class="opt"><input type="checkbox" name="canales" value="Otro" id="form-diagnostico-c5"><span>Otro</span></label>
-            </div>
-          </fieldset>
-          <div class="form__row">
-            <div class="field">
-              <label for="form-diagnostico-necesidad">¿Qué necesitas?</label>
-              <select id="form-diagnostico-necesidad" name="necesidad">
-                <option value="">Elige una opción</option>
-                <option>Tienda online</option>
-                <option>Mejorar mi tienda actual</option>
-                <option>Página web o landing</option>
-                <option>CRO: vendo poco para las visitas que tengo</option>
-                <option>Meta Ads</option>
-                <option>Todavía no lo tengo claro</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="form-diagnostico-presupuesto">Presupuesto aproximado</label>
-              <select id="form-diagnostico-presupuesto" name="presupuesto">
-                <option value="">Prefiero conversarlo</option>
-                <option>Hasta $300.000</option>
-                <option>Entre $300.000 y $600.000</option>
-                <option>Sobre $600.000</option>
-              </select>
-            </div>
-          </div>
-          <div class="field">
-            <label for="form-diagnostico-mensaje">¿Algo más que debamos saber?</label>
-            <textarea id="form-diagnostico-mensaje" name="mensaje" rows="3" placeholder="Qué vendes, qué te está costando hoy, si tienes una fecha en mente…"></textarea>
-          </div>
-          <div class="honey" aria-hidden="true"><label for="form-diagnostico-website">No completar</label><input id="form-diagnostico-website" name="website" tabindex="-1" autocomplete="off"></div>
-          <button class="btn btn--light btn--block" type="submit" data-submit data-ev="click_diagnostico" data-ev-pos="form">Solicitar mi diagnóstico gratuito</button>
-          <p class="form__status" data-status role="status" aria-live="polite" hidden></p>
-          <p class="fine">Te respondemos por correo o WhatsApp. No compartimos tus datos con nadie: <a class="link" href="/privacidad">cómo tratamos tus datos</a>.</p>
-        </form>
-        <div class="form__done" id="form-listo" hidden>
-          <h3>Recibimos tu solicitud</h3>
-          <p>Vamos a mirar tu Instagram o tu sitio antes de escribirte. Te vamos a contactar por correo o WhatsApp para coordinar el diagnóstico: una videollamada corta donde te decimos qué haríamos, en qué orden y cuánto costaría.</p>
-          <p>Si prefieres adelantarlo, escríbenos a <a class="link" href="mailto:contacto@vetalabs.cl">contacto@vetalabs.cl</a>.</p>
-        </div>
-      </div>
+  <!-- ===================== CIERRE ===================== -->
+  <section class="sec sec--dark grid-bg">
+    <div class="wrap wrap--narrow" style="text-align:center">
+      <p class="eyebrow" style="justify-content:center">Diagnóstico gratuito</p>
+      <h2 style="margin-bottom:18px">Veamos qué le falta a tu negocio</h2>
+      <p class="lead" style="margin:0 auto 28px">Miramos cómo vendes hoy y te decimos qué mejorar, en qué orden y cuánto costaría. Sin costo y sin compromiso.</p>
+      <a class="btn btn--light" href="/contacto" data-ev="click_diagnostico" data-ev-pos="cierre">Solicitar diagnóstico gratuito</a>
     </div>
   </section>
 

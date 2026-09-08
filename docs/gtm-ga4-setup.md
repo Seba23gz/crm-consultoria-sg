@@ -1,14 +1,13 @@
 # Conectar Google Analytics 4 al sitio
 
-El sitio ya carga Google Tag Manager (`GTM-TS67GQTV`) y ya empuja sus nueve
-eventos a `dataLayer`. Falta lo que solo se puede hacer desde la cuenta de
-Google: crear la propiedad de GA4 y configurar las etiquetas dentro del
-contenedor.
+El sitio usa Google Tag Manager (`GTM-TS67GQTV`) y empuja diez eventos a
+`dataLayer`. La propiedad de GA4 y las etiquetas ya están activas en producción;
+este documento sirve para revisar o reconstruir esa configuración.
 
 `gtm-vetalabs-ga4.json` es esa configuración, lista para importar: la etiqueta
 base de GA4 y una etiqueta por cada evento del sitio, con sus parámetros.
 
-## Pasos
+## Pasos para reconstruir la configuración
 
 1. **Crear la propiedad.** En [analytics.google.com](https://analytics.google.com),
    propiedad nueva para `vetalabs.cl`: zona horaria de Santiago y moneda CLP.
@@ -25,7 +24,7 @@ base de GA4 y una etiqueta por cada evento del sitio, con sus parámetros.
 
 3. **Poner el ID real.** En **Variables**, abrir `GA4 — Measurement ID` y
    reemplazar `G-XXXXXXXXXX`. Es el único lugar donde hay que cambiarlo: las
-   diez etiquetas lo leen de ahí.
+   once etiquetas lo leen de ahí: la etiqueta base y diez eventos.
 
 4. **Probar antes de publicar.** Botón **Vista previa**, abrir vetalabs.cl,
    **aceptar** en el banner de cookies y comprobar que las etiquetas se disparan.
@@ -51,15 +50,17 @@ base de GA4 y una etiqueta por cada evento del sitio, con sus parámetros.
 | `GA4 - click_shopify` | clic a la tienda de un caso | `origen`, `destino` |
 | `GA4 - click_meta_ads` | clic en el servicio de Meta Ads | `origen`, `destino` |
 | `GA4 - click_identidad` | clic en identidad de marca | `origen`, `destino` |
+| `GA4 - click_web` | clic en páginas web o landings | `origen`, `destino` |
 
 `origen` dice desde qué parte de la página se hizo clic (`hero`, `nav`, `dock`,
 `footer`, `cta_final`…), así que se puede saber qué ubicación del CTA convierte.
 
 ## Consentimiento
 
-**No hay que configurar nada.** Las etiquetas de Google leen `analytics_storage`,
-que el sitio deja en `denied` hasta que la persona acepta en el banner. Si
-rechaza, la etiqueta no guarda cookies ni envía datos identificables.
+**No hay que configurar una etiqueta adicional.** El sitio usa consentimiento
+básico: antes de aceptar no descarga GTM ni hace solicitudes a GA4. Al aceptar,
+`analytics_storage` pasa a `granted`, GTM se descarga y las etiquetas pueden
+medir; los permisos de publicidad permanecen denegados.
 
 Consecuencia esperada: **GA4 va a mostrar menos visitas que las reales**, porque
 quien rechaza no se mide. Es el costo de cumplir la ley, no un error.

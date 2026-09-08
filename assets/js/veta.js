@@ -11,9 +11,9 @@
   /* CONFIGURACIÓN — lo único que hay que tocar para encender cada cosa. */
   /* ------------------------------------------------------------------ */
   //
-  // MEDICIÓN: el sitio carga Google Tag Manager (contenedor GTM-TS67GQTV) desde
-  // el <head> de cada página. Analytics y el píxel de Meta se configuran DENTRO
-  // de GTM, no acá.
+  // MEDICIÓN: assets/js/consent.js deja todo denegado y solo descarga Google
+  // Tag Manager (contenedor GTM-TS67GQTV) después de que la persona acepta.
+  // Analytics y el píxel de Meta se configuran DENTRO de GTM, no acá.
   //
   // Las dos constantes de abajo son la vía alternativa, para cargar cada
   // herramienta directamente sin pasar por GTM. Deben quedarse vacías mientras
@@ -62,7 +62,13 @@
   // Eventos de Meta con nombre propio. El resto viaja como evento personalizado.
   var META_EVENTS = { form_submit: 'Lead', click_whatsapp: 'Contact', click_diagnostico: 'InitiateCheckout' };
 
+  function puedeMedir() {
+    return typeof window.vetaHasMeasurementConsent === 'function' && window.vetaHasMeasurementConsent();
+  }
+
   function track(name, params) {
+    // No se guardan eventos previos para mandarlos retroactivamente al aceptar.
+    if (!puedeMedir()) return false;
     var data = params || {};
     window.dataLayer.push(Object.assign({ event: name }, data));
     // Solo si GA lo cargó este archivo. Con GTM puesto, `window.gtag` existe
@@ -72,32 +78,39 @@
       if (META_EVENTS[name]) fbq('track', META_EVENTS[name], data);
       else fbq('trackCustom', name, data);
     }
-  }
-  // Expuesto para poder disparar eventos desde el HTML si hiciera falta.
-  window.veta = { track: track, config: CONFIG };
-
-  // Meta Pixel (solo si hay ID configurado).
-  if (CONFIG.META_PIXEL_ID) {
-    window.META_PIXEL_ID = CONFIG.META_PIXEL_ID;
-    !function (f, b, e, v, n, t, s) {
-      if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
-      if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = [];
-      t = b.createElement(e); t.async = !0; t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
-    }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', CONFIG.META_PIXEL_ID);
-    fbq('track', 'PageView');
+    return true;
   }
 
-  // Google Analytics 4 (solo si hay ID configurado).
-  if (CONFIG.GA_MEASUREMENT_ID) {
-    var ga = doc.createElement('script');
-    ga.async = true;
-    ga.src = 'https://www.googletagmanager.com/gtag/js?id=' + CONFIG.GA_MEASUREMENT_ID;
-    doc.head.appendChild(ga);
-    window.gtag = function () { window.dataLayer.push(arguments); };
-    window.gtag('js', new Date());
-    window.gtag('config', CONFIG.GA_MEASUREMENT_ID);
+  function cargarMedicionDirecta() {
+    if (!puedeMedir() || window.__vetaDirectMeasurementLoaded) return;
+    window.__vetaDirectMeasurementLoaded = true;
+
+    // Meta Pixel (solo si hay ID configurado y consentimiento).
+    if (CONFIG.META_PIXEL_ID) {
+      window.META_PIXEL_ID = CONFIG.META_PIXEL_ID;
+      !function (f, b, e, v, n, t, s) {
+        if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
+        if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = [];
+        t = b.createElement(e); t.async = !0; t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
+      }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', CONFIG.META_PIXEL_ID);
+      fbq('track', 'PageView');
+    }
+
+    // Google Analytics 4 (solo si hay ID configurado y consentimiento).
+    if (CONFIG.GA_MEASUREMENT_ID) {
+      var ga = doc.createElement('script');
+      ga.async = true;
+      ga.src = 'https://www.googletagmanager.com/gtag/js?id=' + CONFIG.GA_MEASUREMENT_ID;
+      doc.head.appendChild(ga);
+      window.gtag('js', new Date());
+      window.gtag('config', CONFIG.GA_MEASUREMENT_ID);
+    }
   }
+
+  // Expuesto para disparar eventos y arrancar medición tras el consentimiento.
+  window.veta = { track: track, config: CONFIG, startMeasurement: cargarMedicionDirecta };
+  cargarMedicionDirecta();
 
   // Clicks declarados en el HTML: <a data-ev="click_diagnostico" data-ev-pos="hero">
   doc.addEventListener('click', function (ev) {
@@ -113,8 +126,9 @@
       var viewObs = new IntersectionObserver(function (entries) {
         entries.forEach(function (e) {
           if (!e.isIntersecting) return;
-          track(e.target.dataset.viewEv, { id: e.target.dataset.viewId || e.target.id || '' });
-          viewObs.unobserve(e.target);
+          if (track(e.target.dataset.viewEv, { id: e.target.dataset.viewId || e.target.id || '' })) {
+            viewObs.unobserve(e.target);
+          }
         });
       }, { threshold: 0.35 });
       seen.forEach(function (el) { viewObs.observe(el); });
@@ -209,20 +223,20 @@
   /* =================================================================== */
   /* CONSENTIMIENTO DE COOKIES (Ley 21.719)                              */
   /* =================================================================== */
-  /* El <head> ya dejó la medición en `denied` antes de que GTM cargue. Acá
-     solo se pregunta y se guarda la respuesta.
+  /* El <head> ya dejó la medición en `denied` y no carga GTM. Acá se pregunta,
+     se guarda la respuesta y se arranca la medición solo al aceptar.
 
      Lo que exige la ley y por qué está resuelto así:
      - Previo: nada se activa antes de la respuesta; el default es denegado.
      - Libre: rechazar es un botón del mismo tamaño y en el mismo lugar.
      - Informado: el banner dice qué se mide y enlaza a /privacidad.
      - Revocable: el pie de todas las páginas reabre el banner.
-     - Demostrable: se guarda la decisión con su fecha y la versión del texto.
+     - Versionado: se guarda la decisión con su fecha y versión para recordarla.
 
      La versión importa: si mañana se suma una herramienta al contenedor, subirla
      invalida los consentimientos viejos y vuelve a preguntar, que es lo correcto
      —la persona aceptó otra cosa—. */
-  var CONSENT_CLAVE = 'veta_consent_v1';
+  var CONSENT_CLAVE = 'veta_consent_v2';
 
   var consent = doc.querySelector('[data-consent]');
   if (consent) {
@@ -239,22 +253,35 @@
     }
 
     function decidir(acepta) {
-      var permiso = acepta ? 'granted' : 'denied';
-      // Se avisa a Google en el momento: si aceptó, las etiquetas que estaban
-      // esperando se activan sin recargar la página.
-      if (typeof window.gtag === 'function') {
-        window.gtag('consent', 'update', {
-          ad_storage: permiso, ad_user_data: permiso, ad_personalization: permiso,
-          analytics_storage: permiso, personalization_storage: permiso
-        });
-      }
+      var permisoAnalitica = acepta ? 'granted' : 'denied';
+      var habiaMedicion = !!(window.__vetaGtmLoaded || window.__vetaDirectMeasurementLoaded);
+      window.__vetaConsentGranted = acepta;
       try {
         window.localStorage.setItem(CONSENT_CLAVE, JSON.stringify({
           estado: acepta ? 'aceptado' : 'rechazado',
           fecha: new Date().toISOString()
         }));
-      } catch (e) { /* sin almacenamiento: vale para esta visita y se vuelve a preguntar */ }
+      } catch (e) { /* sin almacenamiento: la decisión vale para esta visita */ }
+
+      if (typeof window.gtag === 'function') {
+        window.gtag('consent', 'update', {
+          ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied',
+          analytics_storage: permisoAnalitica, personalization_storage: 'denied'
+        });
+      }
+
+      if (acepta) {
+        if (typeof window.vetaLoadGTM === 'function') window.vetaLoadGTM();
+        cargarMedicionDirecta();
+      }
       mostrarConsent(false);
+
+      // Una etiqueta ya descargada no puede desinstalarse. Al retirar el
+      // permiso, recargar deja la página limpia y sin nuevas llamadas a Google.
+      if (!acepta && habiaMedicion) {
+        window.location.reload();
+        return;
+      }
       // Que el foco no quede en un botón que acaba de desaparecer.
       var volver = doc.querySelector('[data-consent-abrir]');
       if (volver && doc.activeElement && consent.contains(doc.activeElement)) volver.focus();
@@ -281,6 +308,9 @@
     var btn = form.querySelector('[data-submit]');
     var done = doc.getElementById(form.dataset.doneTarget || '');
     var started = false;
+    var sending = false;
+    var attemptPayload = '';
+    var requestId = '';
 
     var val = function (name) {
       var el = form.elements[name];
@@ -316,6 +346,7 @@
 
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
+      if (sending) return;
 
       var nombre = val('nombre');
       var email = val('email');
@@ -350,9 +381,20 @@
         sitio: val('sitio'),
         canales: checked('canales'), // selección múltiple → arreglo
         presupuesto: val('presupuesto'),
-        mensaje: val('mensaje').slice(0, 2900),
+        mensaje: val('mensaje'),
         website: val('website') // honeypot
       };
+
+      // Conservar la clave al reintentar: un timeout no significa que no se guardó.
+      var serialized = JSON.stringify(payload);
+      if (!requestId || serialized !== attemptPayload) {
+        requestId = window.crypto.randomUUID();
+        attemptPayload = serialized;
+      }
+      payload.request_id = requestId;
+      sending = true;
+      var controller = new AbortController();
+      var timer = setTimeout(function () { controller.abort(); }, 35000);
 
       var label = btn ? btn.textContent : '';
       if (btn) { btn.disabled = true; btn.textContent = 'Enviando…'; }
@@ -361,9 +403,14 @@
       fetch(CONFIG.LEAD_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: controller.signal
       }).then(function (r) {
-        if (!r.ok) throw new Error('http ' + r.status);
+        return r.json().then(function (data) {
+          if (!r.ok || data.ok !== true) throw new Error('http ' + r.status);
+          return data;
+        });
+      }).then(function () {
         track('form_submit', { formulario: form.dataset.leadForm || 'diagnostico', necesidad: payload.negocio || '' });
         form.reset();
         if (done) {
@@ -381,6 +428,8 @@
       }).catch(function () {
         setStatus('No se pudo enviar. Vuelve a intentarlo o escríbenos a contacto@vetalabs.cl.', false);
       }).then(function () {
+        clearTimeout(timer);
+        sending = false;
         if (btn) { btn.disabled = false; btn.textContent = label; }
       });
     });
