@@ -241,6 +241,7 @@
   var consent = doc.querySelector('[data-consent]');
   if (consent) {
     var abrir = doc.querySelectorAll('[data-consent-abrir]');
+    var consentOpener = null;
 
     function leerConsent() {
       try { return JSON.parse(window.localStorage.getItem(CONSENT_CLAVE) || 'null'); }
@@ -282,15 +283,24 @@
         window.location.reload();
         return;
       }
-      // Que el foco no quede en un botón que acaba de desaparecer.
-      var volver = doc.querySelector('[data-consent-abrir]');
-      if (volver && doc.activeElement && consent.contains(doc.activeElement)) volver.focus();
+      // Si el banner se abrió desde el pie, devolvemos el foco exactamente a
+      // ese botón sin mover el scroll. En la pregunta inicial no hay un origen:
+      // enfocar el enlace del footer llevaba al visitante hasta el final de la
+      // página justo después de aceptar o rechazar.
+      if (consentOpener && doc.documentElement.contains(consentOpener)) {
+        try { consentOpener.focus({ preventScroll: true }); }
+        catch (e) { consentOpener.focus(); }
+      } else if (doc.activeElement && consent.contains(doc.activeElement)) {
+        doc.activeElement.blur();
+      }
+      consentOpener = null;
     }
 
     on(consent.querySelector('[data-consent-si]'), 'click', function () { decidir(true); });
     on(consent.querySelector('[data-consent-no]'), 'click', function () { decidir(false); });
     for (var i = 0; i < abrir.length; i++) {
-      on(abrir[i], 'click', function () {
+      on(abrir[i], 'click', function (e) {
+        consentOpener = e.currentTarget;
         mostrarConsent(true);
         consent.querySelector('[data-consent-si]').focus();
       });
