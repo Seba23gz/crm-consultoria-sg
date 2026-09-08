@@ -264,6 +264,35 @@ strong{font-weight:600;color:var(--ink)}
   font:500 14.5px var(--font-body);color:var(--ink-soft)}
 .hero__price b{font:700 15.5px var(--font-display);color:var(--ink)}
 
+/* El hero explica el sistema de venta sin convertir a un cliente particular
+   en la identidad visual de Veta Labs. Los casos reales aparecen más abajo. */
+.hero__system{background:var(--ink);color:var(--paper);padding:clamp(24px,3vw,34px);
+  width:min(100%,500px);justify-self:end}
+.hero__system-head{display:flex;justify-content:space-between;align-items:center;gap:16px;
+  padding-bottom:18px;border-bottom:1px solid var(--ink-3);font:700 10.5px var(--font-mono);
+  letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint)}
+.hero__system-status{display:inline-flex;align-items:center;gap:7px;color:var(--paper);white-space:nowrap}
+.hero__system-status i{width:6px;height:6px;border-radius:50%;background:currentColor}
+.hero__system-title{font:600 clamp(23px,3vw,34px)/1.12 var(--font-display);
+  letter-spacing:-.035em;max-width:15ch;margin:clamp(24px,3vw,34px) 0}
+.hero__flow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--ink-3);
+  border-left:1px solid var(--ink-3)}
+.hero__flow li{padding:18px;border-right:1px solid var(--ink-3);border-bottom:1px solid var(--ink-3);
+  min-height:116px;display:flex;flex-direction:column;gap:10px}
+.hero__flow b{font:600 14px var(--font-display);color:var(--paper)}
+.hero__flow b span{display:block;margin-bottom:7px;font:700 10px var(--font-mono);
+  letter-spacing:.12em;color:var(--ink-faint)}
+.hero__flow small{font-size:12.5px;line-height:1.45;color:var(--ink-faint)}
+.hero__system-base{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.hero__system-base span{border:1px solid var(--ink-3);padding:6px 9px;font:600 10px var(--font-mono);
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint)}
+@media (max-width:900px){ .hero__system{justify-self:start;width:100%} }
+@media (max-width:430px){
+  .hero__system-head{align-items:flex-start;flex-direction:column}
+  .hero__flow{grid-template-columns:1fr}
+  .hero__flow li{min-height:0}
+}
+
 /* Captura real de una tienda dentro del marco del celular. */
 .phone{width:min(100%,320px);margin-inline:auto;background:var(--ink);padding:10px;
   border:1px solid var(--ink-3)}

@@ -93,12 +93,17 @@ for (const w of [390,1280]) {
 }
 
 // ---------- 3. Rechazar ----------
+const scrollAntesDeDecidir=await p.evaluate(()=>window.scrollY);
 await p.click('[data-consent-no]'); await p.waitForTimeout(300);
+const scrollDespuesDeDecidir=await p.evaluate(()=>window.scrollY);
 c=await consentimientos(p);
 ok(c.length===2 && c[1].modo==='update', 'rechazar manda un consent update');
 ok(c[1].analytics==='denied' && c[1].ads==='denied', 'tras rechazar sigue DENEGADO');
 ok(!(await p.locator('[data-consent]').isVisible()), 'el banner se cierra al rechazar');
 ok(!(await p.evaluate(()=>!!window.__gtm)), 'rechazar no descarga GTM');
+ok(Math.abs(scrollDespuesDeDecidir-scrollAntesDeDecidir)<=1,
+   'decidir no mueve la posición de la página',
+   `antes=${scrollAntesDeDecidir} después=${scrollDespuesDeDecidir}`);
 
 // Persiste entre páginas: no vuelve a preguntar.
 await p.goto(B+'/precios',{waitUntil:'domcontentloaded'}); await p.waitForTimeout(400);
