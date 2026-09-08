@@ -281,7 +281,7 @@ function almacenSupabase(sb: SupabaseClient): Almacen {
 async function avisarPorCorreo(lead: LeadNormalizado, graph: LeadDeGraph): Promise<void> {
   const key = env("RESEND_API_KEY");
   if (!key) return;
-  const from = env("RESEND_FROM") ?? "Leads CRM <onboarding@resend.dev>";
+  const from = env("RESEND_FROM") ?? "Leads Veta Labs <leads@vetalabs.cl>";
 
   const fila = (label: string, val: string) =>
     val

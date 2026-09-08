@@ -13,21 +13,10 @@ import { normalize, fallbackId, InputError } from './validation.ts';
 
 // Destino del aviso. Se lee del entorno para poder cambiarlo sin desplegar.
 //
-// El valor por defecto es el Gmail y NO es un descuido: la cuenta de Resend está
-// en modo prueba (sin dominio verificado), así que el remitente
-// `onboarding@resend.dev` solo puede entregar al correo del dueño de la cuenta.
-// Mandarlo a contacto@vetalabs.cl devuelve 403 y el aviso se pierde en silencio,
-// que es exactamente lo que pasó con el lead del 24-08-2026: quedó guardado en el
-// CRM y nadie se enteró.
-//
-// Para volver a contacto@vetalabs.cl, sin tocar este archivo ni redesplegar:
-//   1. Verificar vetalabs.cl en resend.com/domains (agregar los registros DNS).
-//   2. En Supabase → Edge Functions → Secrets:
-//        RESEND_FROM = Leads Veta Labs <leads@vetalabs.cl>
-//        NOTIFY_TO   = contacto@vetalabs.cl
-//   3. Comprobar que esa casilla exista de verdad: verificar el dominio arregla
-//      desde dónde SALE el correo, no que haya un buzón donde RECIBIRLO.
-const NOTIFY_TO = Deno.env.get("NOTIFY_TO") || "sebastiangomez2003@gmail.com";
+// vetalabs.cl está verificado en Resend. Los secretos permiten cambiar ambos
+// valores sin desplegar; los predeterminados mantienen el flujo operativo si
+// esas variables no están definidas.
+const NOTIFY_TO = Deno.env.get("NOTIFY_TO") || "contacto@vetalabs.cl";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -44,7 +33,7 @@ function esc(s: string) {
 async function enviarCorreo(lead: Record<string, string>, requestId: string) {
   const key = Deno.env.get("RESEND_API_KEY");
   if (!key) return "skipped";
-  const from = Deno.env.get("RESEND_FROM") || "Leads CRM <onboarding@resend.dev>";
+  const from = Deno.env.get("RESEND_FROM") || "Leads Veta Labs <leads@vetalabs.cl>";
   // `mensaje` es texto libre y puede traer saltos de línea (y los trae, si el
   // sitio publicado todavía pliega respuestas ahí). En HTML se colapsarían en
   // un párrafo ilegible.
