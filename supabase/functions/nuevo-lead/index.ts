@@ -1,13 +1,14 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "jsr:@supabase/supabase-js@2";
+import "@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "@supabase/supabase-js";
+import { normalize, fallbackId, InputError } from './validation.ts';
 
 // Endpoint público del formulario web. Crea/enlaza empresa + contacto (persona) + lead
 // (oportunidad), y notifica por correo (Resend). verify_jwt off a propósito (form público);
-// protección = honeypot + validación. Claves service_role y Resend vienen del entorno.
+// protección = honeypot + validación + cuotas persistentes. Claves solo del entorno.
 //
-// Campos que acepta: nombre (obligatorio), email, telefono, empresa, cargo,
+// Campos que acepta: nombre y email (obligatorios), telefono, empresa, cargo,
 // negocio/necesidad, canales (arreglo), presupuesto, sitio, mensaje y website
-// (honeypot). Todos menos `nombre` son opcionales: el sitio publicado puede ir
+// (honeypot). Los demás son opcionales: el sitio publicado puede ir
 // una versión atrás y el formulario tiene que seguir entrando igual.
 
 // Destino del aviso. Se lee del entorno para poder cambiarlo sin desplegar.
@@ -40,7 +41,7 @@ function esc(s: string) {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
 }
 
-async function enviarCorreo(lead: Record<string, string>) {
+async function enviarCorreo(lead: Record<string, string>, requestId: string) {
   const key = Deno.env.get("RESEND_API_KEY");
   if (!key) return "skipped";
   const from = Deno.env.get("RESEND_FROM") || "Leads CRM <onboarding@resend.dev>";
@@ -59,104 +60,77 @@ async function enviarCorreo(lead: Record<string, string>) {
     <p style="color:#a1a1aa;margin:10px 0 0;font-size:12px">Guardado como lead en etapa “Nuevo”, con su contacto y empresa.</p>
   </div>`;
   try {
+    for (let attempt = 0; attempt < 3; attempt++) {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
-      headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
+      headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json", "Idempotency-Key": `web-${requestId}` },
+      signal: AbortSignal.timeout(8000),
       body: JSON.stringify({ from, to: [NOTIFY_TO], reply_to: lead.email || undefined, subject: `Nuevo lead: ${lead.nombre}`, html }),
     });
-    if (!res.ok) { console.error("Resend error", res.status, await res.text()); return `error:${res.status}`; }
+    if (!res.ok) {
+      console.error("Resend error", res.status); // No registrar datos personales.
+      if ((res.status === 429 || res.status >= 500) && attempt < 2) {
+        await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+        continue;
+      }
+      return `error:${res.status}`;
+    }
     return "sent";
+    }
+    return 'error';
   } catch (e) { console.error("Resend exception", e); return "error"; }
 }
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "Método no permitido" }, 405);
-
-  let body: Record<string, unknown>;
-  try { body = await req.json(); } catch { return json({ error: "JSON inválido" }, 400); }
-
-  const str = (v: unknown) => (v ?? "").toString().trim();
-  const nombre = str(body.nombre);
-  const empresaNombre = str(body.empresa);
-  const cargo = str(body.cargo);
-  const negocio = str(body.negocio);
-  const mensaje = str(body.mensaje);
-  const email = str(body.email);
-  const telefono = str(body.telefono);
-  const honeypot = str(body.website);
-
-  // Respuestas del formulario de diagnóstico que ahora tienen columna propia en
-  // `leads`. Son opcionales a propósito: una versión anterior del sitio las
-  // pliega dentro de `mensaje` y no manda ninguna, y debe seguir funcionando.
-  //
-  // `necesidad` y `negocio` son la misma pregunta: el sitio la manda en
-  // `negocio` porque es lo que titula la oportunidad. Se acepta cualquiera de
-  // las dos para no depender de qué versión del sitio esté publicada.
-  const necesidad = str(body.necesidad) || negocio;
-  const presupuesto = str(body.presupuesto);
-  const sitio = str(body.sitio);
-  // Selección múltiple: llega como arreglo, pero se tolera texto separado por comas.
-  const canales = (Array.isArray(body.canales) ? body.canales : str(body.canales).split(","))
-    .map((c: unknown) => str(c)).filter(Boolean).slice(0, 12);
-
-  if (honeypot) return json({ ok: true });
-  if (!nombre) return json({ error: "Falta el nombre" }, 400);
-  if (nombre.length > 120 || empresaNombre.length > 160 || cargo.length > 120 || negocio.length > 200 || mensaje.length > 3000 || email.length > 200 || telefono.length > 40) {
-    return json({ error: "Datos demasiado largos" }, 400);
-  }
-  if (necesidad.length > 200 || presupuesto.length > 120 || sitio.length > 300 || canales.some((c: string) => c.length > 60)) {
-    return json({ error: "Datos demasiado largos" }, 400);
-  }
-
-  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-
-  // 1) Empresa: busca por nombre o crea
-  let empresa_id: number | null = null;
-  if (empresaNombre) {
-    const { data: found } = await supabase.from("empresas").select("id").ilike("nombre", empresaNombre).limit(1).maybeSingle();
-    if (found) empresa_id = found.id;
-    else {
-      // El sitio declarado va también a la ficha de la empresa: es donde el CRM
-      // lo busca después, cuando el lead ya se convirtió en cuenta.
-      const { data: creada } = await supabase.from("empresas")
-        .insert({ nombre: empresaNombre, rubro: necesidad || null, sitio_web: sitio || null }).select("id").single();
-      empresa_id = creada ? creada.id : null;
+  if (!req.headers.get('content-type')?.includes('application/json')) return json({ error: 'Usa JSON.' }, 415);
+  // Límite real del cuerpo, también cuando no hay Content-Length.
+  const reader = req.body?.getReader();
+  if (!reader) return json({ error: 'Faltan datos.' }, 400);
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  try {
+    while (true) {
+      const part = await reader.read();
+      if (part.done) break;
+      size += part.value.byteLength;
+      if (size > 16384) { await reader.cancel(); return json({ error: 'Datos demasiado largos.' }, 413); }
+      chunks.push(part.value);
     }
+    const bytes = new Uint8Array(size);
+    let offset = 0;
+    for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.length; }
+    const input = normalize(JSON.parse(new TextDecoder().decode(bytes)));
+    if (input.website) return json({ ok: true });
+    const requestId = input.requestId || await fallbackId(input.payload);
+    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const { data, error } = await supabase.rpc('recibir_lead_web', {
+      p_request_id: requestId, p_payload: input.payload
+    });
+    if (error) {
+      if (error.message.includes('rate_limited')) return json({ error: 'Demasiados envíos. Inténtalo más tarde.' }, 429);
+      if (error.message.includes('request_conflict')) return json({ error: 'La solicitud cambió. Recarga y vuelve a intentarlo.' }, 409);
+      console.error('web intake failed', error.code);
+      return json({ error: 'No pudimos guardar tu solicitud. Inténtalo de nuevo.' }, 503);
+    }
+    let emailStatus = data.email_status;
+    const { data: claimed, error: claimError } = await supabase.rpc('reclamar_aviso_web', { p_request_id: requestId });
+    if (claimed && !claimError) {
+      const p = input.payload;
+      const result = await enviarCorreo({ ...p, negocio: p.necesidad, canales: p.canales.join(', ') }, requestId);
+      emailStatus = result === 'sent' ? 'sent' : 'failed';
+      const { error: stateError } = await supabase.from('web_intake')
+        .update({ email_status: emailStatus }).eq('request_id', requestId);
+      if (stateError) console.error('email status persistence failed', stateError.code);
+    }
+    // El lead ya está guardado: un fallo del aviso no pide al cliente reenviarlo.
+    return json({ ok: true, email: emailStatus, duplicate: data.duplicate });
+  } catch (error) {
+    if (error instanceof InputError || error instanceof SyntaxError) {
+      return json({ error: error instanceof InputError ? error.message : 'JSON inválido.' }, 400);
+    }
+    console.error('web intake unexpected error');
+    return json({ error: 'No pudimos procesar tu solicitud. Inténtalo de nuevo.' }, 503);
   }
-
-  // 2) Contacto (persona): busca por email o crea
-  let contacto_id: number | null = null;
-  if (email) {
-    const { data: c } = await supabase.from("contactos").select("id").ilike("email", email).limit(1).maybeSingle();
-    if (c) contacto_id = c.id;
-  }
-  if (!contacto_id) {
-    const { data: c, error: ce } = await supabase.from("contactos")
-      .insert({ nombre, cargo: cargo || null, email: email || null, telefono: telefono || null, empresa_id }).select("id").single();
-    if (ce) return json({ error: ce.message }, 500);
-    contacto_id = c.id;
-  }
-
-  // 3) Lead (oportunidad)
-  const hoy = new Date().toISOString().slice(0, 10);
-  const titulo = necesidad ? `Interés: ${necesidad}` : "Lead desde la web";
-  // `notas` queda para lo que la persona escribió libremente y para lo que
-  // anote después quien atienda el lead. El resto vive en sus columnas.
-  const notas = mensaje || null;
-  const { error: le } = await supabase.from("leads").insert({
-    empresa_id, contacto_id, titulo, etapa: "nuevo", prioridad: "media", notas, ultimo_contacto: hoy,
-    origen: "web",
-    necesidad: necesidad || null,
-    canales: canales.length ? canales : null,
-    presupuesto: presupuesto || null,
-    sitio: sitio || null,
-  });
-  if (le) return json({ error: le.message }, 500);
-
-  const emailStatus = await enviarCorreo({
-    nombre, email, telefono, empresa: empresaNombre, cargo, mensaje,
-    negocio: necesidad, sitio, presupuesto, canales: canales.join(", "),
-  });
-  return json({ ok: true, email: emailStatus });
 });

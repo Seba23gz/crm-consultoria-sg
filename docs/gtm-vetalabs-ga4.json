@@ -7,7 +7,7 @@
     "containerId": "200000000",
     "containerVersionId": "0",
     "name": "Veta Labs - GA4 y eventos del sitio",
-    "description": "GA4 mas los nueve eventos que vetalabs.cl ya empuja a dataLayer. Reemplazar la variable 'GA4 - Measurement ID' por el ID real antes de publicar. Importar con la opcion MERGE, nunca OVERWRITE.",
+    "description": "GA4 mas los diez eventos que vetalabs.cl ya empuja a dataLayer. Reemplazar la variable 'GA4 - Measurement ID' por el ID real antes de publicar. Importar con la opcion MERGE, nunca OVERWRITE.",
     "container": {
       "path": "accounts/6000000000/containers/200000000",
       "accountId": "6000000000",
@@ -46,7 +46,7 @@
           "type": "MAP"
         },
         "fingerprint": "1700000000016",
-        "notes": "Carga GA4 en todas las paginas. No necesita configuracion de consentimiento: las etiquetas de Google leen analytics_storage, que el sitio deja en denied hasta que la persona acepta.",
+        "notes": "Carga GA4 solo despues de que el sitio obtiene consentimiento y descarga GTM. analytics_storage pasa a granted; los permisos de publicidad siguen denied.",
         "path": "accounts/6000000000/containers/200000000/tags/1"
       },
       {
@@ -588,6 +588,70 @@
         "fingerprint": "1700000000025",
         "notes": "Clic en el servicio de identidad de marca.",
         "path": "accounts/6000000000/containers/200000000/tags/10"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "tagId": "11",
+        "name": "GA4 - click_web",
+        "type": "gaawe",
+        "parameter": [
+          {
+            "type": "TEMPLATE",
+            "key": "eventName",
+            "value": "click_web"
+          },
+          {
+            "type": "LIST",
+            "key": "eventSettingsTable",
+            "list": [
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "origen"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{dlv - origen}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
+                    "value": "destino"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{dlv - destino}}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "TAG_REFERENCE",
+            "key": "measurementId",
+            "value": "Google tag - GA4"
+          }
+        ],
+        "firingTriggerId": [
+          "10"
+        ],
+        "tagFiringOption": "ONCE_PER_EVENT",
+        "monitoringMetadata": {
+          "type": "MAP"
+        },
+        "notes": "Clic hacia un sitio web de proyecto.",
+        "path": "accounts/6000000000/containers/200000000/tags/11"
       }
     ],
     "trigger": [
@@ -824,6 +888,31 @@
         ],
         "fingerprint": "1700000000015",
         "path": "accounts/6000000000/containers/200000000/triggers/9"
+      },
+      {
+        "accountId": "6000000000",
+        "containerId": "200000000",
+        "triggerId": "10",
+        "name": "Evento - click_web",
+        "type": "CUSTOM_EVENT",
+        "customEventFilter": [
+          {
+            "type": "EQUALS",
+            "parameter": [
+              {
+                "type": "TEMPLATE",
+                "key": "arg0",
+                "value": "{{_event}}"
+              },
+              {
+                "type": "TEMPLATE",
+                "key": "arg1",
+                "value": "click_web"
+              }
+            ]
+          }
+        ],
+        "path": "accounts/6000000000/containers/200000000/triggers/10"
       }
     ],
     "variable": [
