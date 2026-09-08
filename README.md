@@ -218,6 +218,11 @@ RLS y solo es accesible por el servidor.
 El aviso usa una clave de idempotencia de Resend. `email_status = sent` significa
 aceptado por Resend, no entrega confirmada. Los estados `failed` y `pending`
 requieren revisión operativa: no hay un trabajador programado de reenvíos.
+El dominio `vetalabs.cl` está verificado en Resend; por defecto los avisos de
+`nuevo-lead` y `meta-lead` salen desde
+`Leads Veta Labs <leads@vetalabs.cl>` y llegan a `contacto@vetalabs.cl`.
+`RESEND_FROM` permite cambiar el remitente sin redesplegar y `NOTIFY_TO` hace lo
+mismo con el destinatario de `nuevo-lead`.
 
 ### Meta Lead Ads
 

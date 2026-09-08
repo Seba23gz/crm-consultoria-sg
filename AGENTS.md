@@ -128,12 +128,11 @@ versionadas en el repo. `email-evento`, `recordatorio-diario` e
 `importar-empresas` viven **solo** en Supabase: si hay que tocarlas, bajarlas
 primero al repo.
 
-**Aviso de leads por correo.** La cuenta de Resend está en modo prueba: sin
-dominio verificado, el remitente `onboarding@resend.dev` solo entrega al correo
-del dueño de la cuenta. Por eso `NOTIFY_TO` cae por defecto en el Gmail. Para
-volver a contacto@vetalabs.cl: verificar vetalabs.cl en resend.com/domains y
-poner los secretos `RESEND_FROM` y `NOTIFY_TO` en Supabase. No hay que
-redesplegar la función.
+**Aviso de leads por correo.** `vetalabs.cl` está verificado en Resend. Por
+defecto, `nuevo-lead` y `meta-lead` envían desde
+`Leads Veta Labs <leads@vetalabs.cl>` a `contacto@vetalabs.cl`;
+`RESEND_FROM` permite cambiar el remitente sin redesplegar y `NOTIFY_TO` hace lo
+mismo con el destinatario de `nuevo-lead`.
 
 `nuevo-lead` acepta: `nombre` (obligatorio), `email`, `telefono`, `empresa`,
 `cargo`, `negocio`/`necesidad`, `sitio`, `canales` (arreglo), `presupuesto`,
