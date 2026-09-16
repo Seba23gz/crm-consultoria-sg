@@ -660,9 +660,8 @@ table.cmp tr:last-child th,table.cmp tr:last-child td{border-bottom:0}
 .prose th{font-weight:600;color:var(--ink);white-space:nowrap}
 
 /* ================== CAPTURAS DE PRODUCTO ================================= */
-/* Las capturas de celular son verticales y muy altas. En las tarjetas de caso
-   se muestran recortadas por arriba —que es donde se identifica el producto—
-   y en la página del caso se ven completas. */
+/* Las tarjetas usan capturas del inicio de cada proyecto. Se limitan en alto
+   y se alinean arriba para conservar la cabecera y la propuesta principal. */
 .case__media img{max-height:min(46vh,360px);width:auto;object-fit:cover;object-position:top center;
   border:1px solid var(--ink-3)}
 
