@@ -116,7 +116,7 @@ Todo lo que hay que encender vive en el bloque `CONFIG` al principio de
 
 ### Medición
 
-Las dieciocho páginas públicas cargan primero `assets/js/consent.js`. Ese script
+Las diecinueve páginas públicas cargan primero `assets/js/consent.js`. Ese script
 solo descarga **Google Tag Manager** (contenedor `GTM-TS67GQTV`) cuando la
 persona acepta la medición. **El CRM queda fuera a propósito**: es interno,
 lleva `noindex` y medir las visitas del propio dueño ensucia los datos del sitio
@@ -344,7 +344,7 @@ node scripts/consent-check.mjs    # consentimiento de cookies
 node scripts/gtm-check.mjs        # contenedor de GTM (no necesita navegador)
 ```
 
-Levanta un servidor que imita el `cleanUrls` de Vercel, abre las dieciocho páginas
+Levanta un servidor que imita el `cleanUrls` de Vercel, abre las diecinueve páginas
 en Chromium a 390&nbsp;px y falla —código 1— si encuentra algo de esto:
 
 - un `<title>` que Google va a cortar o una `meta description` fuera de rango;
